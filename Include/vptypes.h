@@ -78,6 +78,8 @@ typedef enum _bool32 {
     ATIGL_TRUE,     ///< True
 } bool32;
 
+typedef void* VP_FILEHANDLE;
+
 //
 /// float16 type
 //
