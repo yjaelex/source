@@ -10,6 +10,15 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+static bool g_bPause = false;
+
+
+void playVideo(const char * file)
+{
+
+}
+
+
 int main(int, char**)
 {
     SDL_Surface *screen = NULL;
@@ -35,6 +44,7 @@ int main(int, char**)
 
     //Our event structure
     SDL_Event e;
+    const char * key = 0;
     //For tracking if we want to quit
     bool quit = false;
     while (!quit)
@@ -42,21 +52,31 @@ int main(int, char**)
         //Read any events that occured, for now we'll just quit if any event occurs
         while (SDL_PollEvent(&e))
         {
-            //If user closes the window
-            if (e.type == SDL_QUIT)
+            switch (e.type)
             {
+            case SDL_QUIT:
                 quit = true;
+                break;
+            case SDL_KEYDOWN:
+                key = SDL_GetKeyName(e.key.keysym.sym);
+                printf("The %s key was pressed!\n", key);
+                if (e.key.keysym.sym == SDLK_ESCAPE)                    //quit if ¡¯ESC¡¯
+                {
+                    quit = true;
+                }
+                else if (key[0] == 'q')                                 //quit if ¡¯q¡¯ pressed
+                {
+                    quit = true;
+                }
+                break;
+                //If user clicks the mouse
+            case SDL_MOUSEBUTTONDOWN:
+                g_bPause = !g_bPause;
+                break;
+            default:
+                break;
             }
-            //If user presses any key
-            if (e.type == SDL_KEYDOWN)
-            {
-                quit = true;
-            }
-            //If user clicks the mouse
-            if (e.type == SDL_MOUSEBUTTONDOWN)
-            {
-                quit = true;
-            }
+
         }
         //Rendering
         SDL_BlitSurface(image, NULL, screen, NULL);
