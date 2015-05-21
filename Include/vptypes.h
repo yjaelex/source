@@ -55,6 +55,9 @@ typedef unsigned short uint16, *puint16;
 /// 32-bit unsigned integer
 typedef unsigned int uint32, *puint32;
 
+/// 32-bit unsigned integer
+typedef unsigned long long uint64, *puint64;
+
 /// 32-bit floating point
 typedef float float32, *pfloat32;
 

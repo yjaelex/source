@@ -1,7 +1,11 @@
 #ifndef _GR_DEFINES_H
 #define _GR_DEFINES_H
 
-#if defined(COMP_VC)
+#ifdef WIN32
+#define COMP_VC
+#endif
+
+#ifdef COMP_VC
 
 //
 /// Extern, dll, and calling convention definitions
@@ -17,7 +21,8 @@
 #endif
 #define WINCONV   __cdecl               ///< Calling convention for WINAPIV functions
 
-#elif defined(COMP_GCC)
+#else
+#ifdef COMP_GCC
 //
 /// Extern, dll, and calling convention definitions
 //
@@ -35,6 +40,7 @@
 
 #error "Unknown compiler"
 
+#endif
 #endif
 
 #define EXTERNC   EXTERN "C"            ///< Function are mangled as a c interface
@@ -56,14 +62,6 @@
 #if !defined(UINT_MAX)                  ///< limits.h on linux
 #define UINT_MAX 0xffffffff             ///< maximum unsigned int value 
 #endif 
-
-#ifndef UNREFERENCED_PARAMETER
-/// use this macro on unreferenced variables to avoid compiler warnings.
-#define UNREFERENCED_PARAMETER(P)          \
-    { \
-        (P) = (P); \
-    } \
-#endif
 
 
 #endif // _GR_DEFINES

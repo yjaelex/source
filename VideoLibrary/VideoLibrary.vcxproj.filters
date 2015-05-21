@@ -21,5 +21,8 @@
     <ClCompile Include="VideoFileClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MP4FileClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
