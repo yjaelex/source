@@ -9,6 +9,35 @@ static char* pLogLevelStr[] = {
     "<LOG_ERR >:"
 };
 
+void
+osDump(unsigned int indent, const char *lpszFormat, ...)
+{
+	char szMsg[2048];
+	va_list marker;
+	static FILE* fp = NULL;
+
+	va_start(marker, lpszFormat);
+	vsprintf(szMsg, lpszFormat, marker);
+	va_end(marker);
+
+	if (fp == NULL)
+	{
+		char szFileName[64];
+
+		sprintf(szFileName, "VideoLibraryDump.txt");
+		fp = fopen(szFileName, "wb");
+		if (fp == NULL)
+		{
+			return;
+		}
+	}
+
+	fprintf(fp, "%*c", indent, ' ');
+	fprintf(fp, szMsg);
+	fflush(fp);
+}
+
+
 void osLog(LOG_LEVEL level, const char * pFormatStr, ...)
 {
     va_list arg;

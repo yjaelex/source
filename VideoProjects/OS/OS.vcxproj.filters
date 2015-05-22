@@ -21,9 +21,18 @@
     <ClInclude Include="..\..\OS\os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\OS\osFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\OS\osLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\osFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\osFile_posix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

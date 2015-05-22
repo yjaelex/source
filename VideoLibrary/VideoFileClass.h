@@ -105,23 +105,5 @@ private:
     vector<AVStream>    m_vFileStreams;
 };
 
-class MP4Box;
-
-class MP4FileClass : VideoFileClass
-{
-public:
-    MP4FileClass()
-    {
-    }
-
-    ~MP4FileClass()
-    {
-    }
-
-private:
-    MP4Box *            m_pRootBox;
-};
-
-
 
 #endif
