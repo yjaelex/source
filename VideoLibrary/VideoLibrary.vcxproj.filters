@@ -24,5 +24,31 @@
     <ClCompile Include="MP4FileClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vpUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MP4Box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MP4FileClass_IO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MP4Box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoFileClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vpUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AllMP4Box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MP4FileClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

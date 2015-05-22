@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Include;..\OS</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,8 +75,18 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MP4Box.cpp" />
     <ClCompile Include="MP4FileClass.cpp" />
+    <ClCompile Include="MP4FileClass_IO.cpp" />
     <ClCompile Include="VideoFileClass.cpp" />
+    <ClCompile Include="vpUtil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AllMP4Box.h" />
+    <ClInclude Include="MP4Box.h" />
+    <ClInclude Include="MP4FileClass.h" />
+    <ClInclude Include="VideoFileClass.h" />
+    <ClInclude Include="vpUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
