@@ -27,15 +27,14 @@
  *              Ximpo Group Ltd.                mp4v2@ximpo.com
  */
 
-#include "src/impl.h"
+#include "AllMP4Box.h"
 
-namespace mp4v2 {
-namespace impl {
 
-///////////////////////////////////////////////////////////////////////////////
 
-MP4StsdAtom::MP4StsdAtom(MP4File &file)
-        : MP4Atom(file, "stsd")
+
+
+MP4StsdBox::MP4StsdBox(MP4FileClass &file)
+        : MP4Box(file, "stsd")
 {
     AddVersionAndFlags();
 
@@ -44,42 +43,42 @@ MP4StsdAtom::MP4StsdAtom(MP4File &file)
     pCount->SetReadOnly();
     AddProperty(pCount);
 
-    ExpectChildAtom("mp4a", Optional, Many);
-    ExpectChildAtom("enca", Optional, Many);
-    ExpectChildAtom("mp4s", Optional, Many);
-    ExpectChildAtom("mp4v", Optional, Many);
-    ExpectChildAtom("encv", Optional, Many);
-    ExpectChildAtom("rtp ", Optional, Many);
-    ExpectChildAtom("samr", Optional, Many); // For AMR-NB
-    ExpectChildAtom("sawb", Optional, Many); // For AMR-WB
-    ExpectChildAtom("s263", Optional, Many); // For H.263
-    ExpectChildAtom("avc1", Optional, Many);
-    ExpectChildAtom("alac", Optional, Many);
-    ExpectChildAtom("text", Optional, Many);
-    ExpectChildAtom("ac-3", Optional, Many);
+    ExpectChildBox("mp4a", Optional, Many);
+    ExpectChildBox("enca", Optional, Many);
+    ExpectChildBox("mp4s", Optional, Many);
+    ExpectChildBox("mp4v", Optional, Many);
+    ExpectChildBox("encv", Optional, Many);
+    ExpectChildBox("rtp ", Optional, Many);
+    ExpectChildBox("samr", Optional, Many); // For AMR-NB
+    ExpectChildBox("sawb", Optional, Many); // For AMR-WB
+    ExpectChildBox("s263", Optional, Many); // For H.263
+    ExpectChildBox("avc1", Optional, Many);
+    ExpectChildBox("alac", Optional, Many);
+    ExpectChildBox("text", Optional, Many);
+    ExpectChildBox("ac-3", Optional, Many);
 }
 
-void MP4StsdAtom::Read()
+void MP4StsdBox::Read()
 {
     /* do the usual read */
-    MP4Atom::Read();
+    MP4Box::Read();
 
     // check that number of children == entryCount
     MP4Integer32Property* pCount =
         (MP4Integer32Property*)m_pProperties[2];
 
-    if (m_pChildAtoms.Size() != pCount->GetValue()) {
+    if (m_pChildBoxs.Size() != pCount->GetValue()) {
         log.warningf("%s: \"%s\": stsd inconsistency with number of entries",
                      __FUNCTION__, GetFile().GetFilename().c_str() );
 
         /* fix it */
         pCount->SetReadOnly(false);
-        pCount->SetValue(m_pChildAtoms.Size());
+        pCount->SetValue(m_pChildBoxs.Size());
         pCount->SetReadOnly(true);
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

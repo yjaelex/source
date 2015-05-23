@@ -1,30 +1,10 @@
-/*
- * The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is MPEG4IP.
- *
- * The Initial Developer of the Original Code is Cisco Systems Inc.
- * Portions created by Cisco Systems Inc. are
- * Copyright (C) Cisco Systems Inc. 2001.  All Rights Reserved.
- *
- * Contributor(s):
- *      Dave Mackie     dmackie@cisco.com
- */
 
-#include "src/impl.h"
 
-namespace mp4v2 {
-namespace impl {
+#include "AllMP4Box.h"
 
-///////////////////////////////////////////////////////////////////////////////
+
+
+
 
 /*
  * This is used for the 4 bit sample size below.  We need the sampleCount
@@ -35,8 +15,8 @@ namespace impl {
 class MP4HalfSizeTableProperty : public MP4TableProperty
 {
 public:
-    MP4HalfSizeTableProperty(MP4Atom& parentAtom, const char *name, MP4IntegerProperty *pCountProperty) :
-            MP4TableProperty(parentAtom, name, pCountProperty) {};
+    MP4HalfSizeTableProperty(MP4Box& parentBox, const char *name, MP4IntegerProperty *pCountProperty) :
+            MP4TableProperty(parentBox, name, pCountProperty) {};
 
     // The count is half the actual size
     uint32_t GetCount() {
@@ -52,8 +32,8 @@ private:
 };
 
 
-MP4Stz2Atom::MP4Stz2Atom(MP4File &file)
-        : MP4Atom(file, "stz2")
+MP4Stz2Box::MP4Stz2Box(MP4FileClass &file)
+        : MP4Box(file, "stz2")
 {
     AddVersionAndFlags(); /* 0, 1 */
 
@@ -68,7 +48,7 @@ MP4Stz2Atom::MP4Stz2Atom(MP4File &file)
 
 }
 
-void MP4Stz2Atom::Read()
+void MP4Stz2Box::Read()
 {
     ReadProperties(0, 4);
 
@@ -102,7 +82,7 @@ void MP4Stz2Atom::Read()
     Skip(); // to end of atom
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

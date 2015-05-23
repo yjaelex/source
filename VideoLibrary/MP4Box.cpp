@@ -11,7 +11,7 @@ MP4BoxInfo::MP4BoxInfo(const char* name, bool mandatory, bool onlyOne)
     m_count = 0;
 }
 
-MP4Box::MP4Box(MP4FileClass& file, const char* type)
+MP4Box::MP4Box(MP4FileClassClass& file, const char* type)
     : m_File(file)
 {
     SetType(type);
@@ -69,7 +69,7 @@ void MP4Box::Generate()
     }
 }
 
-MP4Box* MP4Box::ReadBox(MP4FileClass& file, MP4Box* pParentBox)
+MP4Box* MP4Box::ReadBox(MP4FileClassClass& file, MP4Box* pParentBox)
 {
     uint8_t hdrSize = 8;
     uint8_t extendedType[16];
@@ -420,9 +420,7 @@ void MP4Box::WriteChildBoxs()
 
 void MP4Box::AddReserved(MP4Box& parentBox, const char* name, uint32_t size)
 {
-    //MP4BytesProperty* pReserved = new MP4BytesProperty(parentBox, name, size);
-    //pReserved->SetReadOnly();
-    //AddProperty(pReserved);
+    m_nReserved = size;
 }
 
 void MP4Box::ExpectChildBox(const char* name, bool mandatory, bool onlyOne)

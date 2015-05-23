@@ -75,6 +75,28 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Box_ac3.cpp" />
+    <ClCompile Include="Box_avc1.cpp" />
+    <ClCompile Include="Box_avcC.cpp" />
+    <ClCompile Include="Box_free.cpp" />
+    <ClCompile Include="Box_ftyp.cpp" />
+    <ClCompile Include="Box_hdlr.cpp" />
+    <ClCompile Include="Box_hinf.cpp" />
+    <ClCompile Include="Box_mdat.cpp" />
+    <ClCompile Include="Box_mdhd.cpp" />
+    <ClCompile Include="Box_mvhd.cpp" />
+    <ClCompile Include="Box_root.cpp" />
+    <ClCompile Include="Box_stbl.cpp" />
+    <ClCompile Include="Box_stdp.cpp" />
+    <ClCompile Include="Box_stsc.cpp" />
+    <ClCompile Include="Box_stsd.cpp" />
+    <ClCompile Include="Box_stsz.cpp" />
+    <ClCompile Include="Box_stz2.cpp" />
+    <ClCompile Include="Box_tfhd.cpp" />
+    <ClCompile Include="Box_tkhd.cpp" />
+    <ClCompile Include="Box_url.cpp" />
+    <ClCompile Include="Box_uuid.cpp" />
+    <ClCompile Include="Box_vmhd.cpp" />
     <ClCompile Include="MP4Box.cpp" />
     <ClCompile Include="MP4FileClass.cpp" />
     <ClCompile Include="MP4FileClass_IO.cpp" />

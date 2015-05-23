@@ -1,38 +1,18 @@
-/*
- * The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is MPEG4IP.
- *
- * The Initial Developer of the Original Code is Cisco Systems Inc.
- * Portions created by Cisco Systems Inc. are
- * Copyright (C) Cisco Systems Inc. 2001.  All Rights Reserved.
- *
- * Contributor(s):
- *      Dave Mackie     dmackie@cisco.com
- */
 
-#include "src/impl.h"
 
-namespace mp4v2 {
-namespace impl {
+#include "AllMP4Box.h"
 
-///////////////////////////////////////////////////////////////////////////////
 
-MP4MvhdAtom::MP4MvhdAtom(MP4File &file)
-        : MP4Atom(file, "mvhd")
+
+
+
+MP4MvhdBox::MP4MvhdBox(MP4FileClass &file)
+        : MP4Box(file, "mvhd")
 {
     AddVersionAndFlags();
 }
 
-void MP4MvhdAtom::AddProperties(uint8_t version)
+void MP4MvhdBox::AddProperties(uint8_t version)
 {
     if (version == 1) {
         AddProperty( /* 2 */
@@ -73,13 +53,13 @@ void MP4MvhdAtom::AddProperties(uint8_t version)
         new MP4Integer32Property(*this, "nextTrackId"));
 }
 
-void MP4MvhdAtom::Generate()
+void MP4MvhdBox::Generate()
 {
     uint8_t version = m_File.Use64Bits(GetType()) ? 1 : 0;
     SetVersion(version);
     AddProperties(version);
 
-    MP4Atom::Generate();
+    MP4Box::Generate();
 
     // set creation and modification times
     MP4Timestamp now = MP4GetAbsTimestamp();
@@ -126,7 +106,7 @@ void MP4MvhdAtom::Generate()
     ((MP4Integer32Property*)m_pProperties[9])->SetValue(1);
 }
 
-void MP4MvhdAtom::Read()
+void MP4MvhdBox::Read()
 {
     /* read atom version */
     ReadProperties(0, 1);
@@ -140,7 +120,7 @@ void MP4MvhdAtom::Read()
     Skip(); // to end of atom
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

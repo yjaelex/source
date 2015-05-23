@@ -19,12 +19,11 @@
  *      Bill May wmay@cisco.com
  */
 
-#include "src/impl.h"
+#include "AllMP4Box.h"
 
-namespace mp4v2 {
-namespace impl {
 
-///////////////////////////////////////////////////////////////////////////////
+
+
 
 /*
  * SizeTableProperty is a special version of the MP4TableProperty -
@@ -34,10 +33,10 @@ namespace impl {
 class SizeTableProperty : public MP4TableProperty
 {
 public:
-    SizeTableProperty(MP4Atom& parentAtom, const char *name, MP4IntegerProperty *pCountProperty) :
-            MP4TableProperty(parentAtom, name, pCountProperty) {};
+    SizeTableProperty(MP4Box& parentBox, const char *name, MP4IntegerProperty *pCountProperty) :
+            MP4TableProperty(parentBox, name, pCountProperty) {};
 protected:
-    void ReadEntry(MP4File& file, uint32_t index) {
+    void ReadEntry(MP4FileClass& file, uint32_t index) {
         // Each table has a size, followed by the length field
         // first, read the length
         m_pProperties[0]->Read(file, index);
@@ -54,8 +53,8 @@ private:
     SizeTableProperty &operator= ( const SizeTableProperty &src );
 };
 
-MP4AvcCAtom::MP4AvcCAtom(MP4File &file)
-        : MP4Atom(file, "avcC")
+MP4AvcCBox::MP4AvcCBox(MP4FileClass &file)
+        : MP4Box(file, "avcC")
 {
     MP4BitfieldProperty *pCount;
     MP4TableProperty *pTable;
@@ -76,21 +75,21 @@ MP4AvcCAtom::MP4AvcCAtom(MP4File &file)
 
     pTable = new SizeTableProperty(*this,"sequenceEntries", pCount);
     AddProperty(pTable); /* 8 */
-    pTable->AddProperty(new MP4Integer16Property(pTable->GetParentAtom(),"sequenceParameterSetLength"));
-    pTable->AddProperty(new MP4BytesProperty(pTable->GetParentAtom(),"sequenceParameterSetNALUnit"));
+    pTable->AddProperty(new MP4Integer16Property(pTable->GetParentBox(),"sequenceParameterSetLength"));
+    pTable->AddProperty(new MP4BytesProperty(pTable->GetParentBox(),"sequenceParameterSetNALUnit"));
 
     MP4Integer8Property *pCount2 = new MP4Integer8Property(*this,"numOfPictureParameterSets");
     AddProperty(pCount2); /* 9 */
 
     pTable = new SizeTableProperty(*this,"pictureEntries", pCount2);
     AddProperty(pTable); /* 10 */
-    pTable->AddProperty(new MP4Integer16Property(pTable->GetParentAtom(),"pictureParameterSetLength"));
-    pTable->AddProperty(new MP4BytesProperty(pTable->GetParentAtom(),"pictureParameterSetNALUnit"));
+    pTable->AddProperty(new MP4Integer16Property(pTable->GetParentBox(),"pictureParameterSetLength"));
+    pTable->AddProperty(new MP4BytesProperty(pTable->GetParentBox(),"pictureParameterSetNALUnit"));
 }
 
-void MP4AvcCAtom::Generate()
+void MP4AvcCBox::Generate()
 {
-    MP4Atom::Generate();
+    MP4Box::Generate();
 
     ((MP4Integer8Property*)m_pProperties[0])->SetValue(1);
 
@@ -139,7 +138,7 @@ void MP4AvcCAtom::Generate()
 // 10   PPS entries
 //
 //
-void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
+void MP4AvcCBox::Clone(MP4AvcCBox *dstBox)
 {
 
     MP4Property *dstProperty;
@@ -161,24 +160,24 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
 
 
     // start with defaults and reserved fields
-    dstAtom->Generate();
+    dstBox->Generate();
 
     // 0, 4, 6 are now generated from defaults
     // leaving 1, 2, 3, 5, 7, 8, 9, 10 to export
 
-    dstProperty=dstAtom->GetProperty(1);
+    dstProperty=dstBox->GetProperty(1);
     ((MP4Integer8Property *)dstProperty)->SetValue(
         ((MP4Integer8Property *)m_pProperties[1])->GetValue());
 
-    dstProperty=dstAtom->GetProperty(2);
+    dstProperty=dstBox->GetProperty(2);
     ((MP4Integer8Property *)dstProperty)->SetValue(
         ((MP4Integer8Property *)m_pProperties[2])->GetValue());
 
-    dstProperty=dstAtom->GetProperty(3);
+    dstProperty=dstBox->GetProperty(3);
     ((MP4Integer8Property *)dstProperty)->SetValue(
         ((MP4Integer8Property *)m_pProperties[3])->GetValue());
 
-    dstProperty=dstAtom->GetProperty(5);
+    dstProperty=dstBox->GetProperty(5);
     ((MP4BitfieldProperty *)dstProperty)->SetValue(
         ((MP4BitfieldProperty *)m_pProperties[5])->GetValue());
 
@@ -187,7 +186,7 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
     //
     // first the count bitfield
     //
-    dstProperty=dstAtom->GetProperty(7);
+    dstProperty=dstBox->GetProperty(7);
     dstProperty->SetReadOnly(false);
     ((MP4BitfieldProperty *)dstProperty)->SetValue(
         ((MP4BitfieldProperty *)m_pProperties[7])->GetValue());
@@ -201,7 +200,7 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
     spPB = (MP4BytesProperty *)pTable->GetProperty(1);
 
     // now dest pointers
-    dstProperty=dstAtom->GetProperty(8);
+    dstProperty=dstBox->GetProperty(8);
     pTable = (MP4TableProperty *) dstProperty;
     dpPI16 = (MP4Integer16Property *)pTable->GetProperty(0);
     dpPB = (MP4BytesProperty *)pTable->GetProperty(1);
@@ -230,7 +229,7 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
     //
     // first the integer8 count
     //
-    dstProperty=dstAtom->GetProperty(9);
+    dstProperty=dstBox->GetProperty(9);
     dstProperty->SetReadOnly(false);
     ((MP4Integer8Property *)dstProperty)->SetValue(
         ((MP4Integer8Property *)m_pProperties[9])->GetValue());
@@ -244,7 +243,7 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
     spPB = (MP4BytesProperty *)pTable->GetProperty(1);
 
     // now dest pointers
-    dstProperty=dstAtom->GetProperty(10);
+    dstProperty=dstBox->GetProperty(10);
     pTable = (MP4TableProperty *) dstProperty;
     dpPI16 = (MP4Integer16Property *)pTable->GetProperty(0);
     dpPB = (MP4BytesProperty *)pTable->GetProperty(1);
@@ -267,7 +266,7 @@ void MP4AvcCAtom::Clone(MP4AvcCAtom *dstAtom)
     MP4Free((void *)tmp);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

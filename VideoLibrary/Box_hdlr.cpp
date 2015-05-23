@@ -1,33 +1,13 @@
-/*
- * The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is MPEG4IP.
- *
- * The Initial Developer of the Original Code is Cisco Systems Inc.
- * Portions created by Cisco Systems Inc. are
- * Copyright (C) Cisco Systems Inc. 2001.  All Rights Reserved.
- *
- * Contributor(s):
- *      Dave Mackie     dmackie@cisco.com
- */
 
-#include "src/impl.h"
 
-namespace mp4v2 {
-namespace impl {
+#include "AllMP4Box.h"
 
-///////////////////////////////////////////////////////////////////////////////
 
-MP4HdlrAtom::MP4HdlrAtom(MP4File &file)
-        : MP4Atom(file, "hdlr")
+
+
+
+MP4HdlrBox::MP4HdlrBox(MP4FileClass &file)
+        : MP4Box(file, "hdlr")
 {
     AddVersionAndFlags(); /* 0, 1 */
     AddReserved(*this, "reserved1", 4); /* 2 */
@@ -43,7 +23,7 @@ MP4HdlrAtom::MP4HdlrAtom(MP4File &file)
 // QT says name field is a counted string
 // MP4 says name field is a null terminated string
 // Here we attempt to make all things work
-void MP4HdlrAtom::Read()
+void MP4HdlrBox::Read()
 {
     // read all the properties but the "name" field
     ReadProperties(0, 5);
@@ -75,7 +55,7 @@ void MP4HdlrAtom::Read()
             // terminated for them by the size field of the subsequent atom.  So if
             // our size is off by one...let it slide.  otherwise, rethrow.
             // The Skip() call will set our start to the correct location
-            // for the next Atom. See issue #52
+            // for the next Box. See issue #52
             ReadProperties(5);
         }
         catch(Exception* x) { 
@@ -89,7 +69,7 @@ void MP4HdlrAtom::Read()
     Skip(); // to end of atom
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

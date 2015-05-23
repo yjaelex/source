@@ -102,6 +102,7 @@ public:
     MP4UrlBox(MP4FileClass &file, const char *type="url ");
     void Read();
     void Write();
+    string              m_location;
 private:
     MP4UrlBox();
     MP4UrlBox( const MP4UrlBox &src );
@@ -684,6 +685,7 @@ private:
 class IPodUUIDBox : public MP4Box {
 public:
     IPodUUIDBox(MP4FileClass &file);
+    uint32_t        value;
 private:
     IPodUUIDBox();
     IPodUUIDBox( const IPodUUIDBox &src );

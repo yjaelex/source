@@ -19,15 +19,14 @@
  *      Bill May wmay@cisco.com
  */
 
-#include "src/impl.h"
+#include "AllMP4Box.h"
 
-namespace mp4v2 {
-namespace impl {
 
-///////////////////////////////////////////////////////////////////////////////
 
-MP4Avc1Atom::MP4Avc1Atom(MP4File &file)
-        : MP4Atom(file, "avc1")
+
+
+MP4Avc1Box::MP4Avc1Box(MP4FileClass &file)
+        : MP4Box(file, "avc1")
 {
     AddReserved(*this, "reserved1", 6); /* 0 */
 
@@ -52,16 +51,16 @@ MP4Avc1Atom::MP4Avc1Atom(MP4File &file)
 
     AddReserved(*this, "reserved4", 4); /* 7 */
 
-    ExpectChildAtom("avcC", Required, OnlyOne);
-    ExpectChildAtom("btrt", Optional, OnlyOne);
-    ExpectChildAtom("colr", Optional, OnlyOne);
-    ExpectChildAtom("pasp", Optional, OnlyOne);
-    // for now ExpectChildAtom("m4ds", Optional, OnlyOne);
+    ExpectChildBox("avcC", Required, OnlyOne);
+    ExpectChildBox("btrt", Optional, OnlyOne);
+    ExpectChildBox("colr", Optional, OnlyOne);
+    ExpectChildBox("pasp", Optional, OnlyOne);
+    // for now ExpectChildBox("m4ds", Optional, OnlyOne);
 }
 
-void MP4Avc1Atom::Generate()
+void MP4Avc1Box::Generate()
 {
-    MP4Atom::Generate();
+    MP4Box::Generate();
 
     ((MP4Integer16Property*)m_pProperties[1])->SetValue(1);
 
@@ -87,7 +86,7 @@ void MP4Avc1Atom::Generate()
     m_pProperties[7]->SetReadOnly(true);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }
 } // namespace mp4v2::impl

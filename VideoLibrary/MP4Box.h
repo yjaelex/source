@@ -47,7 +47,7 @@ private:
     static bool descendsFrom( MP4Box* parent, const char* type );
 
 public:
-    MP4Box(MP4FileClass& file, const char* type = NULL);
+    MP4Box(MP4FileClassClass& file, const char* type = NULL);
     virtual ~MP4Box();
 
     MP4FileClass& GetFile() {
@@ -211,6 +211,7 @@ protected:
 
     MP4Box*							m_pParentBox;
     uint8_t							m_nDepth;
+    uint32_t                        m_nReserved;
 
     vector<MP4BoxInfo*>				m_vChildBoxInfos;
 	vector<MP4Box*>					m_vChildBoxs;

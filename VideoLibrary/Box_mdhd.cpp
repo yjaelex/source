@@ -1,37 +1,18 @@
-/*
- * The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is MPEG4IP.
- *
- * The Initial Developer of the Original Code is Cisco Systems Inc.
- * Portions created by Cisco Systems Inc. are
- * Copyright (C) Cisco Systems Inc. 2001.  All Rights Reserved.
- *
- * Contributor(s):
- *      Dave Mackie     dmackie@cisco.com
- */
 
-#include "src/impl.h"
+
+#include "AllMP4Box.h"
 
 namespace mp4v2 { namespace impl {
 
-///////////////////////////////////////////////////////////////////////////////
 
-MP4MdhdAtom::MP4MdhdAtom(MP4File &file)
-        : MP4Atom(file, "mdhd")
+
+MP4MdhdBox::MP4MdhdBox(MP4FileClass &file)
+        : MP4Box(file, "mdhd")
 {
     AddVersionAndFlags();
 }
 
-void MP4MdhdAtom::AddProperties(uint8_t version)
+void MP4MdhdBox::AddProperties(uint8_t version)
 {
     if (version == 1) {
         AddProperty(
@@ -60,13 +41,13 @@ void MP4MdhdAtom::AddProperties(uint8_t version)
     AddReserved(*this, "reserved", 2);
 }
 
-void MP4MdhdAtom::Generate()
+void MP4MdhdBox::Generate()
 {
     uint8_t version = m_File.Use64Bits(GetType()) ? 1 : 0;
     SetVersion(version);
     AddProperties(version);
 
-    MP4Atom::Generate();
+    MP4Box::Generate();
 
     // set creation and modification times
     MP4Timestamp now = MP4GetAbsTimestamp();
@@ -79,7 +60,7 @@ void MP4MdhdAtom::Generate()
     }
 }
 
-void MP4MdhdAtom::Read()
+void MP4MdhdBox::Read()
 {
     /* read atom version */
     ReadProperties(0, 1);
@@ -93,6 +74,6 @@ void MP4MdhdAtom::Read()
     Skip(); // to end of atom
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 
 }} // namespace mp4v2::impl
