@@ -150,15 +150,7 @@ MP4Box* MP4Box::ReadBox(MP4FileClass& file, MP4Box* pParentBox)
 
     pBox->SetParentBox(pParentBox);
 
-	try {
-		pBox->Read();
-	}
-	catch (Exception* x) {
-		// delete Box and rethrow so we don't leak memory.
-		delete pBox;	
-		throw x;
-	}
-
+    pBox->Read();
 
     return pBox;
 }
@@ -185,7 +177,7 @@ void MP4Box::Read()
     if (BoxID(m_type) != 0 && m_nSize > 1000000)
 	{
         osLog(LOG_INFO, "%s: \"%s\": %s Box size %" PRIu64 " is suspect", __FUNCTION__,
-                     m_File.GetFilename().c_str(), m_type, m_size);
+                     m_File.GetFilename().c_str(), m_type, m_nSize);
     }
 
     ReadProperties();
@@ -203,7 +195,7 @@ void MP4Box::Skip()
 	if (m_File.GetPosition() != m_nEnd)
 	{
         osLog(LOG_INFO, "\"%s\": Skip: %" PRIu64 " bytes",
-                      m_File.GetFilename().c_str(), m_end - m_File.GetPosition());
+                      m_File.GetFilename().c_str(), m_nEnd - m_File.GetPosition());
     }
     m_File.SetPosition(m_nEnd);
 }
@@ -257,7 +249,7 @@ MP4Box* MP4Box::FindChildBox(const char* name)
     (void)MP4NameFirstIndex(name, &BoxIndex);
 
     // need to get to the index'th child Box of the right type
-    for (uint32_t i = 0; i < m_pChildBoxs.Size(); i++) {
+    for (uint32_t i = 0; i < m_vChildBoxs.size(); i++) {
         if (MP4NameFirstMatches(m_vChildBoxs[i]->GetType(), name)) {
             if (BoxIndex == 0) {
                 // this is the one, ask it to match
@@ -291,7 +283,7 @@ void MP4Box::ReadChildBoxs()
             }
             // otherwise, output a warning, but don't care
 			osLog(LOG_WARN, "%s: \"%s\": In %s Box, extra %" PRId64 " bytes at end of Box", __FUNCTION__,
-                         m_File.GetFilename().c_str(), m_type, (m_end - position));
+                         m_File.GetFilename().c_str(), m_type, (m_nEnd - position));
             for (uint64_t ix = 0; ix < m_nEnd - position; ix++) {
                 (void)m_File.ReadUInt8();
             }
@@ -325,12 +317,12 @@ void MP4Box::ReadChildBoxs()
     }
 
     // if mandatory child Box doesn't exist, print warning
-    uint32_t numBoxInfo = m_pChildBoxInfos.Size();
+    uint32_t numBoxInfo = m_vChildBoxInfos.size();
     for (uint32_t i = 0; i < numBoxInfo; i++) {
-        if (m_pChildBoxInfos[i]->m_mandatory
-                && m_pChildBoxInfos[i]->m_count == 0) {
+        if (m_vChildBoxInfos[i]->m_mandatory
+                && m_vChildBoxInfos[i]->m_count == 0) {
             osLog(LOG_WARN, "%s: \"%s\": In Box %s missing child Box %s", __FUNCTION__,
-                         m_File.GetFilename().c_str(), GetType(), m_pChildBoxInfos[i]->m_name);
+                         m_File.GetFilename().c_str(), GetType(), m_vChildBoxInfos[i]->m_name);
         }
     }
 
@@ -397,17 +389,17 @@ void MP4Box::FinishWrite(bool use64)
 	m_nSize = (m_nEnd - m_nStart);
 
     osLog(LOG_INFO, "end: type %s %" PRIu64 " %" PRIu64 " size %" PRIu64,
-                       m_type,m_start, m_end, m_size);
+                       m_type,m_nStart, m_nEnd, m_nSize);
     //use64 = m_File.Use64Bits();
     if (use64) {
-        m_File.SetPosition(m_start + 8);
-        m_File.WriteUInt64(m_size);
+        m_File.SetPosition(m_nStart + 8);
+        m_File.WriteUInt64(m_nSize);
     } else {
-        ASSERT(m_size <= (uint64_t)0xFFFFFFFF);
-        m_File.SetPosition(m_start);
-        m_File.WriteUInt32(m_size);
+        osAssert(m_nSize <= (uint64_t)0xFFFFFFFF);
+        m_File.SetPosition(m_nStart);
+        m_File.WriteUInt32(m_nSize);
     }
-    m_File.SetPosition(m_end);
+    m_File.SetPosition(m_nEnd);
 
     // adjust size to just reflect data portion of Box
 	m_nSize -= (use64 ? 16 : 8);
@@ -426,12 +418,6 @@ void MP4Box::WriteChildBoxs()
     osLog(LOG_INFO, "Write: \"%s\": finished %s", m_File.GetFilename().c_str(), m_type);
 }
 
-void MP4Box::AddVersionAndFlags()
-{
-    //AddProperty(new MP4Integer8Property(*this, "version"));
-    //AddProperty(new MP4Integer24Property(*this, "flags"));
-}
-
 void MP4Box::AddReserved(MP4Box& parentBox, const char* name, uint32_t size)
 {
     //MP4BytesProperty* pReserved = new MP4BytesProperty(parentBox, name, size);
@@ -442,38 +428,6 @@ void MP4Box::AddReserved(MP4Box& parentBox, const char* name, uint32_t size)
 void MP4Box::ExpectChildBox(const char* name, bool mandatory, bool onlyOne)
 {
     m_vChildBoxInfos.push_back(new MP4BoxInfo(name, mandatory, onlyOne));
-}
-
-uint8_t MP4Box::GetVersion()
-{
-    if (strcmp("version", m_pProperties[0]->GetName())) {
-        return 0;
-    }
-    return ((MP4Integer8Property*)m_pProperties[0])->GetValue();
-}
-
-void MP4Box::SetVersion(uint8_t version)
-{
-    if (strcmp("version", m_pProperties[0]->GetName())) {
-        return;
-    }
-    ((MP4Integer8Property*)m_pProperties[0])->SetValue(version);
-}
-
-uint32_t MP4Box::GetFlags()
-{
-    if (strcmp("flags", m_pProperties[1]->GetName())) {
-        return 0;
-    }
-    return ((MP4Integer24Property*)m_pProperties[1])->GetValue();
-}
-
-void MP4Box::SetFlags(uint32_t flags)
-{
-    if (strcmp("flags", m_pProperties[1]->GetName())) {
-        return;
-    }
-    ((MP4Integer24Property*)m_pProperties[1])->SetValue(flags);
 }
 
 void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
@@ -518,7 +472,7 @@ void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
     }
 }
 
-void MP4Box::DumpDumpProperties(uint8_t indent, bool dumpImplicits)
+void MP4Box::DumpProperties(uint8_t indent, bool dumpImplicits)
 {
 	// Start offset
 	osDump(indent, "Start offset: %d(0x%x)\n", m_nStart, m_nStart);
@@ -526,6 +480,11 @@ void MP4Box::DumpDumpProperties(uint8_t indent, bool dumpImplicits)
 	osDump(indent, "Full Size   : %d(0x%x)\n", m_nSize, m_nSize);
 	// Type
 	osDump(indent, "Box Type    : %s(0x%x)\n", m_type, STRTOINT32(m_type));
+}
+
+void MP4Box::ReadProperties()
+{
+    // No extra properties for base box.
 }
 
 uint8_t MP4Box::GetDepth()

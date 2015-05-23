@@ -5,6 +5,18 @@
 #include "MP4Box.h"
 #include "osFile.h"
 
+/** Bit: enable 64-bit data-atoms. */
+#define MP4_CREATE_64BIT_DATA 0x01
+/** Bit: enable 64-bit time-atoms. @note Incompatible with QuickTime. */
+#define MP4_CREATE_64BIT_TIME 0x02
+
+#define MP4Malloc           osMalloc
+#define MP4Calloc           osCalloc
+#define MP4Stralloc         osStralloc
+#define MP4Realloc          osRealloc
+
+class MP4Box;
+
 class MP4FileClass : VideoFileClass
 {
 public:
@@ -65,9 +77,19 @@ public:
 	void DisableMemoryBuffer(
 		uint8_t** ppBytes = NULL, uint64_t* pNumBytes = NULL);
 
+    // Get & Set functions
+    string & GetFilename()
+    {
+        return m_FileName;
+    }
+
+
+    bool Use64Bits(const char *atomName);
+    void Check64BitStatus(const char *atomName);
 
 private:
 	File*				m_file;
+    string              m_FileName;
 	MP4Box *            m_pRootBox;
 	// read/write in memory
 	uint8_t*			m_memoryBuffer;
@@ -80,9 +102,11 @@ private:
 	uint8_t				m_numWriteBits;
 	uint8_t				m_bufWriteBits;
 
+    uint32_t            m_createFlags;
+
 private:
 	MP4FileClass(const MP4FileClass &src);
-	MP4FileClass &operator= (const MP4FileClass &src)
+    MP4FileClass &operator= (const MP4FileClass &src);
 };
 
 #endif

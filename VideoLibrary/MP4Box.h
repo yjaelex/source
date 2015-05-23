@@ -3,11 +3,12 @@
 #define _VP_MP4BOX_H
 
 #include "vptypes.h"
-#include "VideoFileClass.h"
+#include "MP4FileClass.h"
 #include "vpUtil.h"
 
 class MP4Box;
 class MP4BoxInfo;
+class MP4FileClass;
 
 #define Required    true
 #define Optional    false
@@ -167,6 +168,7 @@ public:
     virtual void FinishWrite(bool use64 = false);
     virtual void Dump(uint8_t indent, bool dumpImplicits);
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+    virtual void ReadProperties();
 
     bool GetLargesizeMode();
 

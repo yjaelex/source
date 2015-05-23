@@ -50,7 +50,7 @@ void MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
         return;
 
     osAssert( buf );
-    WARNING( m_numReadBits > 0 );
+    osWARNING( m_numReadBits > 0 );
 
     if( m_memoryBuffer ) {
         if( m_memoryBufferPosition + bufsiz > m_memoryBufferSize )
@@ -66,7 +66,7 @@ void MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
     osAssert( file );
     File::Size nin;
     if( file->read( buf, bufsiz, nin ))
-        osAssert(!"read failed", sys::getLastError() );
+        osAssert(!"read failed");
     if( nin != bufsiz )
         osAssert(!"not enough bytes, reached end-of-file" );
 }
@@ -135,7 +135,7 @@ void MP4FileClass::WriteBytes( uint8_t* buf, uint32_t bufsiz, File* file )
     osAssert( file );
     File::Size nout;
     if( file->write( buf, bufsiz, nout ))
-        osAssert(!"write failed", sys::getLastError() );
+        osAssert(!"write failed");
     if( nout != bufsiz )
         osAssert(!"not all bytes written" );
 }
@@ -367,7 +367,7 @@ char* MP4FileClass::ReadCountedString(uint8_t charSize, bool allowExpandedCount,
          * a non counted string has been used in the place of a
          * counted string).
          */  
-        WARNING(charLength > fixedLength - 1);
+        osWARNING(charLength > fixedLength - 1);
         charLength = fixedLength - 1U;
     }
 

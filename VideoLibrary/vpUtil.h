@@ -2,6 +2,7 @@
 #define _VP_UTIL_H
 
 #include "vptypes.h"
+#include "os.h"
 
 #define VP_BYTESWAP_16(x) \
     uint16_t( ((uint16_t(x) & 0xff00U) >> 8) \
@@ -37,5 +38,9 @@
 
 uint32_t STRTOINT32(const char* s);
 void INT32TOSTR(uint32_t i, char* s);
+bool MP4NameFirstMatches(const char* s1, const char* s2);
+bool MP4NameFirstIndex(const char* s, uint32_t* pIndex);
+const char* MP4NameAfterFirst(const char *s);
+
 
 #endif

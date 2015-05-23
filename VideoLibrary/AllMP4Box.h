@@ -14,6 +14,27 @@ public:
 
     int8&  version;
     int32& flags;
+
+    uint8_t GetVersion()
+    {
+        return version;
+    }
+
+    void SetVersion(uint8_t boxversion)
+    {
+        version = boxversion;
+    }
+
+    uint32_t GetFlags()
+    {
+        return flags;
+    }
+
+    void SetFlags(uint32_t boxflags)
+    {
+        flags = boxflags;
+    }
+
 private:
     MP4FullBox();
     MP4FullBox( const MP4FullBox &src );
