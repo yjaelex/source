@@ -36,11 +36,17 @@
 #   define VP_NTOHL(x)  VP_BYTESWAP_32(x)
 #endif
 
+typedef uint32_t    MP4TrackId;
+typedef uint32_t    MP4SampleId;
+typedef uint64_t    MP4Timestamp;
+typedef uint64_t    MP4Duration;
+typedef uint32_t    MP4EditId;
+
 uint32_t STRTOINT32(const char* s);
 void INT32TOSTR(uint32_t i, char* s);
 bool MP4NameFirstMatches(const char* s1, const char* s2);
 bool MP4NameFirstIndex(const char* s, uint32_t* pIndex);
 const char* MP4NameAfterFirst(const char *s);
-
+MP4Timestamp MP4GetAbsTimestamp();
 
 #endif

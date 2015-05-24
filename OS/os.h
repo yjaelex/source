@@ -80,6 +80,6 @@ inline void* osRealloc(void* p, uint32_t newSize) {
 
 
 void osDump(unsigned int indent, const char *lpszFormat, ...);
-
+int64_t osGetLocalTimeSeconds();
 
 #endif

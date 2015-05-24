@@ -12,27 +12,27 @@ class MP4FullBox : public MP4Box
 public:
     MP4FullBox( MP4FileClass &file, const char* type );
 
-    int8&  version;
-    int32& flags;
+    int8                    m_version;
+    int32                   m_flags;
 
     uint8_t GetVersion()
     {
-        return version;
+        return m_version;
     }
 
     void SetVersion(uint8_t boxversion)
     {
-        version = boxversion;
+        m_version = boxversion;
     }
 
     uint32_t GetFlags()
     {
-        return flags;
+        return m_flags;
     }
 
     void SetFlags(uint32_t boxflags)
     {
-        flags = boxflags;
+        m_flags = boxflags;
     }
 
 private:
@@ -602,39 +602,47 @@ public:
     MP4TkhdBox(MP4FileClass &file);
     void Generate();
     void Read();
-protected:
-    void AddProperties(uint8_t version);
 
+protected:
+    //The default value of the track header flags for media tracks is 7 (track_enabled, track_in_movie,
+    //track_in_preview).If in a presentation all tracks have neither track_in_movie nor track_in_preview set, then all
+    //tracks shall be treated as if both flags were set on all tracks.Hint tracks should have the track header flags set
+    //to 0, so that they are ignored for local playback and preview.
+    //if (version == 1) {
+    //    unsigned int(64) creation_time;
+    //    unsigned int(64) modification_time;
+    //    unsigned int(32) track_ID;
+    //    const unsigned int(32) reserved = 0;
+    //    unsigned int(64) duration;
+    //}
+    //else { // version==0
+    //    unsigned int(32) creation_time;
+    //    unsigned int(32) modification_time;
+    //    unsigned int(32) track_ID;
+    //    const unsigned int(32) reserved = 0;
+    //    unsigned int(32) duration;
+    //}
 
     uint64                  m_creationTime;
     uint64                  m_modificationTime;
     uint32                  m_trackId;
+    uint32                  m_reserved0;
     uint64                  m_duration;
-    uint32                  m_trackId;
  
-    if (version == 1) {
-        unsigned int(64) creation_time;
-        unsigned int(64) modification_time;
-        unsigned int(32) track_ID;
-        const unsigned int(32) reserved = 0;
-        unsigned int(64) duration;
-    }
-    else { // version==0
-        unsigned int(32) creation_time;
-        unsigned int(32) modification_time;
-        unsigned int(32) track_ID;
-        const unsigned int(32) reserved = 0;
-        unsigned int(32) duration;
-    }
     uint32                  m_reserved1[2];
     int16                   m_layer;
     int16                   m_alternate_group;
-    int16                   m_volume                //{ if track_is_audio 0x0100 else 0 };
-    uint16_t                reserved;
-    int32 matrix[9];            // { 0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000 };
+
+    //{ if track_is_audio 0x0100 else 0 };
+    int16                   m_volume;
+    uint16                  m_reserved2;
+
+    // { 0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000 };
     // unity matrix
-    unsigned int(32) width;
-    unsigned int(32) height;
+    int32                   m_matrix[9];
+
+    uint32                  m_width;
+    uint32                  m_height;
 
 private:
     MP4TkhdBox();
