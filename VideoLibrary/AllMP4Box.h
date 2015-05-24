@@ -597,13 +597,45 @@ private:
     MP4TfhdBox &operator= ( const MP4TfhdBox &src );
 };
 
-class MP4TkhdBox : public MP4Box {
+class MP4TkhdBox : public MP4FullBox {
 public:
     MP4TkhdBox(MP4FileClass &file);
     void Generate();
     void Read();
 protected:
     void AddProperties(uint8_t version);
+
+
+    uint64                  m_creationTime;
+    uint64                  m_modificationTime;
+    uint32                  m_trackId;
+    uint64                  m_duration;
+    uint32                  m_trackId;
+ 
+    if (version == 1) {
+        unsigned int(64) creation_time;
+        unsigned int(64) modification_time;
+        unsigned int(32) track_ID;
+        const unsigned int(32) reserved = 0;
+        unsigned int(64) duration;
+    }
+    else { // version==0
+        unsigned int(32) creation_time;
+        unsigned int(32) modification_time;
+        unsigned int(32) track_ID;
+        const unsigned int(32) reserved = 0;
+        unsigned int(32) duration;
+    }
+    uint32                  m_reserved1[2];
+    int16                   m_layer;
+    int16                   m_alternate_group;
+    int16                   m_volume                //{ if track_is_audio 0x0100 else 0 };
+    uint16_t                reserved;
+    int32 matrix[9];            // { 0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000 };
+    // unity matrix
+    unsigned int(32) width;
+    unsigned int(32) height;
+
 private:
     MP4TkhdBox();
     MP4TkhdBox( const MP4TkhdBox &src );

@@ -1,8 +1,4 @@
-
-
 #include "AllMP4Box.h"
-
-
 
 
 
@@ -119,7 +115,3 @@ void MP4TkhdBox::Read()
     Skip(); // to end of atom
 }
 
-
-
-}
-} // namespace mp4v2::impl
