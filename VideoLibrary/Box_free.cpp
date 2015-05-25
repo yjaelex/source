@@ -1,12 +1,7 @@
-
-
 #include "AllMP4Box.h"
 
 
-
-
-
-MP4FreeBox::MP4FreeBox( MP4File &file, const char* type )
+MP4FreeBox::MP4FreeBox( MP4FileClass &file, const char* type )
     : MP4Box( file, type ? type : "free" )
 {
 }
@@ -29,8 +24,3 @@ void MP4FreeBox::Write()
 #endif
     FinishWrite(use64);
 }
-
-
-
-}
-} // namespace mp4v2::impl

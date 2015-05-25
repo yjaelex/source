@@ -1,9 +1,4 @@
-
-
 #include "AllMP4Box.h"
-
-
-
 
 
 MP4MdatBox::MP4MdatBox(MP4FileClass &file)
@@ -19,10 +14,5 @@ void MP4MdatBox::Read()
 void MP4MdatBox::Write()
 {
     // should never get here
-    ASSERT(false);
+    osAssert(false);
 }
-
-
-
-}
-} // namespace mp4v2::impl

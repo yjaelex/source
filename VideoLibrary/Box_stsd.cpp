@@ -67,13 +67,13 @@ void MP4StsdBox::Read()
     MP4Integer32Property* pCount =
         (MP4Integer32Property*)m_pProperties[2];
 
-    if (m_pChildBoxs.Size() != pCount->GetValue()) {
+    if (m_vChildBoxs.Size() != pCount->GetValue()) {
         log.warningf("%s: \"%s\": stsd inconsistency with number of entries",
                      __FUNCTION__, GetFile().GetFilename().c_str() );
 
         /* fix it */
         pCount->SetReadOnly(false);
-        pCount->SetValue(m_pChildBoxs.Size());
+        pCount->SetValue(m_vChildBoxs.Size());
         pCount->SetReadOnly(true);
     }
 }

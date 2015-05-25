@@ -11,7 +11,7 @@ MP4BoxInfo::MP4BoxInfo(const char* name, bool mandatory, bool onlyOne)
     m_count = 0;
 }
 
-MP4Box::MP4Box(MP4FileClassClass& file, const char* type)
+MP4Box::MP4Box(MP4FileClass& file, const char* type)
     : m_File(file)
 {
     SetType(type);
@@ -69,7 +69,7 @@ void MP4Box::Generate()
     }
 }
 
-MP4Box* MP4Box::ReadBox(MP4FileClassClass& file, MP4Box* pParentBox)
+MP4Box* MP4Box::ReadBox(MP4FileClass& file, MP4Box* pParentBox)
 {
     uint8_t hdrSize = 8;
     uint8_t extendedType[16];
@@ -183,7 +183,8 @@ void MP4Box::Read()
     ReadProperties();
 
     // read child Boxs, if we expect there to be some
-    if (m_vChildBoxInfos.size() > 0) {
+    if (m_vChildBoxInfos.size() > 0)
+	{
         ReadChildBoxs();
     }
 
@@ -430,10 +431,12 @@ void MP4Box::ExpectChildBox(const char* name, bool mandatory, bool onlyOne)
 
 void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
 {
-    if ( m_type[0] != '\0' ) {
+    if ( m_type[0] != '\0' )
+	{
         // create list of ancestors
         list<string> tlist;
-        for( MP4Box* Box = this; Box; Box = Box->GetParentBox() ) {
+        for( MP4Box* Box = this; Box; Box = Box->GetParentBox() )
+		{
             const char* const type = Box->GetType();
             if( type && type[0] != '\0' )
                 tlist.push_front( type );
@@ -447,8 +450,7 @@ void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
         if( can.length() )
             can.resize( can.length() - 1 );
 
-        osDump(indent, "\"%s\": type %s (%s)\n", GetFile().GetFilename().c_str(),
-                 m_type, can.c_str() );
+        osDump(indent, "\"%s\": type %s (%s)\n", GetFile().GetFilename().c_str(), m_type, can.c_str() );
     }
 
     uint32_t i;

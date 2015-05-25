@@ -47,7 +47,7 @@ private:
     static bool descendsFrom( MP4Box* parent, const char* type );
 
 public:
-    MP4Box(MP4FileClassClass& file, const char* type = NULL);
+    MP4Box(MP4FileClass& file, const char* type = NULL);
     virtual ~MP4Box();
 
     MP4FileClass& GetFile() {

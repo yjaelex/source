@@ -10,10 +10,14 @@ class MP4FreeBox;
 class MP4FullBox : public MP4Box
 {
 public:
-    MP4FullBox( MP4FileClass &file, const char* type );
+	MP4FullBox(MP4FileClass &file, const char* type) : MP4Box(file, type)
+	{
+		m_flags = 0;
+		m_version = 0;
+	}
 
-    int8                    m_version;
-    int32                   m_flags;
+    uint8                    m_version;
+    uint32                   m_flags;
 
     uint8_t GetVersion()
     {
@@ -34,6 +38,20 @@ public:
     {
         m_flags = boxflags;
     }
+
+	virtual void ReadProperties()
+	{
+		m_flags = m_File.ReadUInt32();
+		m_version = (m_flags & 0xf0000000) >> 24;
+		m_flags = m_flags & 0x0fffffff;
+	}
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		MP4Box::DumpProperties(indent, dumpImplicits);
+		osDump(indent, "Version: %8d(0x%8x)\n", m_version, m_version);
+		osDump(indent, "Flags  : %d(0x%x)\n", m_flags, m_flags);
+	}
 
 private:
     MP4FullBox();
@@ -68,10 +86,10 @@ private:
     MP4RootBox( const MP4RootBox &src );
     MP4RootBox &operator= ( const MP4RootBox &src );
 
-    MP4FtypBox* m_rewrite_ftyp;
-    uint64_t     m_rewrite_ftypPosition;
-    MP4FreeBox* m_rewrite_free;
-    uint64_t     m_rewrite_freePosition;
+    MP4FtypBox*					m_rewrite_ftyp;
+    uint64_t					m_rewrite_ftypPosition;
+    MP4FreeBox*					m_rewrite_free;
+    uint64_t					m_rewrite_freePosition;
 };
 
 /***********************************************************************
@@ -329,9 +347,31 @@ public:
     void Generate();
     void Read();
 
-    std::string		majorBrand;
-    int32&			minorVersion;
-	std::string		compatibleBrands;
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		char tempStr[5] = { 0 };
+
+		INT32TOSTR(m_majorBrand, tempStr);
+		osDump(indent, "MajorBrand: %s(0x%x)\n", tempStr, m_majorBrand);
+		osDump(indent, "MinorVersion: %d(0x%x)\n", m_minorVersion, m_minorVersion);
+
+		for (uint32 i = 0; i < m_compatibleBrands.size(); i++)
+		{
+			INT32TOSTR(m_compatibleBrands[i], tempStr);
+			osDump(indent, "MajorBrand: %s(0x%x)\n", tempStr, m_compatibleBrands[i]);
+		}
+	}
+
+
+	// Each brand is a printable four - character code, registered with ISO, that identifies a precise specification.
+	// major_brand ¨C is a brand identifier
+	// minor_version ¨C is an informative integer for the minor version of the major brand
+	// compatible_brands ¨C is a list, to the end of the box, of brands
+	uint32					m_majorBrand;
+	uint32					m_minorVersion;
+	vector<uint32>			m_compatibleBrands;
+
 private:
     MP4FtypBox();
     MP4FtypBox( const MP4FtypBox &src );
@@ -403,13 +443,42 @@ private:
     MP4MdhdBox &operator= ( const MP4MdhdBox &src );
 };
 
-class MP4MvhdBox : public MP4Box {
+class MP4MvhdBox : public MP4FullBox {
 public:
     MP4MvhdBox(MP4FileClass &file);
     void Generate();
     void Read();
-protected:
-    void AddProperties(uint8_t version);
+
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+	//if (version == 1) {
+	//	unsigned int(64) creation_time;
+	//	unsigned int(64) modification_time;
+	//	unsigned int(32) timescale;
+	//	unsigned int(64) duration;
+	//}
+	//else { // version==0
+	//	unsigned int(32) creation_time;
+	//	unsigned int(32) modification_time;
+	//	unsigned int(32) timescale;
+	//	unsigned int(32) duration;
+	//}
+	uint64					m_creationTime;
+	uint64					m_modificationTime;
+	uint32					m_timescale;
+	uint64					m_duration;
+
+	uint32					m_rate;				// typically 1.0
+	uint16					m_volume;			// typically, full volume
+	uint16					m_reserved0;
+	uint32					m_reserved[2];
+	// { 0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000 };
+	// unity matrix
+	uint32                  m_matrix[9];
+	uint32					m_pre_defined[6];
+	uint32					m_next_track_ID;
+
 private:
     MP4MvhdBox();
     MP4MvhdBox( const MP4MvhdBox &src );
@@ -602,6 +671,9 @@ public:
     MP4TkhdBox(MP4FileClass &file);
     void Generate();
     void Read();
+
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
 
 protected:
     //The default value of the track header flags for media tracks is 7 (track_enabled, track_in_movie,

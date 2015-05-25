@@ -1,10 +1,4 @@
-
-
 #include "AllMP4Box.h"
-
-
-
-
 
 MP4HdlrBox::MP4HdlrBox(MP4FileClass &file)
         : MP4Box(file, "hdlr")

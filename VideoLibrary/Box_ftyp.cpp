@@ -1,43 +1,39 @@
-
-
 #include "AllMP4Box.h"
-
-namespace mp4v2 { namespace impl {
-
-
 
 MP4FtypBox::MP4FtypBox(MP4FileClass &file)
     : MP4Box( file, "ftyp" )
-    , majorBrand       ( *new MP4StringProperty( *this, "majorBrand" ))
-    , minorVersion     ( *new MP4Integer32Property( *this, "minorVersion" ))
-    , compatibleBrands ( *new MP4StringProperty( *this, "compatibleBrands", false, false, true ))
 {
-    majorBrand.SetFixedLength( 4 );
-    compatibleBrands.SetFixedLength( 4 );
-
-    AddProperty( &majorBrand );
-    AddProperty( &minorVersion );
-    AddProperty( &compatibleBrands );
+    m_majorBrand = 0;
+	m_minorVersion = 0;
+	m_compatibleBrands.clear();
 }
 
 void MP4FtypBox::Generate()
 {
     MP4Box::Generate();
 
-    majorBrand.SetValue( "mp42" );
-    minorVersion.SetValue( 0 );
+	m_majorBrand = STRTOINT32("mp42");
+	m_minorVersion = 0;
 
-    compatibleBrands.SetCount( 2 );
-    compatibleBrands.SetValue( "mp42", 0 );
-    compatibleBrands.SetValue( "isom", 1 );
+	m_compatibleBrands.push_back(STRTOINT32("mp42"));
+	m_compatibleBrands.push_back(STRTOINT32("isom"));
+}
+
+void MP4FtypBox::ReadProperties()
+{
+	m_majorBrand = m_File.ReadUInt32();
+	m_minorVersion = m_File.ReadUInt32();
+
+	uint32 compatibleBrandsCount = (m_nSize - 8) / 4;		// brands array fills rest of box
+	for (uint32 i = 0; i < compatibleBrandsCount; i++)
+	{
+		m_compatibleBrands.push_back(m_File.ReadUInt32());
+	}
+
+	osAssert(GetEnd() == m_File.GetPosition());
 }
 
 void MP4FtypBox::Read()
 {
-    compatibleBrands.SetCount( (m_size - 8) / 4 ); // brands array fills rest of atom
     MP4Box::Read();
 }
-
-
-
-}} // namespace mp4v2::impl
