@@ -14,6 +14,7 @@
 #define MP4Calloc           osCalloc
 #define MP4Stralloc         osStralloc
 #define MP4Realloc          osRealloc
+#define MP4Free				osFree
 
 class MP4Box;
 
@@ -33,7 +34,7 @@ public:
 	void SetPosition(uint64_t pos, File* file = NULL);
 	uint64_t GetSize(File* file = NULL);
 
-	void ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file = NULL);
+	bool ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file = NULL);
 	void PeekBytes(uint8_t* buf, uint32_t bufsiz, File* file = NULL);
 
 	uint64_t ReadUInt(uint8_t size);
@@ -52,6 +53,14 @@ public:
 	void FlushReadBits();
 	uint32_t ReadMpegLength();
 
+	// Called to free internal string buffer created bt ReadString&ReadCountedString
+	void FreeString(char* string)
+	{
+		if (string)
+		{
+			MP4Free(string);
+		}
+	}
 
 	void WriteBytes(uint8_t* buf, uint32_t bufsiz, File* file = NULL);
 	void WriteUInt8(uint8_t value);

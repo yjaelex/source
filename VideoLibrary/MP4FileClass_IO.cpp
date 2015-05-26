@@ -44,7 +44,7 @@ uint64_t MP4FileClass::GetSize( File* file )
     return file->size;
 }
 
-void MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
+bool MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
 {
     if( bufsiz == 0 )
         return;
@@ -53,11 +53,14 @@ void MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
     osWARNING( m_numReadBits > 0 );
 
     if( m_memoryBuffer ) {
-        if( m_memoryBufferPosition + bufsiz > m_memoryBufferSize )
-            osAssert(!"not enough bytes, reached end-of-memory" );
+		if (m_memoryBufferPosition + bufsiz > m_memoryBufferSize)
+		{
+			osAssert(!"not enough bytes, reached end-of-memory");
+			return false;
+		}
         memcpy( buf, &m_memoryBuffer[m_memoryBufferPosition], bufsiz );
         m_memoryBufferPosition += bufsiz;
-        return;
+        return true;
     }
 
     if( !file )
@@ -65,10 +68,19 @@ void MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
 
     osAssert( file );
     File::Size nin;
-    if( file->read( buf, bufsiz, nin ))
-        osAssert(!"read failed");
-    if( nin != bufsiz )
-        osAssert(!"not enough bytes, reached end-of-file" );
+	if (file->read(buf, bufsiz, nin))
+	{
+		osAssert(!"read failed");
+		return false;
+	}
+
+	if (nin != bufsiz)
+	{
+		osAssert(!"not enough bytes, reached end-of-file");
+		return false;
+	}
+
+	return true;
 }
 
 void MP4FileClass::PeekBytes( uint8_t* buf, uint32_t bufsiz, File* file )
@@ -321,7 +333,10 @@ char* MP4FileClass::ReadString()
             if (data == NULL) return NULL;
             alloced *= 2;
         }
-        ReadBytes((uint8_t*)&data[length], 1);
+		if (false == ReadBytes((uint8_t*)&data[length], 1))
+		{
+			if (data) MP4Free(data);
+		}
         length++;
     } while (data[length - 1] != 0);
 
@@ -373,8 +388,12 @@ char* MP4FileClass::ReadCountedString(uint8_t charSize, bool allowExpandedCount,
 
     uint32_t byteLength = charLength * charSize;
     char* data = (char*)MP4Malloc(byteLength + 1);
-    if (byteLength > 0) {
-        ReadBytes((uint8_t*)data, byteLength);
+    if (byteLength > 0) 
+	{
+		if (false == ReadBytes((uint8_t*)data, byteLength))
+		{
+			MP4Free(data);
+		}
     }
     data[byteLength] = '\0';
 
@@ -383,8 +402,11 @@ char* MP4FileClass::ReadCountedString(uint8_t charSize, bool allowExpandedCount,
         const uint8_t padsize = fixedLength - byteLength -1U;
         if( padsize ) {
             uint8_t* padbuf = (uint8_t*)malloc( padsize );
-            ReadBytes( padbuf, padsize );
-            free( padbuf );
+            if (false == ReadBytes( padbuf, padsize ))
+			{
+				MP4Free(data);
+			}
+            MP4Free( padbuf );
         }
     }
 

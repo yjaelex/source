@@ -388,10 +388,31 @@ private:
     MP4GminBox &operator= ( const MP4GminBox &src );
 };
 
-class MP4HdlrBox : public MP4Box {
+typedef enum HANDLER_TYPE
+{
+	HANDLER_TYPE_UNKNOW  =0,
+	HANDLER_TYPE_VIDEO,			//¡®vide¡¯ Video track
+	HANDLER_TYPE_AUDIO,			//¡®soun¡¯ Audio track
+	HANDLER_TYPE_HINT,			//¡®hint¡¯ Hint track
+	HANDLER_TYPE_META,			//¡®meta¡¯ Timed Metadata track
+	HANDLER_TYPE_AUXV			//¡®auxv¡¯ Auxiliary Video track
+}HANDLER_TYPE;
+
+class MP4HdlrBox : public MP4FullBox {
 public:
     MP4HdlrBox(MP4FileClass &file);
     void Read();
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+	uint32					m_pre_defined;
+	uint32					m_handler_type;
+	uint32					m_reserved[3];
+	string					m_name;
+
+	//Handler type
+	HANDLER_TYPE			m_Tracktype;
+
 private:
     MP4HdlrBox();
     MP4HdlrBox( const MP4HdlrBox &src );
@@ -430,13 +451,25 @@ private:
     MP4MdatBox &operator= ( const MP4MdatBox &src );
 };
 
-class MP4MdhdBox : public MP4Box {
+class MP4MdhdBox : public MP4FullBox {
 public:
     MP4MdhdBox(MP4FileClass &file);
     void Generate();
     void Read();
-protected:
-    void AddProperties(uint8_t version);
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+	uint64					m_creationTime;
+	uint64					m_modificationTime;
+	uint32					m_timescale;
+	uint64					m_duration;
+
+	// ISO-639-2/T language code
+	//bit(1) pad = 0;
+	//unsigned int(5)[3] language;
+	uint16					m_language;
+	uint16					m_pre_defined;
+	char					m_code[3];
 private:
     MP4MdhdBox();
     MP4MdhdBox( const MP4MdhdBox &src );
@@ -754,7 +787,7 @@ private:
     MP4UrnBox &operator= ( const MP4UrnBox &src );
 };
 
-class MP4VmhdBox : public MP4Box {
+class MP4VmhdBox : public MP4FullBox {
 public:
     MP4VmhdBox(MP4FileClass &file);
     void Generate();

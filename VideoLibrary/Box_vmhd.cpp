@@ -1,12 +1,10 @@
-
 #include "AllMP4Box.h"
 
 
 MP4VmhdBox::MP4VmhdBox(MP4FileClass &file)
-        : MP4Box(file, "vmhd")
+        : MP4FullBox(file, "vmhd")
 {
-    AddVersionAndFlags();
-    AddReserved(*this, "reserved", 8);
+
 }
 
 void MP4VmhdBox::Generate()

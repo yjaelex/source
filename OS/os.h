@@ -77,7 +77,10 @@ inline void* osRealloc(void* p, uint32_t newSize) {
     return temp;
 }
 
-
+inline void osFree(void * p)
+{
+	free(p);
+}
 
 void osDump(unsigned int indent, const char *lpszFormat, ...);
 int64_t osGetLocalTimeSeconds();
