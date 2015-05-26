@@ -99,6 +99,15 @@
     <ClCompile Include="Box_vmhd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Box_dref.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Box_urn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Box_standard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MP4Box.h">

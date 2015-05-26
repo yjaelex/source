@@ -46,6 +46,11 @@ public:
 		m_flags = m_flags & 0x0fffffff;
 	}
 
+    virtual void WriteProperties()
+    {
+        m_File.WriteUInt32((m_flags & 0x0fffffff) | ((uint32)m_version<<24));
+    }
+
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
 	{
 		MP4Box::DumpProperties(indent, dumpImplicits);
@@ -115,12 +120,12 @@ private:
     MP4TrefTypeBox &operator= ( const MP4TrefTypeBox &src );
 };
 
-class MP4UrlBox : public MP4Box {
+class MP4UrlBox : public MP4FullBox {
 public:
     MP4UrlBox(MP4FileClass &file, const char *type="url ");
     void Read();
     void Write();
-    string              m_location;
+    string                  m_location;
 private:
     MP4UrlBox();
     MP4UrlBox( const MP4UrlBox &src );
@@ -307,10 +312,19 @@ private:
  * Specialized Boxs
  ************************************************************************/
 
-class MP4DrefBox : public MP4Box {
+class MP4DrefBox : public MP4FullBox {
 public:
     MP4DrefBox(MP4FileClass &file);
     void Read();
+    void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+    //unsigned int(32) entry_count;
+    //for (i = 1; i <= entry_count; i++) {
+    //    DataEntryBox(entry_version, entry_flags) data_entry;
+    //}
+    uint32                  m_entry_count;
+
+
 private:
     MP4DrefBox();
     MP4DrefBox( const MP4DrefBox &src );
@@ -777,10 +791,13 @@ private:
     MP4UdtaBox &operator= ( const MP4UdtaBox &src );
 };
 
-class MP4UrnBox : public MP4Box {
+class MP4UrnBox : public MP4FullBox {
 public:
     MP4UrnBox(MP4FileClass &file);
     void Read();
+
+    string                  m_name;
+    string                  m_location;
 private:
     MP4UrnBox();
     MP4UrnBox( const MP4UrnBox &src );

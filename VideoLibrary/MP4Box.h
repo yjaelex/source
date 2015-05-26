@@ -140,6 +140,11 @@ public:
         }
     }
 
+    void ExpectChildAtom(const char* name, bool mandatory, bool onlyOne)
+    {
+        m_pChildAtomInfos.Add(new MP4AtomInfo(name, mandatory, onlyOne));
+    }
+
     uint32_t GetNumberOfChildBoxs()
 	{
 		return m_vChildBoxs.size();
@@ -169,6 +174,10 @@ public:
     virtual void Dump(uint8_t indent, bool dumpImplicits);
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
     virtual void ReadProperties();
+    virtual void WriteProperties()
+    {
+
+    }
 
     bool GetLargesizeMode();
 

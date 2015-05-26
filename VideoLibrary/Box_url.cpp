@@ -1,23 +1,29 @@
-
-
 #include "AllMP4Box.h"
 
-
 MP4UrlBox::MP4UrlBox(MP4FileClass &file, const char *type)
-        : MP4Box(file, type)
+        : MP4FullBox(file, type)
 {
-    AddVersionAndFlags();
+    m_location.clear();
 }
 
 void MP4UrlBox::Read()
 {
-    // read the version and flags properties
-    ReadProperties(0, 2);
+    // read version and flags */
+    MP4FullBox::ReadProperties();
+    m_location.clear();
 
     // check if self-contained flag is set
-    if (!(GetFlags() & 1)) {
+    if (!(GetFlags() & 1))
+    {
         // if not then read url location
-        ReadProperties(2);
+        // read a null terminated string
+        char * pStr = m_File.ReadString();
+        osAssert(pStr);
+        if (pStr)
+        {
+            m_location.append(pStr);
+        }
+        m_File.FreeString(pStr);
     }
 
     Skip(); // to end of atom
@@ -25,25 +31,18 @@ void MP4UrlBox::Read()
 
 void MP4UrlBox::Write()
 {
-    MP4StringProperty* pLocationProp =
-        (MP4StringProperty*)m_pProperties[2];
-
     // if no url location has been set
     // then set self-contained flag
     // and don't attempt to write anything
-    if (pLocationProp->GetValue() == NULL) {
+    if (m_location.empty())
+    {
         SetFlags(GetFlags() | 1);
-        pLocationProp->SetImplicit(true);
-    } else {
+    } else 
+    {
         SetFlags(GetFlags() & 0xFFFFFE);
-        pLocationProp->SetImplicit(false);
     }
 
     // write atom as usual
     MP4Box::Write();
 }
 
-
-
-}
-} // namespace mp4v2::impl

@@ -346,7 +346,7 @@ void MP4Box::Write()
 {
     BeginWrite();
 
-    // WriteProperties();
+    this->WriteProperties();
 
     WriteChildBoxs();
 
@@ -582,7 +582,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
         return new MP4RootBox(file);
 
     // construct Boxs which are context-savvy
-    if( parent ) {
+    if( parent )
+    {
         const char* const ptype = parent->GetType();
 
         if( descendsFrom( parent, "ilst" )) {
@@ -822,6 +823,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
     }
 
     // default to MP4StandardBox implementation
+    osAssert(!"Unsupported Box Type. TODO::");
+    osLog(LOG_ERROR, "Unsupported Box Type: %s", type);
     return new MP4StandardBox( file, type ); 
 }
 
