@@ -104,6 +104,21 @@ private:
 class MP4StandardBox : public MP4Box {
 public:
     MP4StandardBox(MP4FileClass &file, const char *name);
+	virtual void ReadProperties();
+
+	uint32                 m_bufferSizeDB;
+	uint32                 m_avgBitrate;
+	uint32                 m_maxBitrate;
+	string                 m_base_url;
+	uint64                 m_bytes;
+	uint32                 m_milliSecs;
+	uint32                 m_data_format;
+
+	uint32                 m_granularity;
+	uint32                 m_bytes32bits;
+	uint64                 m_packets;
+	uint32                 m_offset;
+	uint32                 m_timeScale;
 private:
     MP4StandardBox();
     MP4StandardBox( const MP4StandardBox &src );

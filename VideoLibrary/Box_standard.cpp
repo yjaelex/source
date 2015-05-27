@@ -2,6 +2,9 @@
 
 MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(file, type)
 {
+	// The following if-else structure is a big one;
+	// This is just a temp solution, to define various box structures; ported ftom libmp4v2.
+	// It intends to cover all other types of boxes.
     if (BoxID(type) == BoxID("bitr")) {
         /* 0 */
             uint32 m_avgBitrate;
@@ -17,7 +20,6 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         string m_base_url;
 
     }
-
     //else if (BoxID(type) == BoxID("co64")) {
     //    AddVersionAndFlags();
 
@@ -203,9 +205,10 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         ExpectChildBox("minf", Required, OnlyOne);
 
     } else if (BoxID(type) == BoxID("meta")) { // iTunes
-        AddVersionAndFlags(); /* 0, 1 */
-        ExpectChildBox("hdlr", Required, OnlyOne);
-        ExpectChildBox("ilst", Required, OnlyOne);
+		osAssert(0);
+        //AddVersionAndFlags(); /* 0, 1 */
+        //ExpectChildBox("hdlr", Required, OnlyOne);
+        //ExpectChildBox("ilst", Required, OnlyOne);
 
     } else if (BoxID(type) == BoxID("mfhd")) {
         osAssert(0);
@@ -414,4 +417,126 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         osAssert(0);
         SetUnknownType(true);
     }
+
+	m_bufferSizeDB = 0;
+	m_avgBitrate = 0;
+	m_maxBitrate = 0;
+	m_base_url.clear();
+	m_bytes = 0;
+	m_milliSecs = 0;
+	m_data_format = 0;
+	m_granularity = 0;
+	m_bytes32bits = 0;
+	m_packets = 0;
+	m_offset = 0;
+	m_timeScale = 0;
+}
+
+
+void MP4StandardBox::ReadProperties()
+{
+	if (BoxID(m_type) == BoxID("bitr")) {
+		/* 0 */
+		m_avgBitrate = m_File.ReadUInt32();
+
+		/* 1 */
+		m_maxBitrate = m_File.ReadUInt32();
+
+	}
+	else if (BoxID(m_type) == BoxID("btrt")) {
+		m_bufferSizeDB = m_File.ReadUInt32(); /* 0 */
+		m_avgBitrate = m_File.ReadUInt32();   /* 1 */
+		m_maxBitrate = m_File.ReadUInt32();   /* 2 */
+	}
+	else if (BoxID(m_type) == BoxID("burl")) {
+		// read a null terminated string
+		char * pStr = m_File.ReadString();
+		osAssert(pStr);
+		if (pStr)
+		{
+			m_base_url.append(pStr);
+		}
+		m_File.FreeString(pStr);
+	}
+
+	else if (BoxID(m_type) == BoxID("dimm")) {
+		// bytes of immediate data
+		m_bytes = m_File.ReadUInt64();
+
+	}
+	else if (BoxID(m_type) == BoxID("dmax")) {
+		// max packet duration
+		m_milliSecs = m_File.ReadUInt32();
+
+	}
+	else if (BoxID(m_type) == BoxID("dmed")) {
+		// bytes sent from media data
+		m_bytes = m_File.ReadUInt64();
+
+	}
+	else if (BoxID(m_type) == BoxID("drep")) {
+		// bytes of repeated data
+		m_bytes = m_File.ReadUInt64();
+		/*
+		* e???
+		*/
+	}
+	else if (BoxID(m_type) == BoxID("frma")) {
+
+		m_data_format = m_File.ReadUInt32();
+	}
+
+	else if (BoxID(m_type) == BoxID("maxr")) {
+		m_granularity = m_File.ReadUInt32();
+		m_bytes32bits = m_File.ReadUInt32();
+
+	}
+
+	else if (BoxID(m_type) == BoxID("nump")) {
+		// packets sent
+		m_packets = m_File.ReadUInt64();
+
+	}
+
+	else if (BoxID(m_type) == BoxID("pmax")) {
+		// max packet size
+		m_bytes32bits = m_File.ReadUInt32();
+	}
+
+	else if (BoxID(m_type) == BoxID("snro")) {
+		m_offset = m_File.ReadUInt32();
+
+	}
+
+	else if (BoxID(m_type) == BoxID("tims")) {
+
+		m_timeScale = m_File.ReadUInt32();
+
+	}
+	else if (BoxID(m_type) == BoxID("tmin")) {
+		// min relative xmit time
+		m_milliSecs = m_File.ReadUInt32();
+
+	}
+	else if (BoxID(m_type) == BoxID("tmax")) {
+		// max relative xmit time
+		m_milliSecs = m_File.ReadUInt32();
+
+	}
+
+	else if (BoxID(m_type) == BoxID("trpy") ||
+		BoxID(m_type) == BoxID("tpyl")) {
+		// bytes sent including RTP headers
+		m_bytes = m_File.ReadUInt32();
+
+	}
+	else if (BoxID(m_type) == BoxID("tsro")) {
+		m_offset = m_File.ReadUInt32();
+	}
+	else {
+		/*
+		* default - unknown type
+		*/
+		osAssert(0);
+	}
 }
