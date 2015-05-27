@@ -151,11 +151,46 @@ private:
  * Sound and Video Boxs - use the generic Boxs when possible
  * (MP4SoundBox and MP4VideoBox)
  ***********************************************************************/
+
+typedef struct SampleEntry
+{
+	uint8					m_reserved[6];
+	uint16					m_data_reference_index;
+};
+
 class MP4SoundBox : public MP4Box {
 public:
     MP4SoundBox(MP4FileClass &file, const char *Boxid);
     void Generate();
     void Read();
+
+	//SampleEntry entry;
+	//const unsigned int(32)[2] reserved = 0;
+	//template unsigned int(16) channelcount = 2;
+	//template unsigned int(16) samplesize = 16;
+	//unsigned int(16) pre_defined = 0;
+	//const unsigned int(16) reserved = 0;
+	//template unsigned int(32) samplerate = { default samplerate of media } << 16;
+	SampleEntry						m_entry;
+	uint32							m_reserved1[2];
+	uint16							m_channelcount;
+	uint16							m_samplesize;
+	uint16							m_pre_defined;
+	uint16							m_reserved2;
+	uint32							m_samplerate;
+
+	uint16 						m_soundVersion;
+	uint16 						m_compressionId;
+	uint16 						m_packetSize;
+	uint32 						m_samplesPerPacket;
+	uint32 						m_bytesPerPacket;
+	uint32 						m_bytesPerFrame;
+	uint32 						m_bytesPerSample;
+
+	uint16 						m_reserved3;
+	uint32 						m_reserved4;
+	vector<uint8> 				m_soundVersion2Data;
+
 protected:
     void AddProperties(uint8_t version);
 private:
@@ -649,10 +684,14 @@ private:
     MP4StscBox &operator= ( const MP4StscBox &src );
 };
 
-class MP4StsdBox : public MP4Box {
+class MP4StsdBox : public MP4FullBox {
 public:
     MP4StsdBox(MP4FileClass &file);
     void Read();
+	virtual void ReadProperties();
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+	uint32						m_entryCount;
 private:
     MP4StsdBox();
     MP4StsdBox( const MP4StsdBox &src );
@@ -829,6 +868,82 @@ private:
     MP4VmhdBox &operator= ( const MP4VmhdBox &src );
 };
 
+class MP4SmhdBox : public MP4FullBox {
+public:
+	MP4SmhdBox(MP4FileClass &file)
+		: MP4FullBox(file, "smhd")
+	{
+		m_balance = 0;
+		m_reserved = 0;
+	}
+
+
+	void Read()
+	{
+		// read version and flags */
+		MP4FullBox::ReadProperties();
+		m_balance = m_File.ReadUInt16();
+
+		Skip(); // to end of atom
+	}
+
+private:
+	uint16					m_balance;
+	uint16					m_reserved;
+	MP4SmhdBox();
+	MP4SmhdBox(const MP4SmhdBox &src);
+	MP4SmhdBox &operator= (const MP4SmhdBox &src);
+};
+
+class MP4NmhdBox : public MP4FullBox {
+public:
+	MP4NmhdBox(MP4FileClass &file)
+		: MP4FullBox(file, "nmhd")
+	{
+
+	}
+
+private:
+	MP4NmhdBox();
+	MP4NmhdBox(const MP4NmhdBox &src);
+	MP4NmhdBox &operator= (const MP4NmhdBox &src);
+};
+
+class MP4HmhdBox : public MP4FullBox {
+public:
+	MP4HmhdBox(MP4FileClass &file)
+		: MP4FullBox(file, "hmhd")
+	{
+		m_maxPDUsize = 0;
+		m_avgPDUsize = 0;
+		m_maxbitrate = 0;
+		m_avgbitrate = 0;
+	}
+
+
+	void Read()
+	{
+		// read version and flags */
+		MP4FullBox::ReadProperties();
+		m_maxPDUsize = m_File.ReadUInt16();
+		m_avgPDUsize = m_File.ReadUInt16();
+		m_maxbitrate = m_File.ReadUInt32();
+		m_avgbitrate = m_File.ReadUInt32();
+		Skip(); // to end of atom
+	}
+
+	uint16 					m_maxPDUsize;
+	uint16 					m_avgPDUsize;
+	uint32 					m_maxbitrate;
+	uint32 					m_avgbitrate;
+
+private:
+	uint16					m_reserved;
+	MP4HmhdBox();
+	MP4HmhdBox(const MP4HmhdBox &src);
+	MP4HmhdBox &operator= (const MP4HmhdBox &src);
+};
+
 class MP4HrefBox : public MP4Box {
 public:
     MP4HrefBox(MP4FileClass &file);
@@ -867,15 +982,6 @@ private:
     IPodUUIDBox();
     IPodUUIDBox( const IPodUUIDBox &src );
     IPodUUIDBox &operator= ( const IPodUUIDBox &src );
-};
-
-class MP4NmhdBox : public MP4Box {
-public:
-    MP4NmhdBox(MP4FileClass &file);
-private:
-    MP4NmhdBox();
-    MP4NmhdBox( const MP4NmhdBox &src );
-    MP4NmhdBox &operator= ( const MP4NmhdBox &src );
 };
 
 /*! Nero Chapter List.

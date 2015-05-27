@@ -1,9 +1,4 @@
-
-
 #include "AllMP4Box.h"
-
-namespace mp4v2 { namespace impl {
-
 
 
 MP4StblBox::MP4StblBox(MP4FileClass &file)
@@ -41,7 +36,3 @@ void MP4StblBox::Generate()
     // and ask it to self generate
     pChunkOffsetBox->Generate();
 }
-
-
-
-}} // namespace mp4v2::impl

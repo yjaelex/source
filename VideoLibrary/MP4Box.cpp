@@ -693,6 +693,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4VideoBox( file, type );
             if( BoxID(type) == BoxID("href") )
                 return new MP4HrefBox(file);
+			if (BoxID(type) == BoxID("hmhd"))
+				return new MP4HmhdBox(file);
             break;
 
         case 'i':
@@ -769,6 +771,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4StdpBox(file);
             if( BoxID(type) == BoxID("sdp ") )
                 return new MP4SdpBox(file);
+			if (BoxID(type) == BoxID("smhd"))
+				return new MP4SmhdBox(file);
             if( BoxID(type) == BoxID("sync") )
                 return new MP4TrefTypeBox( file, type );
             if( BoxID(type) == BoxID("skip") )

@@ -108,6 +108,9 @@
     <ClCompile Include="Box_standard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Box_sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MP4Box.h">

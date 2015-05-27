@@ -87,6 +87,7 @@
     <ClCompile Include="Box_mdhd.cpp" />
     <ClCompile Include="Box_mvhd.cpp" />
     <ClCompile Include="Box_root.cpp" />
+    <ClCompile Include="Box_sound.cpp" />
     <ClCompile Include="Box_standard.cpp" />
     <ClCompile Include="Box_stbl.cpp" />
     <ClCompile Include="Box_stdp.cpp" />
