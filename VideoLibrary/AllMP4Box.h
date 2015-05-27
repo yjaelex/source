@@ -163,6 +163,7 @@ public:
     MP4SoundBox(MP4FileClass &file, const char *Boxid);
     void Generate();
     void Read();
+    virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
 
 	//SampleEntry entry;
 	//const unsigned int(32)[2] reserved = 0;
@@ -186,10 +187,7 @@ public:
 	uint32 						m_bytesPerPacket;
 	uint32 						m_bytesPerFrame;
 	uint32 						m_bytesPerSample;
-
-	uint16 						m_reserved3;
-	uint32 						m_reserved4;
-	vector<uint8> 				m_soundVersion2Data;
+    uint8 				        m_soundVersion2Data[20];
 
 protected:
     void AddProperties(uint8_t version);
@@ -201,8 +199,95 @@ private:
 
 class MP4VideoBox : public MP4Box {
 public:
-    MP4VideoBox(MP4FileClass &file, const char *Boxid);
-    void Generate();
+    MP4VideoBox(MP4FileClass &file, const char *Boxid) : MP4Box(file, Boxid)
+    {
+
+    }
+
+    void Read()
+    {
+        m_File.ReadBytes(m_entry.m_reserved, sizeof(m_entry.m_reserved));
+        m_entry.m_data_reference_index = m_File.ReadUInt16();
+
+        //ByteBuffer content = ByteBuffer.allocate(78);
+        //dataSource.read(content);
+        //content.position(6);
+        //dataReferenceIndex = IsoTypeReader.readUInt16(content);
+
+        //long tmp = IsoTypeReader.readUInt16(content);
+        //assert 0 == tmp : "reserved byte not 0";
+        //tmp = IsoTypeReader.readUInt16(content);
+        //assert 0 == tmp : "reserved byte not 0";
+        //predefined[0] = IsoTypeReader.readUInt32(content);     // should be zero
+        //predefined[1] = IsoTypeReader.readUInt32(content);     // should be zero
+        //predefined[2] = IsoTypeReader.readUInt32(content);     // should be zero
+        //width = IsoTypeReader.readUInt16(content);
+        //height = IsoTypeReader.readUInt16(content);
+        //horizresolution = IsoTypeReader.readFixedPoint1616(content);
+        //vertresolution = IsoTypeReader.readFixedPoint1616(content);
+        //tmp = IsoTypeReader.readUInt32(content);
+        //assert 0 == tmp : "reserved byte not 0";
+        //frameCount = IsoTypeReader.readUInt16(content);
+        //int compressornameDisplayAbleData = IsoTypeReader.readUInt8(content);
+        //if (compressornameDisplayAbleData > 31) {
+        //    //System.out.println("invalid compressor name displayable data: " + compressornameDisplayAbleData);
+        //    compressornameDisplayAbleData = 31;
+        //}
+        //byte[] bytes = new byte[compressornameDisplayAbleData];
+        //content.get(bytes);
+        //compressorname = Utf8.convert(bytes);
+        //if (compressornameDisplayAbleData < 31) {
+        //    byte[] zeros = new byte[31 - compressornameDisplayAbleData];
+        //    content.get(zeros);
+        //    //assert Mp4Arrays.equals(zeros, new byte[zeros.length]) : "The compressor name length was not filled up with zeros";
+        //}
+        //depth = IsoTypeReader.readUInt16(content);
+        //tmp = IsoTypeReader.readUInt16(content);
+        //assert 0xFFFF == tmp;
+
+        if (m_vChildBoxInfos.size() > 0)
+        {
+            ReadChildBoxs();
+        }
+        Skip();
+    }
+
+    void Generate()
+    {
+        m_entry.m_data_reference_index = 1;
+        m_horizresolution = m_vertresolution = 0x00480000;
+        m_frameCount = 1;
+        m_depth = 24;
+        m_pre_defined = 0xffff;
+    }
+
+    //class VisualSampleEntry(codingname) extends SampleEntry(codingname){
+    //    unsigned int(16) pre_defined = 0;
+    //    const unsigned int(16) reserved = 0;
+    //    unsigned int(32)[3] pre_defined = 0;
+    //    unsigned int(16) width;
+    //    unsigned int(16) height;
+    //    template unsigned int(32) horizresolution = 0x00480000; // 72 dpi
+    //    template unsigned int(32) vertresolution = 0x00480000; // 72 dpi
+    //    const unsigned int(32) reserved = 0;
+    //    template unsigned int(16) frame_count = 1;
+    //    string[32] compressorname;
+    //    template unsigned int(16) depth = 0x0018;
+    //    int(16) pre_defined = -1;
+    //    CleanApertureBox clap; // optional
+    //    PixelAspectRatioBox pasp; // optional
+    //}
+    SampleEntry						m_entry;
+    uint8							m_reserved1[16];
+    uint16							m_width;
+    uint16							m_height;
+    uint32							m_horizresolution;
+    uint32							m_vertresolution;
+    uint32							m_reserved2;
+    uint16							m_frameCount;
+    string                          m_compressorname;       // SetFixedLength(32);
+    uint16                          m_depth;
+    uint16                          m_pre_defined;          // -1;
 private:
     MP4VideoBox();
     MP4VideoBox( const MP4VideoBox &src );
