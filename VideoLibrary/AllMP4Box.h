@@ -211,39 +211,28 @@ public:
 
         //ByteBuffer content = ByteBuffer.allocate(78);
         //dataSource.read(content);
-        //content.position(6);
-        //dataReferenceIndex = IsoTypeReader.readUInt16(content);
+		m_File.ReadBytes(m_reserved1, sizeof(m_reserved1));
 
-        //long tmp = IsoTypeReader.readUInt16(content);
-        //assert 0 == tmp : "reserved byte not 0";
-        //tmp = IsoTypeReader.readUInt16(content);
-        //assert 0 == tmp : "reserved byte not 0";
-        //predefined[0] = IsoTypeReader.readUInt32(content);     // should be zero
-        //predefined[1] = IsoTypeReader.readUInt32(content);     // should be zero
-        //predefined[2] = IsoTypeReader.readUInt32(content);     // should be zero
-        //width = IsoTypeReader.readUInt16(content);
-        //height = IsoTypeReader.readUInt16(content);
-        //horizresolution = IsoTypeReader.readFixedPoint1616(content);
-        //vertresolution = IsoTypeReader.readFixedPoint1616(content);
-        //tmp = IsoTypeReader.readUInt32(content);
-        //assert 0 == tmp : "reserved byte not 0";
-        //frameCount = IsoTypeReader.readUInt16(content);
-        //int compressornameDisplayAbleData = IsoTypeReader.readUInt8(content);
-        //if (compressornameDisplayAbleData > 31) {
-        //    //System.out.println("invalid compressor name displayable data: " + compressornameDisplayAbleData);
-        //    compressornameDisplayAbleData = 31;
-        //}
-        //byte[] bytes = new byte[compressornameDisplayAbleData];
-        //content.get(bytes);
-        //compressorname = Utf8.convert(bytes);
-        //if (compressornameDisplayAbleData < 31) {
-        //    byte[] zeros = new byte[31 - compressornameDisplayAbleData];
-        //    content.get(zeros);
-        //    //assert Mp4Arrays.equals(zeros, new byte[zeros.length]) : "The compressor name length was not filled up with zeros";
-        //}
-        //depth = IsoTypeReader.readUInt16(content);
-        //tmp = IsoTypeReader.readUInt16(content);
-        //assert 0xFFFF == tmp;
+		m_width = m_File.ReadUInt16();
+		m_height = m_File.ReadUInt16();
+		m_horizresolution = m_File.ReadUInt32();
+		m_vertresolution = m_File.ReadUInt32();
+		m_reserved2 = m_File.ReadUInt32();
+		m_frameCount = m_File.ReadUInt16();
+
+		// read a counted string
+		m_compressorname.clear();
+		char * pStr = m_File.ReadCountedString();
+		osAssert(pStr);
+		if (pStr)
+		{
+			m_compressorname.append(pStr);
+		}
+		m_File.FreeString(pStr);
+		
+		m_depth = m_File.ReadUInt16();
+		m_pre_defined = m_File.ReadUInt16();
+		osAssert(0xFFFF == m_pre_defined);
 
         if (m_vChildBoxInfos.size() > 0)
         {
@@ -251,6 +240,17 @@ public:
         }
         Skip();
     }
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		osDump(indent, "Data Reference Index: %"PRIu16"(0x%"PRIx16")\n", m_entry.m_data_reference_index, m_entry.m_data_reference_index);
+		osDump(indent, "Sound Version: %"PRIu16"(0x%"PRIx16")\n", m_width, m_width);
+		osDump(indent, "Channel Count: %"PRIu16"(0x%"PRIx16")\n", m_height, m_height);
+		osDump(indent, "Sample Rate: %d(0x%x)\n", m_horizresolution, m_horizresolution);
+		osDump(indent, "Sample Rate: %d(0x%x)\n", m_vertresolution, m_vertresolution);
+		osDump(indent, "Sample Size: %"PRIu16"(0x%"PRIx16")\n", m_frameCount, m_frameCount);
+		osDump(indent, "Sample Size: %"PRIu16"(0x%"PRIx16")\n", m_depth, m_depth);
+	}
 
     void Generate()
     {
@@ -1192,6 +1192,78 @@ private:
     MP4UdtaElementBox &operator= ( const MP4UdtaElementBox &src );
 };
 
+//The Decoding Time to Sample Box contains decode time delta's: DT(n+1) = DT(n) + STTS(n) where STTS(n)
+//is the(uncompressed) table entry for sample n.
+//The DT axis has a zero origin; DT(i) = SUM(for j = 0 to i - 1 of delta(j)), and the sum of all deltas gives the length
+//of the media in the track.
+typedef struct DecodingTimeToSampleEntry
+{
+public:
+	DecodingTimeToSampleEntry()
+	{
+		sample_count = sample_delta = 0;
+	}
+
+	uint32 sample_count;
+	uint32 sample_delta;
+}DecodingTimeToSampleEntry;
+
+class MP4SttsBox : public MP4FullBox {
+public:
+	MP4SttsBox(MP4FileClass &file) : MP4FullBox(file, "stts")
+	{
+		m_entry_count = 0;
+		m_vTimeToSampleTable.clear();
+	}
+	void Read()
+	{
+		MP4FullBox::ReadProperties();
+		m_entry_count = m_File.ReadUInt32();
+
+		// Read time table
+		DecodingTimeToSampleEntry entry;
+		for (uint32 i = 0; i < m_entry_count; i++)
+		{
+			entry.sample_count = m_File.ReadUInt32();
+			entry.sample_delta = m_File.ReadUInt32();
+			m_vTimeToSampleTable.push_back(entry);
+		}
+
+		Skip();
+	}
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		osDump(indent, "Entry Count: %d(0x%x)\n", m_entry_count, m_entry_count);
+		uint32 printCount = min(m_entry_count, 8);
+		osDump(indent, "Index     - SampleCount - Delta   \n", m_entry_count, m_entry_count);
+		for (uint32 i = 0; i < printCount; i++)
+		{
+			m_vTimeToSampleTable.push_back(entry);
+			osDump(indent, "%d      - %d       - %d   \n", i, m_vTimeToSampleTable[i].sample_count, 
+				m_vTimeToSampleTable[i].sample_delta);
+		}
+	}
+
+protected:
+	/*aligned(8) class TimeToSampleBox
+		extends FullBox(¡¯stts¡¯, version = 0, 0) {
+		unsigned int(32) entry_count;
+		int i;
+		for (i = 0; i < entry_count; i++) {
+			unsigned int(32) sample_count;
+			unsigned int(32) sample_delta;
+		}
+	}*/
+
+	uint32								m_entry_count;
+	vector<DecodingTimeToSampleEntry>	m_vTimeToSampleTable;
+
+private:
+	MP4SttsBox();
+	MP4SttsBox(const MP4SttsBox &src);
+	MP4SttsBox &operator= (const MP4SttsBox &src);
+};
 
 #endif
 

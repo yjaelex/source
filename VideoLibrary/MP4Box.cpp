@@ -773,6 +773,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4SdpBox(file);
 			if (BoxID(type) == BoxID("smhd"))
 				return new MP4SmhdBox(file);
+			if (BoxID(type) == BoxID("stts"))
+				return new MP4SttsBox(file);
             if( BoxID(type) == BoxID("sync") )
                 return new MP4TrefTypeBox( file, type );
             if( BoxID(type) == BoxID("skip") )

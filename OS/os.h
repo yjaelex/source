@@ -82,6 +82,10 @@ inline void osFree(void * p)
 	free(p);
 }
 
+#define min(x,y) ((x) < (y) ? (x) : (y))
+#define max(x,y) ((x) > (y) ? (x) : (y))
+
+
 void osDump(unsigned int indent, const char *lpszFormat, ...);
 int64_t osGetLocalTimeSeconds();
 
