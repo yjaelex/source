@@ -69,9 +69,6 @@
     <ClCompile Include="Box_stbl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Box_stdp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Box_stsc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -749,20 +749,80 @@ private:
     MP4StblBox &operator= ( const MP4StblBox &src );
 };
 
-class MP4StdpBox : public MP4Box {
+class MP4StdpBox : public MP4FullBox {
 public:
-    MP4StdpBox(MP4FileClass &file);
-    void Read();
+	MP4StdpBox(MP4FileClass &file) : MP4FullBox(file, "stdp")
+	{
+		m_sample_count = 0;
+		m_vPriorityTable.clear();
+	}
+	void Read()
+	{
+		MP4FullBox::ReadProperties();
+		m_sample_count = (m_nSize - 4) / 2;
+
+		// Read able
+		uint16 sampleNum = 0;
+		for (uint32 i = 0; i < m_sample_count; i++)
+		{
+			sampleNum = m_File.ReadUInt16();
+			m_vPriorityTable.push_back(sampleNum);
+		}
+
+		Skip();
+	}
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		osDump(indent, "Entry Count: %d(0x%x)\n", m_sample_count, m_sample_count);
+		uint32 printCount = min(m_sample_count, 8);
+		osDump(indent, "Index     - SampleCount\n");
+		for (uint32 i = 0; i < printCount; i++)
+		{
+			osDump(indent, "%d      - %d       \n", i, m_vPriorityTable[i]);
+		}
+	}
+
+protected:
+
+	uint32								m_sample_count;
+	vector<uint16>						m_vPriorityTable;
+
 private:
     MP4StdpBox();
     MP4StdpBox( const MP4StdpBox &src );
     MP4StdpBox &operator= ( const MP4StdpBox &src );
 };
 
+typedef struct SampletoChunkEntry
+{
+public:
+	SampletoChunkEntry()
+	{
+		first_chunk = samples_per_chunk = sample_description_index =  0;
+	}
+
+	uint32 first_chunk;
+	uint32 samples_per_chunk;
+	uint32 sample_description_index;
+}SampletoChunkEntry;
+
 class MP4StscBox : public MP4Box {
 public:
     MP4StscBox(MP4FileClass &file);
     void Read();
+
+	/*aligned(8) class SampleToChunkBox
+		extends FullBox(¡®stsc¡¯, version = 0, 0) {
+		unsigned int(32) entry_count;
+		for (i = 1; i <= entry_count; i++) {
+			unsigned int(32) first_chunk;
+			unsigned int(32) samples_per_chunk;
+			unsigned int(32) sample_description_index;
+		}
+	}*/
+	uint32							m_entryCount;
+	vector<SampletoChunkEntry>		m_SampletoChunkTable;
 private:
     MP4StscBox();
     MP4StscBox( const MP4StscBox &src );
@@ -1236,10 +1296,9 @@ public:
 	{
 		osDump(indent, "Entry Count: %d(0x%x)\n", m_entry_count, m_entry_count);
 		uint32 printCount = min(m_entry_count, 8);
-		osDump(indent, "Index     - SampleCount - Delta   \n", m_entry_count, m_entry_count);
+		osDump(indent, "Index     - SampleCount - Delta   \n");
 		for (uint32 i = 0; i < printCount; i++)
 		{
-			m_vTimeToSampleTable.push_back(entry);
 			osDump(indent, "%d      - %d       - %d   \n", i, m_vTimeToSampleTable[i].sample_count, 
 				m_vTimeToSampleTable[i].sample_delta);
 		}
@@ -1263,6 +1322,109 @@ private:
 	MP4SttsBox();
 	MP4SttsBox(const MP4SttsBox &src);
 	MP4SttsBox &operator= (const MP4SttsBox &src);
+};
+
+typedef struct CompositionTimeToSampleEntry
+{
+public:
+	CompositionTimeToSampleEntry()
+	{
+		sample_count = sample_offset = 0;
+	}
+
+	uint32 sample_count;
+	uint32 sample_offset;
+}CompositionTimeToSampleEntry;
+
+class MP4CttsBox : public MP4FullBox {
+public:
+	MP4CttsBox(MP4FileClass &file) : MP4FullBox(file, "ctts")
+	{
+		m_entry_count = 0;
+		m_vTimeToSampleTable.clear();
+	}
+	void Read()
+	{
+		MP4FullBox::ReadProperties();
+		m_entry_count = m_File.ReadUInt32();
+
+		// Read time table
+		CompositionTimeToSampleEntry entry;
+		for (uint32 i = 0; i < m_entry_count; i++)
+		{
+			entry.sample_count = m_File.ReadUInt32();
+			entry.sample_offset = m_File.ReadUInt32();
+			m_vTimeToSampleTable.push_back(entry);
+		}
+
+		Skip();
+	}
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		osDump(indent, "Entry Count: %d(0x%x)\n", m_entry_count, m_entry_count);
+		uint32 printCount = min(m_entry_count, 8);
+		osDump(indent, "Index     - SampleCount - Delta   \n");
+		for (uint32 i = 0; i < printCount; i++)
+		{
+			osDump(indent, "%d      - %d       - %d   \n", i, m_vTimeToSampleTable[i].sample_count,
+				m_vTimeToSampleTable[i].sample_offset);
+		}
+	}
+
+protected:
+	uint32									m_entry_count;
+	vector<CompositionTimeToSampleEntry>	m_vTimeToSampleTable;
+
+private:
+	MP4CttsBox();
+	MP4CttsBox(const MP4CttsBox &src);
+	MP4CttsBox &operator= (const MP4CttsBox &src);
+};
+
+class MP4StssBox : public MP4FullBox {
+public:
+	MP4StssBox(MP4FileClass &file) : MP4FullBox(file, "stss")
+	{
+		m_entry_count = 0;
+		m_vSyncSampleTable.clear();
+	}
+	void Read()
+	{
+		MP4FullBox::ReadProperties();
+		m_entry_count = m_File.ReadUInt32();
+
+		// Read able
+		uint32 sampleNum = 0;
+		for (uint32 i = 0; i < m_entry_count; i++)
+		{
+			sampleNum = m_File.ReadUInt32();
+			m_vSyncSampleTable.push_back(sampleNum);
+		}
+
+		Skip();
+	}
+
+	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
+	{
+		osDump(indent, "Entry Count: %d(0x%x)\n", m_entry_count, m_entry_count);
+		uint32 printCount = min(m_entry_count, 8);
+		osDump(indent, "Index     - SampleCount\n");
+		for (uint32 i = 0; i < printCount; i++)
+		{
+			osDump(indent, "%d      - %d       \n", i, m_vSyncSampleTable[i]);
+		}
+	}
+
+protected:
+
+	uint32								m_entry_count;
+	vector<uint32>						m_vSyncSampleTable;
+
+private:
+	MP4StssBox();
+	MP4StssBox(const MP4StssBox &src);
+	MP4StssBox &operator= (const MP4StssBox &src);
 };
 
 #endif

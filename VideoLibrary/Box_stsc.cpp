@@ -1,29 +1,10 @@
-
-
 #include "AllMP4Box.h"
-
-
-
-
 
 MP4StscBox::MP4StscBox(MP4FileClass &file)
         : MP4Box(file, "stsc")
 {
-    AddVersionAndFlags();
-
-    MP4Integer32Property* pCount =
-        new MP4Integer32Property(*this, "entryCount");
-    AddProperty(pCount);
-
-    MP4TableProperty* pTable = new MP4TableProperty(*this, "entries", pCount);
-    AddProperty(pTable);
-
-    pTable->AddProperty(
-        new MP4Integer32Property(pTable->GetParentBox(), "firstChunk"));
-    pTable->AddProperty(
-        new MP4Integer32Property(pTable->GetParentBox(), "samplesPerChunk"));
-    pTable->AddProperty(
-        new MP4Integer32Property(pTable->GetParentBox(), "sampleDescriptionIndex"));
+	m_entryCount = 0;
+	m_SampletoChunkTable = 0;
 
     // As an optimization we add an implicit property to this table,
     // "firstSample" that corresponds to the first sample of the firstChunk
@@ -37,9 +18,9 @@ void MP4StscBox::Read()
 {
     // Read as usual
     MP4Box::Read();
-
+	MP4FullBox::ReadProperties();
     // Compute the firstSample values for later use
-    uint32_t count =
+	uint32_t  =
         ((MP4Integer32Property*)m_pProperties[2])->GetValue();
 
     MP4Integer32Property* pFirstChunk = (MP4Integer32Property*)

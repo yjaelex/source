@@ -646,6 +646,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4ChplBox(file);
             if( BoxID(type) == BoxID("colr") )
                 return new MP4ColrBox(file);
+			if (BoxID(type) == BoxID("ctts"))
+				return new MP4CttsBox(file);
             break;
 
         case 'd':
