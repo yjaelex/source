@@ -75,8 +75,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Box_ac3.cpp" />
-    <ClCompile Include="Box_avc1.cpp" />
     <ClCompile Include="Box_avcC.cpp" />
     <ClCompile Include="Box_dref.cpp" />
     <ClCompile Include="Box_free.cpp" />
@@ -94,7 +92,6 @@
     <ClCompile Include="Box_stsd.cpp" />
     <ClCompile Include="Box_stsz.cpp" />
     <ClCompile Include="Box_stz2.cpp" />
-    <ClCompile Include="Box_tfhd.cpp" />
     <ClCompile Include="Box_tkhd.cpp" />
     <ClCompile Include="Box_url.cpp" />
     <ClCompile Include="Box_urn.cpp" />

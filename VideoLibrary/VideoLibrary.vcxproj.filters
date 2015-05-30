@@ -33,12 +33,6 @@
     <ClCompile Include="MP4FileClass_IO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Box_ac3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Box_avc1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Box_avcC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -79,9 +73,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Box_stz2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Box_tfhd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Box_tkhd.cpp">

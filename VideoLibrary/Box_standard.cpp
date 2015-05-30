@@ -20,35 +20,6 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         string m_base_url;
 
     }
-    //else if (BoxID(type) == BoxID("co64")) {
-    //    AddVersionAndFlags();
-
-    //    MP4Integer32Property* pCount =
-    //        uint32 m_entryCount");
-    //    AddProperty(pCount);
-
-    //    MP4TableProperty* pTable = new MP4TableProperty(*this, "entries", pCount);
-    //    AddProperty(pTable);
-
-    //    pTable->AddProperty(
-    //        uint64 m_chunkOffset;
-    //} else if (BoxID(type) == BoxID("ctts")) {
-    //    AddVersionAndFlags();
-
-    //    MP4Integer32Property* pCount =
-    //        uint32 m_entryCount");
-    //    AddProperty(pCount);
-
-    //    MP4TableProperty* pTable = new MP4TableProperty(*this, "entries", pCount);
-    //    AddProperty(pTable);
-
-    //    pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "sampleCount;
-    //    pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "sampleOffset;
-    //    /*
-    //     * d???
-    //     */
-    //}
-    
     else if (BoxID(type) == BoxID("dinf")) {
         ExpectChildBox("dref", Required, OnlyOne);
 
@@ -302,20 +273,6 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
 
     } else if (BoxID(type) == BoxID("snro")) {
         uint32 m_offset;
-
-    } else if (BoxID(type) == BoxID("stco")) {
-        osAssert(0);
-        /// TODO
-        //AddVersionAndFlags();
-
-        //MP4Integer32Property* pCount = uint32 m_entryCount");
-        //AddProperty(pCount);
-
-        //MP4TableProperty* pTable = new MP4TableProperty(*this, "entries", pCount);
-        //AddProperty(pTable);
-
-        //pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "chunkOffset;
-
     } else if (BoxID(type) == BoxID("stsh")) {
         osAssert(0);
         /// TODO

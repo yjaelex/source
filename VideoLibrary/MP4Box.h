@@ -140,9 +140,9 @@ public:
         }
     }
 
-    void ExpectChildAtom(const char* name, bool mandatory, bool onlyOne)
+    void ExpectChildBox(const char* name, bool mandatory, bool onlyOne = true)
     {
-        m_pChildAtomInfos.Add(new MP4AtomInfo(name, mandatory, onlyOne));
+        m_vChildBoxInfos.push_back(new MP4BoxInfo(name, mandatory, onlyOne));
     }
 
     uint32_t GetNumberOfChildBoxs()
@@ -182,14 +182,6 @@ public:
     bool GetLargesizeMode();
 
 protected:
-
-    void AddVersionAndFlags();
-
-    void AddReserved(MP4Box& parentBox, const char* name, uint32_t size);
-
-    void ExpectChildBox(const char* name,
-                         bool mandatory, bool onlyOne = true);
-
     MP4BoxInfo* FindBoxInfo(const char* name);
 
     bool IsMe(const char* name);

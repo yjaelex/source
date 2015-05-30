@@ -47,7 +47,7 @@ uint64_t MP4FileClass::GetSize( File* file )
 bool MP4FileClass::ReadBytes( uint8_t* buf, uint32_t bufsiz, File* file )
 {
     if( bufsiz == 0 )
-        return;
+        return true;
 
     osAssert( buf );
     osWARNING( m_numReadBits > 0 );

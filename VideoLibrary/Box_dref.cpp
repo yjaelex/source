@@ -5,9 +5,9 @@ MP4DrefBox::MP4DrefBox(MP4FileClass &file)
 {
     m_entry_count = 0;
 
-    ExpectChildAtom("url ", Optional, Many);
-    ExpectChildAtom("urn ", Optional, Many);
-    ExpectChildAtom("alis", Optional, Many);
+    ExpectChildBox("url ", Optional, Many);
+    ExpectChildBox("urn ", Optional, Many);
+    ExpectChildBox("alis", Optional, Many);
 }
 
 void MP4DrefBox::Read()

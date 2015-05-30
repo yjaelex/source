@@ -4,8 +4,9 @@
 #include "VideoFileClass.h"
 #include "MP4Box.h"
 #include "osFile.h"
+#include "os.h"
 
-/** Bit: enable 64-bit data-atoms. */
+/** Bit: enable 64-bit data-box. */
 #define MP4_CREATE_64BIT_DATA 0x01
 /** Bit: enable 64-bit time-atoms. @note Incompatible with QuickTime. */
 #define MP4_CREATE_64BIT_TIME 0x02

@@ -419,16 +419,6 @@ void MP4Box::WriteChildBoxs()
     osLog(LOG_INFO, "Write: \"%s\": finished %s", m_File.GetFilename().c_str(), m_type);
 }
 
-void MP4Box::AddReserved(MP4Box& parentBox, const char* name, uint32_t size)
-{
-    m_nReserved = size;
-}
-
-void MP4Box::ExpectChildBox(const char* name, bool mandatory, bool onlyOne)
-{
-    m_vChildBoxInfos.push_back(new MP4BoxInfo(name, mandatory, onlyOne));
-}
-
 void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
 {
     if ( m_type[0] != '\0' )
@@ -626,9 +616,9 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
 
         case 'a':
             if( BoxID(type) == BoxID("avc1") )
-                return new MP4Avc1Box(file);
+                return new MP4VideoBox(file);
             if( BoxID(type) == BoxID("ac-3") )
-                return new MP4Ac3Box(file);
+                return new MP4SoundBox(file);
             if( BoxID(type) == BoxID("avcC") )
                 return new MP4AvcCBox(file);
             if( BoxID(type) == BoxID("alis") )
@@ -826,6 +816,10 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4VideoBox( file, type );
             break;
 
+        case '.':
+            if (BoxID(type) == BoxID(".mp3"))
+                return new MP4SoundBox(file, type);
+            break;
         default:
             break;
     }
