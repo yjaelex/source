@@ -1,9 +1,6 @@
 #include "AllMP4Box.h"
 
 
-
-
-
 /*
  * SizeTableProperty is a special version of the MP4TableProperty -
  * the BytesProperty will need to set the value before it can read

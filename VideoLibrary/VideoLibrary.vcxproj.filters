@@ -99,6 +99,9 @@
     <ClCompile Include="Box_sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AVC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MP4Box.h">
@@ -114,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MP4FileClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AVC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

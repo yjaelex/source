@@ -75,6 +75,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AVC.cpp" />
     <ClCompile Include="Box_avcC.cpp" />
     <ClCompile Include="Box_dref.cpp" />
     <ClCompile Include="Box_free.cpp" />
@@ -105,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AllMP4Box.h" />
+    <ClInclude Include="AVC.h" />
     <ClInclude Include="MP4Box.h" />
     <ClInclude Include="MP4FileClass.h" />
     <ClInclude Include="VideoFileClass.h" />
