@@ -3,6 +3,7 @@
 #include "vptypes.h"
 #include "os.h"
 #include "osFile.h"
+#include "VideoFileClass.h"
 
 typedef struct SPSENTRY
 {
@@ -42,7 +43,7 @@ public:
         m_hasExts = false;
     }
 
-    void Read(File * file);
+    void Read(VideoFileClass * file, uint64 endPos);
 
     uint8                           m_configurationVersion;           // shall be 1
     uint8                           m_AVCProfileIndication;           // profile code as defined in ISO/IEC 14496-10
@@ -65,13 +66,12 @@ public:
     //    struct len
     //    {
     //        uint8   reserved1 : 3;              // bit(3) reserved = ¡®111¡¯b;;
-    //        uint8   lengthSizeMinusOne : 5;
+    //        uint8   numOfSequenceParameterSets : 5;
     //    }
     //    uint8 all;
     //};
-    uint8                           m_lengthSizeMinusOne; // the length in bytes of the NALUnitLength
+    uint8                           m_numOfSequenceParameterSets; // the length in bytes of the NALUnitLength
 
-    uint8                           m_numOfSequenceParameterSets;
     vector<SPSENTRY>                m_SPSTable;
     uint8                           m_numOfPictureParameterSets;
     vector<PPSENTRY>                m_PPSTable;
