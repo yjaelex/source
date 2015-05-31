@@ -16,7 +16,7 @@ void AVCDecoderConfigurationRecord::Read(VideoFileClass * file, uint64 endPos)
         sps.sequenceParameterSetLength = file->ReadUInt16();
         sps.sequenceParameterSetNALUnit.resize(sps.sequenceParameterSetLength);
         file->ReadBytes(sps.sequenceParameterSetNALUnit.data(), sps.sequenceParameterSetLength);
-        
+
         m_SPSTable.push_back(sps);
     }
 
