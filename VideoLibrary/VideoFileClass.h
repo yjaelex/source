@@ -144,7 +144,12 @@ public:
         return m_FileName;
     }
 
-    virtual bool Open(const char* fileName);
+    virtual bool Open(const char* fileName, File::Mode mode, FileProvider* provider);
+
+    // Read video file metadata; construct file structure.
+    virtual void ReadFromFile();
+
+    virtual void Dump(bool dumpImplicits);
 
     virtual void Close();
 
@@ -155,6 +160,7 @@ public:
 private:
     File*				m_file;
     string              m_FileName;
+    uint32              m_fileOriginalSize;
     // read/write in memory
     uint8_t*			m_memoryBuffer;
     uint64_t			m_memoryBufferPosition;

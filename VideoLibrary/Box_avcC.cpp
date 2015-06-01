@@ -35,3 +35,15 @@ MP4AvcCBox::MP4AvcCBox(MP4FileClass &file)
 //
 
 
+
+void MP4AvcCBox::Read()
+{
+    m_avcConfig.Read(&m_File, GetEnd());
+
+    Skip(); // to end of atom
+}
+
+void MP4AvcCBox::DumpProperties(uint8_t indent, bool dumpImplicits)
+{
+    m_avcConfig.Dump(indent);
+}

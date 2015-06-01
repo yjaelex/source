@@ -1,8 +1,36 @@
 #include "VideoFileClass.h"
 
-bool VideoFileClass::Open(const char* fileName)
+
+bool VideoFileClass::Open(const char* fileName, File::Mode mode, FileProvider* provider)
 {
+    osAssert(!m_file);
+
+    m_file = new File(fileName, mode, provider ? provider : NULL);
+    if (m_file->open())
+    {
+        osAssert(!"Open File failed!");
+        return false;
+    }
+
+    switch (mode)
+    {
+    case File::MODE_READ:
+    case File::MODE_MODIFY:
+        m_fileOriginalSize = m_file->size;
+        break;
+
+    case File::MODE_CREATE:
+    default:
+        m_fileOriginalSize = 0;
+        break;
+    }
+
     return true;
+}
+
+void VideoFileClass::ReadFromFile()
+{
+
 }
 
 void VideoFileClass::Close()

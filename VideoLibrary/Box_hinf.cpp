@@ -1,9 +1,4 @@
-
-
 #include "AllMP4Box.h"
-
-namespace mp4v2 { namespace impl {
-
 
 
 MP4HinfBox::MP4HinfBox(MP4FileClass &file)
@@ -29,9 +24,10 @@ void MP4HinfBox::Generate()
     // are optional (on read), if we generate it for writing
     // we really want all the children
 
-    for (uint32_t i = 0; i < m_pChildBoxInfos.Size(); i++) {
+    for (uint32_t i = 0; i < m_vChildBoxInfos.size(); i++)
+    {
         MP4Box* pChildBox =
-            CreateBox(m_File, this, m_pChildBoxInfos[i]->m_name);
+            CreateBox(m_File, this, m_vChildBoxInfos[i]->m_name);
 
         AddChildBox(pChildBox);
 
@@ -39,7 +35,3 @@ void MP4HinfBox::Generate()
         pChildBox->Generate();
     }
 }
-
-
-
-}} // namespace mp4v2::impl

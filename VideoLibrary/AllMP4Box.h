@@ -330,12 +330,19 @@ private:
     MP4AmrBox &operator= ( const MP4AmrBox &src );
 };
 
+#include "AVC.h"
+
 // H.264 Boxs
 class MP4AvcCBox : public MP4Box {
 public:
     MP4AvcCBox(MP4FileClass &file);
     void Generate();
     void Clone(MP4AvcCBox *dstBox);
+    void Read();
+    virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+    AVCDecoderConfigurationRecord                   m_avcConfig;
+
 private:
     MP4AvcCBox();
     MP4AvcCBox( const MP4AvcCBox &src );

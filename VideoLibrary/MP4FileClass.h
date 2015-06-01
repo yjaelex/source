@@ -27,6 +27,8 @@ public:
     void WriteMpegLength(uint32_t value, bool compact = false);
     bool Use64Bits(const char *atomName);
     void Check64BitStatus(const char *atomName);
+    virtual void ReadFromFile();
+    virtual void Dump(bool dumpImplicits);
 
 private:
 	MP4Box *            m_pRootBox;

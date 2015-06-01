@@ -50,3 +50,30 @@ void MP4FileClass::WriteMpegLength(uint32_t value, bool compact)
 }
 
 
+
+void MP4FileClass::ReadFromFile()
+{
+    // ensure we start at beginning of file
+    SetPosition(0);
+
+    // create a new root box
+    osAssert(m_pRootBox == NULL);
+    m_pRootBox = MP4Box::CreateBox(*this, NULL, NULL);
+
+    uint64_t fileSize = GetSize();
+
+    m_pRootBox->SetStart(0);
+    m_pRootBox->SetSize(fileSize);
+    m_pRootBox->SetEnd(fileSize);
+
+    m_pRootBox->Read();
+
+    // create MP4Track's for any tracks in the file
+    // GenerateTracks();
+}
+
+void MP4FileClass::Dump(bool dumpImplicits)
+{
+    osDump(0, "\"%s\": Dumping MP4 file meta data information...  \n", GetFilename().c_str());
+    m_pRootBox->Dump(0, dumpImplicits);
+}

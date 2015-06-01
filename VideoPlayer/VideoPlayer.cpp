@@ -4,6 +4,8 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+#include "VideoFileClass.h"
+#include "MP4FileClass.h"
 #include <os.h>
 
 //Screen attributes
@@ -18,11 +20,22 @@ void playVideo(const char * file)
 
 }
 
+void dumpFileInfo(const char * name)
+{
+    MP4FileClass * mp4File = new MP4FileClass();
+    mp4File->Open(name, File::MODE_READ, NULL);
+    mp4File->Dump(false);
+
+    delete mp4File;
+}
 
 int main(int, char**)
 {
     SDL_Surface *screen = NULL;
     SDL_Surface *image = NULL;
+
+    dumpFileInfo("sample.mp4");
+    return 0;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {

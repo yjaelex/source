@@ -66,3 +66,33 @@ void AVCDecoderConfigurationRecord::Read(VideoFileClass * file, uint64 endPos)
     osAssert(file->GetPosition() <= endPos);
 }
 
+static void printByteBuffer(uint8 * pBuf, uint32 len)
+{
+    if (!pBuf) return;
+    for (uint32 i = 0; i < len; i++)
+    {
+        osDump(0, "  %x", pBuf[i]);
+    }
+}
+
+void AVCDecoderConfigurationRecord::Dump(uint8_t indent)
+{
+    osDump(indent, "Configuration Version: %d(0x%x)\n", m_configurationVersion, m_configurationVersion);
+    osDump(indent, "AVCProfile Indication: %d(0x%x)\n", m_AVCProfileIndication, m_AVCProfileIndication);
+    osDump(indent, "Profile Compatibility: %d(0x%x)\n", m_profile_compatibility, m_profile_compatibility);
+    osDump(indent, "AVC Level Indication: %d(0x%x)\n", m_AVCLevelIndication, m_AVCLevelIndication);
+    osDump(indent, "LengthSize MinusOne: %d(0x%x)\n", m_lengthSizeMinusOne, m_lengthSizeMinusOne);
+
+    osDump(indent, "Num Of Sequence Parameter Sets: %d(0x%x)\n", m_numOfSequenceParameterSets, m_numOfSequenceParameterSets);
+    for (uint32 i = 0; i < m_numOfSequenceParameterSets; i++)
+    {
+        printByteBuffer(m_SPSTable[i].sequenceParameterSetNALUnit.data(), m_SPSTable[i].sequenceParameterSetLength);
+    }
+
+    osDump(indent, "Num Of Picture Parameter Sets: %d(0x%x)\n", m_numOfPictureParameterSets, m_numOfPictureParameterSets);
+    for (uint32 i = 0; i < m_numOfPictureParameterSets; i++)
+    {
+        printByteBuffer(m_PPSTable[i].pictureParameterSetNALUnit.data(), m_PPSTable[i].pictureParameterSetLength);
+    }
+}
+

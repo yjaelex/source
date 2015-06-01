@@ -616,9 +616,9 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
 
         case 'a':
             if( BoxID(type) == BoxID("avc1") )
-                return new MP4VideoBox(file);
+                return new MP4VideoBox(file, type);
             if( BoxID(type) == BoxID("ac-3") )
-                return new MP4SoundBox(file);
+                return new MP4SoundBox(file, type);
             if( BoxID(type) == BoxID("avcC") )
                 return new MP4AvcCBox(file);
             if( BoxID(type) == BoxID("alis") )

@@ -58,11 +58,13 @@ inline void* osCalloc(size_t size) {
     return memset(osMalloc(size), 0, size);
 }
 
+/*
 inline char* osStralloc(const char* s1) {
     char* s2 = (char*)osMalloc(strlen(s1) + 1);
     strcpy(s2, s1);
     return s2;
 }
+*/
 
 inline void* osRealloc(void* p, uint32_t newSize) {
     // workaround library bug

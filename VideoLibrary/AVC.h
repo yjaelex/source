@@ -48,7 +48,7 @@ public:
     }
 
     void Read(VideoFileClass * file, uint64 endPos);
-    void Dump();
+    void Dump(uint8_t indent);
 
     uint32 GetNumOfSPS()
     {
