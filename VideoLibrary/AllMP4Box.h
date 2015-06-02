@@ -322,8 +322,8 @@ private:
 
 class MP4AmrBox : public MP4Box {
 public:
-    MP4AmrBox(MP4FileClass &file, const char *type);
-    void Generate();
+	MP4AmrBox(MP4FileClass &file, const char *type) : MP4Box(file, type) { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4AmrBox();
     MP4AmrBox( const MP4AmrBox &src );
@@ -336,7 +336,7 @@ private:
 class MP4AvcCBox : public MP4Box {
 public:
     MP4AvcCBox(MP4FileClass &file);
-    void Generate();
+	void Generate() {};
     void Clone(MP4AvcCBox *dstBox);
     void Read();
     virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
@@ -352,9 +352,9 @@ private:
 
 class MP4D263Box : public MP4Box {
 public:
-    MP4D263Box(MP4FileClass &file);
-    void Generate();
-    void Write();
+	MP4D263Box(MP4FileClass &file) : MP4Box(file, "d263") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
+	void Write() {};
 private:
     MP4D263Box();
     MP4D263Box( const MP4D263Box &src );
@@ -363,8 +363,8 @@ private:
 
 class MP4DamrBox : public MP4Box {
 public:
-    MP4DamrBox(MP4FileClass &file);
-    void Generate();
+	MP4DamrBox(MP4FileClass &file) : MP4Box(file, "damr") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4DamrBox();
     MP4DamrBox( const MP4DamrBox &src );
@@ -373,8 +373,8 @@ private:
 
 class MP4EncaBox : public MP4Box {
 public:
-    MP4EncaBox(MP4FileClass &file);
-    void Generate();
+	MP4EncaBox(MP4FileClass &file) : MP4Box(file, "enca") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4EncaBox();
     MP4EncaBox( const MP4EncaBox &src );
@@ -383,8 +383,8 @@ private:
 
 class MP4EncvBox : public MP4Box {
 public:
-    MP4EncvBox(MP4FileClass &file);
-    void Generate();
+	MP4EncvBox(MP4FileClass &file) : MP4Box(file, "encv") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4EncvBox();
     MP4EncvBox( const MP4EncvBox &src );
@@ -393,8 +393,8 @@ private:
 
 class MP4Mp4aBox : public MP4Box {
 public:
-    MP4Mp4aBox(MP4FileClass &file);
-    void Generate();
+	MP4Mp4aBox(MP4FileClass &file) : MP4Box(file, "mp4a") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4Mp4aBox();
     MP4Mp4aBox( const MP4Mp4aBox &src );
@@ -403,9 +403,9 @@ private:
 
 class MP4DAc3Box : public MP4Box {
 public:
-    MP4DAc3Box(MP4FileClass &file);
-    void Generate();
-    void Dump(uint8_t indent, bool dumpImplicits);
+	MP4DAc3Box(MP4FileClass &file) : MP4Box(file, "dac3") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
+	void Dump(uint8_t indent, bool dumpImplicits) {};
 private:
     MP4DAc3Box();
     MP4DAc3Box( const MP4DAc3Box &src );
@@ -414,8 +414,8 @@ private:
 
 class MP4Mp4sBox : public MP4Box {
 public:
-    MP4Mp4sBox(MP4FileClass &file);
-    void Generate();
+	MP4Mp4sBox(MP4FileClass &file) : MP4Box(file, "mp4s") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4Mp4sBox();
     MP4Mp4sBox( const MP4Mp4sBox &src );
@@ -424,8 +424,8 @@ private:
 
 class MP4Mp4vBox : public MP4Box {
 public:
-    MP4Mp4vBox(MP4FileClass &file);
-    void Generate();
+	MP4Mp4vBox(MP4FileClass &file) : MP4Box(file, "mp4v") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4Mp4vBox();
     MP4Mp4vBox( const MP4Mp4vBox &src );
@@ -434,8 +434,8 @@ private:
 
    class MP4Tsc2Box : public MP4Box {
    public:
-      MP4Tsc2Box(MP4FileClass &file);
-      void Generate();
+	  MP4Tsc2Box(MP4FileClass &file) : MP4Box(file, "tsc2") { osAssert(!"Not impletmented!!!"); }
+	  void Generate() {};
    private:
       MP4Tsc2Box();
       MP4Tsc2Box( const MP4Tsc2Box &src );
@@ -445,8 +445,8 @@ private:
 
 class MP4S263Box : public MP4Box {
 public:
-    MP4S263Box(MP4FileClass &file);
-    void Generate();
+	MP4S263Box(MP4FileClass &file) : MP4Box(file, "s263") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4S263Box();
     MP4S263Box( const MP4S263Box &src );
@@ -480,11 +480,10 @@ private:
 
 class MP4ElstBox : public MP4Box {
 public:
-    MP4ElstBox(MP4FileClass &file);
-    void Generate();
-    void Read();
-protected:
-    void AddProperties(uint8_t version);
+	MP4ElstBox(MP4FileClass &file) : MP4Box(file, "elst") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
+	void Read() {};
+
 private:
     MP4ElstBox();
     MP4ElstBox( const MP4ElstBox &src );
@@ -541,8 +540,8 @@ private:
 
 class MP4GminBox : public MP4Box {
 public:
-    MP4GminBox(MP4FileClass &file);
-    void Generate();
+	MP4GminBox(MP4FileClass &file) : MP4Box(file, "gmin") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4GminBox();
     MP4GminBox( const MP4GminBox &src );
@@ -592,7 +591,7 @@ private:
 
 class MP4HntiBox : public MP4Box {
 public:
-    MP4HntiBox(MP4FileClass &file);
+	MP4HntiBox(MP4FileClass &file) : MP4Box(file, "hnti") { osAssert(!"Not impletmented!!!"); }
     void Read();
 private:
     MP4HntiBox();
@@ -681,7 +680,7 @@ private:
 
 class MP4OhdrBox : public MP4Box {
 public:
-    MP4OhdrBox(MP4FileClass &file);
+	MP4OhdrBox(MP4FileClass &file) : MP4Box(file, "ohdr") { osAssert(!"Not impletmented!!!"); }
     ~MP4OhdrBox();
     void Read();
 private:
@@ -692,22 +691,10 @@ private:
 
 class MP4RtpBox : public MP4Box {
 public:
-    MP4RtpBox(MP4FileClass &file);
-    void Generate();
-    void Read();
-    void Write();
-
-protected:
-    void AddPropertiesStsdType();
-    void AddPropertiesHntiType();
-
-    void GenerateStsdType();
-    void GenerateHntiType();
-
-    void ReadStsdType();
-    void ReadHntiType();
-
-    void WriteHntiType();
+	MP4RtpBox(MP4FileClass &file) : MP4Box(file, "rtp ") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
+	void Read() {};
+	void Write() {};
 
 private:
     MP4RtpBox();
@@ -717,7 +704,7 @@ private:
 
 class MP4SdpBox : public MP4Box {
 public:
-    MP4SdpBox(MP4FileClass &file);
+	MP4SdpBox(MP4FileClass &file) : MP4Box(file, "sdp ") { osAssert(!"Not impletmented!!!"); }
     void Read();
     void Write();
 private:
@@ -729,12 +716,12 @@ private:
 // sdtp - Independent and Disposable Samples Box.
 class MP4SdtpBox : public MP4FullBox {
 public:
-    MP4SdtpBox(MP4FileClass &file);
+	MP4SdtpBox(MP4FileClass &file) : MP4FullBox(file, "sdtp") { data = 0; osAssert(!"Not impletmented!!!"); }
     void Read();
 
     // raw bytes; one byte for each sample.
     // number of bytes == stsz.sampleCount.
-    int8& data;
+    int8  data;
 private:
     MP4SdtpBox();
     MP4SdtpBox( const MP4SdtpBox &src );
@@ -743,7 +730,7 @@ private:
 
 class MP4SmiBox : public MP4Box {
 public:
-    MP4SmiBox(MP4FileClass &file);
+	MP4SmiBox(MP4FileClass &file) : MP4Box(file, "smi ") { osAssert(!"Not impletmented!!!"); }
     void Read();
 private:
     MP4SmiBox();
@@ -917,9 +904,9 @@ private:
 
 class MP4TextBox : public MP4Box {
 public:
-    MP4TextBox(MP4FileClass &file);
-    void Generate();
-    void Read();
+	MP4TextBox(MP4FileClass &file) : MP4Box(file, "text") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
+	void Read() {};
 protected:
     void AddPropertiesStsdType();
     void AddPropertiesGmhdType();
@@ -934,8 +921,8 @@ private:
 
 class MP4Tx3gBox : public MP4Box {
 public:
-    MP4Tx3gBox(MP4FileClass &file);
-    void Generate();
+	MP4Tx3gBox(MP4FileClass &file) : MP4Box(file, "tx3g") { osAssert(!"Not impletmented!!!"); }
+	void Generate() {};
 private:
     MP4Tx3gBox();
     MP4Tx3gBox( const MP4Tx3gBox &src );
@@ -944,7 +931,7 @@ private:
 
 class MP4FtabBox : public MP4Box {
 public:
-    MP4FtabBox(MP4FileClass &file);
+	MP4FtabBox(MP4FileClass &file) : MP4Box(file, "ftab") { osAssert(!"Not impletmented!!!"); }
 private:
     MP4FtabBox();
     MP4FtabBox( const MP4FtabBox &src );
@@ -1152,7 +1139,7 @@ private:
 class MP4PaspBox : public MP4Box {
 public:
     MP4PaspBox(MP4FileClass &file);
-    void Generate();
+	void Generate() {};
 private:
     MP4PaspBox();
     MP4PaspBox( const MP4PaspBox &src );
@@ -1162,7 +1149,7 @@ private:
 class MP4ColrBox : public MP4Box {
 public:
     MP4ColrBox(MP4FileClass &file);
-    void Generate();
+	void Generate() {};
 private:
     MP4ColrBox();
     MP4ColrBox( const MP4ColrBox &src );
@@ -1203,7 +1190,7 @@ private:
 class MP4ChplBox : public MP4Box {
 public:
     MP4ChplBox(MP4FileClass &file);
-    void Generate();
+	void Generate() {};
 private:
     MP4ChplBox();
     MP4ChplBox( const MP4ChplBox &src );

@@ -45,8 +45,14 @@ uint32 VideoFileClass::GetSampleByteSize(uint32 sampleIndex)
 
 bool VideoFileClass::DumpSampleData(pvoid pBuffer, uint32 bufferSize)
 {
-    return true;
+	return true;
 }
+
+void VideoFileClass::Dump(bool dumpImplicits)
+{
+
+}
+
 
 // VideoFileClass low level IO support
 
