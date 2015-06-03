@@ -127,8 +127,11 @@ private:
 
 class MP4TrefTypeBox : public MP4Box {
 public:
-    MP4TrefTypeBox(MP4FileClass &file, const char* type);
-    void Read();
+    MP4TrefTypeBox(MP4FileClass &file, const char* type) : MP4Box(file, type)
+    {
+        osAssert(!"Not impletmented!!!");
+    }
+    void Read() {};
 private:
     MP4TrefTypeBox();
     MP4TrefTypeBox( const MP4TrefTypeBox &src );
@@ -592,7 +595,7 @@ private:
 class MP4HntiBox : public MP4Box {
 public:
 	MP4HntiBox(MP4FileClass &file) : MP4Box(file, "hnti") { osAssert(!"Not impletmented!!!"); }
-    void Read();
+    void Read() {};
 private:
     MP4HntiBox();
     MP4HntiBox( const MP4HntiBox &src );
@@ -681,8 +684,8 @@ private:
 class MP4OhdrBox : public MP4Box {
 public:
 	MP4OhdrBox(MP4FileClass &file) : MP4Box(file, "ohdr") { osAssert(!"Not impletmented!!!"); }
-    ~MP4OhdrBox();
-    void Read();
+    ~MP4OhdrBox() {};
+    void Read() {};
 private:
     MP4OhdrBox();
     MP4OhdrBox( const MP4OhdrBox &src );
@@ -705,8 +708,8 @@ private:
 class MP4SdpBox : public MP4Box {
 public:
 	MP4SdpBox(MP4FileClass &file) : MP4Box(file, "sdp ") { osAssert(!"Not impletmented!!!"); }
-    void Read();
-    void Write();
+    void Read() {};
+    void Write() {};
 private:
     MP4SdpBox();
     MP4SdpBox( const MP4SdpBox &src );
@@ -717,7 +720,7 @@ private:
 class MP4SdtpBox : public MP4FullBox {
 public:
 	MP4SdtpBox(MP4FileClass &file) : MP4FullBox(file, "sdtp") { data = 0; osAssert(!"Not impletmented!!!"); }
-    void Read();
+    void Read() {};
 
     // raw bytes; one byte for each sample.
     // number of bytes == stsz.sampleCount.
@@ -731,7 +734,7 @@ private:
 class MP4SmiBox : public MP4Box {
 public:
 	MP4SmiBox(MP4FileClass &file) : MP4Box(file, "smi ") { osAssert(!"Not impletmented!!!"); }
-    void Read();
+    void Read() {};
 private:
     MP4SmiBox();
     MP4SmiBox( const MP4SmiBox &src );
@@ -940,8 +943,8 @@ private:
 
 class MP4TfhdBox : public MP4FullBox {
 public:
-    MP4TfhdBox(MP4FileClass &file);
-    void Read();
+    MP4TfhdBox(MP4FileClass &file) : MP4FullBox(file, "tfhd") { osAssert(!"Not impletmented!!!"); }
+    //void Read();
 
 private:
     MP4TfhdBox();
@@ -1007,8 +1010,8 @@ private:
 
 class MP4TrunBox : public MP4Box {
 public:
-    MP4TrunBox(MP4FileClass &file);
-    void Read();
+    MP4TrunBox(MP4FileClass &file) : MP4Box(file, "trun") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 protected:
     void AddProperties(uint32_t flags);
 private:
@@ -1019,8 +1022,8 @@ private:
 
 class MP4UdtaBox : public MP4Box {
 public:
-    MP4UdtaBox(MP4FileClass &file);
-    void Read();
+    MP4UdtaBox(MP4FileClass &file) : MP4Box(file, "udta") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 private:
     MP4UdtaBox();
     MP4UdtaBox( const MP4UdtaBox &src );
@@ -1128,8 +1131,8 @@ private:
 
 class MP4HrefBox : public MP4Box {
 public:
-    MP4HrefBox(MP4FileClass &file);
-    void Generate(void);
+    MP4HrefBox(MP4FileClass &file) : MP4Box(file, "href") { osAssert(!"Not impletmented!!!"); }
+    void Generate(void) {};
 private:
     MP4HrefBox();
     MP4HrefBox( const MP4HrefBox &src );
@@ -1138,7 +1141,7 @@ private:
 
 class MP4PaspBox : public MP4Box {
 public:
-    MP4PaspBox(MP4FileClass &file);
+    MP4PaspBox(MP4FileClass &file) : MP4Box(file, "pasp") { osAssert(!"Not impletmented!!!"); }
 	void Generate() {};
 private:
     MP4PaspBox();
@@ -1148,7 +1151,7 @@ private:
 
 class MP4ColrBox : public MP4Box {
 public:
-    MP4ColrBox(MP4FileClass &file);
+    MP4ColrBox(MP4FileClass &file) : MP4Box(file, "colr") { osAssert(!"Not impletmented!!!"); }
 	void Generate() {};
 private:
     MP4ColrBox();
@@ -1189,7 +1192,7 @@ private:
  */
 class MP4ChplBox : public MP4Box {
 public:
-    MP4ChplBox(MP4FileClass &file);
+    MP4ChplBox(MP4FileClass &file) : MP4Box(file, "chpl") { osAssert(!"Not impletmented!!!"); }
 	void Generate() {};
 private:
     MP4ChplBox();
@@ -1203,13 +1206,13 @@ private:
 class MP4ItmfHdlrBox : public MP4FullBox
 {
 public:
-    MP4ItmfHdlrBox(MP4FileClass &file);
-    void Read();
+    MP4ItmfHdlrBox(MP4FileClass &file) : MP4FullBox(file, "hdlr") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 
-    int32& reserved1;
-    int8&     handlerType;
-    int8&     reserved2;
-    int8&     name;
+    int32 reserved1;
+    int8     handlerType;
+    int8     reserved2;
+    int8     name;
 private:
     MP4ItmfHdlrBox();
     MP4ItmfHdlrBox( const MP4ItmfHdlrBox &src );
@@ -1220,7 +1223,7 @@ private:
 class MP4ItemBox : public MP4Box
 {
 public:
-    MP4ItemBox( MP4FileClass &file, const char* type );
+    MP4ItemBox(MP4FileClass &file, const char* type) : MP4Box(file, type) { osAssert(!"Not impletmented!!!"); }
 private:
     MP4ItemBox();
     MP4ItemBox( const MP4ItemBox &src );
@@ -1231,10 +1234,10 @@ private:
 class MP4MeanBox : public MP4FullBox
 {
 public:
-    MP4MeanBox(MP4FileClass &file);
-    void Read();
+    MP4MeanBox(MP4FileClass &file) : MP4FullBox(file, "mean") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 
-    int8& value;
+    int8 value;
 private:
     MP4MeanBox();
     MP4MeanBox( const MP4MeanBox &src );
@@ -1245,10 +1248,10 @@ private:
 class MP4NameBox : public MP4FullBox
 {
 public:
-    MP4NameBox(MP4FileClass &file);
-    void Read();
+    MP4NameBox(MP4FileClass &file) : MP4FullBox(file, "name") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 
-    int8& value;
+    int8 value;
 private:
     MP4NameBox();
     MP4NameBox( const MP4NameBox &src );
@@ -1259,14 +1262,14 @@ private:
 class MP4DataBox : public MP4Box
 {
 public:
-    MP4DataBox(MP4FileClass &file);
-    void Read();
+    MP4DataBox(MP4FileClass &file) : MP4Box(file, "data") { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 
-    int16& typeReserved;
-    int8&  typeSetIdentifier;
-    int32& typeCode;
-    int32& locale;
-    int8&     metadata;
+    int16 typeReserved;
+    int8  typeSetIdentifier;
+    int32 typeCode;
+    int32 locale;
+    int8     metadata;
 private:
     MP4DataBox();
     MP4DataBox( const MP4DataBox &src );
@@ -1279,10 +1282,10 @@ private:
 class MP4UdtaElementBox : public MP4Box
 {
 public:
-    MP4UdtaElementBox( MP4FileClass &file, const char* type );
-    void Read();
+    MP4UdtaElementBox(MP4FileClass &file, const char* type) : MP4Box(file, type) { osAssert(!"Not impletmented!!!"); }
+    void Read() {};
 
-    int8& value;
+    int8 value;
 private:
     MP4UdtaElementBox();
     MP4UdtaElementBox( const MP4UdtaElementBox &src );
