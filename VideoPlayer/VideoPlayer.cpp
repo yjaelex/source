@@ -24,7 +24,6 @@ void dumpFileInfo(const char * name)
 {
     MP4FileClass * mp4File = new MP4FileClass();
     mp4File->Open(name, File::MODE_READ, NULL);
-    mp4File->ReadFromFile();
     mp4File->Dump(false);
 
     delete mp4File;
