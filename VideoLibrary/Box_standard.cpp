@@ -359,7 +359,8 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         /*
          * default - unknown type
          */
-        osAssert(0);
+        osAssert(!"Unsupported Box Type. TODO::");
+        osLog(LOG_ERROR, "Unsupported Box Type: %s", type);
         SetUnknownType(true);
     }
 
@@ -482,6 +483,6 @@ void MP4StandardBox::ReadProperties()
 		/*
 		* default - unknown type
 		*/
-		osAssert(0);
+		// osAssert(0);
 	}
 }

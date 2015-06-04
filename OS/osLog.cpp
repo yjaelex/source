@@ -51,6 +51,6 @@ void osLog(LOG_LEVEL level, const char * pFormatStr, ...)
 
     if (!g_bLogToFile)
     {
-        printf("%s %s", pLogLevelStr[level], buf);
+        printf("%s %s \n", pLogLevelStr[level], buf);
     }
 }

@@ -12,6 +12,8 @@ bool VideoFileClass::Open(const char* fileName, File::Mode mode, FileProvider* p
         return false;
     }
 
+    m_FileName.assign(fileName);
+
     switch (mode)
     {
     case File::MODE_READ:

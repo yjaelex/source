@@ -825,8 +825,6 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
     }
 
     // default to MP4StandardBox implementation
-    osAssert(!"Unsupported Box Type. TODO::");
-    osLog(LOG_ERROR, "Unsupported Box Type: %s", type);
     return new MP4StandardBox( file, type ); 
 }
 

@@ -224,4 +224,5 @@ pip-log.txt
 # Precompiled Headers
 *.gch
 *.pch
+*.mp4
 

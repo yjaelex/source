@@ -10,13 +10,18 @@ MP4DrefBox::MP4DrefBox(MP4FileClass &file)
     ExpectChildBox("alis", Optional, Many);
 }
 
+void MP4DrefBox::ReadProperties()
+{
+    MP4FullBox::ReadProperties();
+    m_entry_count = m_File.ReadUInt32();
+}
+
 void MP4DrefBox::Read()
 {
     /* do the usual read */
     MP4Box::Read();
 
     // check that number of children == entryCount
-    m_entry_count = m_File.ReadUInt32();
 
     if (m_vChildBoxs.size() != m_entry_count)
     {

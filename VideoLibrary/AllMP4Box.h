@@ -466,7 +466,8 @@ class MP4DrefBox : public MP4FullBox {
 public:
     MP4DrefBox(MP4FileClass &file);
     void Read();
-    void DumpProperties(uint8_t indent, bool dumpImplicits);
+    virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+    virtual void ReadProperties();
 
     //unsigned int(32) entry_count;
     //for (i = 1; i <= entry_count; i++) {
