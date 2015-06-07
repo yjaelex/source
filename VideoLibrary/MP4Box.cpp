@@ -638,6 +638,8 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4ColrBox(file);
 			if (BoxID(type) == BoxID("ctts"))
 				return new MP4CttsBox(file);
+            if (BoxID(type) == BoxID("co64"))
+                return new MP4Co64Box(file);
             break;
 
         case 'd':
@@ -753,8 +755,12 @@ MP4Box::factory( MP4FileClass &file, MP4Box* parent, const char* type )
                 return new MP4StblBox(file);
             if( BoxID(type) == BoxID("stsd") )
                 return new MP4StsdBox(file);
+            if (BoxID(type) == BoxID("stss"))
+                return new MP4StssBox(file);
             if( BoxID(type) == BoxID("stsz") )
                 return new MP4StszBox(file);
+            if (BoxID(type) == BoxID("stco"))
+                return new MP4StcoBox(file);
             if( BoxID(type) == BoxID("stsc") )
                 return new MP4StscBox(file);
             if( BoxID(type) == BoxID("stz2") )

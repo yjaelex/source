@@ -287,19 +287,6 @@ MP4StandardBox::MP4StandardBox (MP4FileClass &file, const char *type) : MP4Box(f
         //pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "shadowedSampleNumber;
         //pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "syncSampleNumber;
 
-    } else if (BoxID(type) == BoxID("stss")) {
-        osAssert(0);
-        /// TODO
-        //AddVersionAndFlags();
-
-        //MP4Integer32Property* pCount = uint32 m_entryCount");
-        //AddProperty(pCount);
-
-        //MP4TableProperty* pTable = new MP4TableProperty(*this, "entries", pCount);
-        //AddProperty(pTable);
-
-        //pTable->AddProperty(new MP4Integer32Property(pTable->GetParentBox(), "sampleNumber;
-
     } else if (BoxID(type) == BoxID("tims")) {
 
             uint32 m_timeScale;

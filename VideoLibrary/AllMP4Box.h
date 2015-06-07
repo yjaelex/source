@@ -249,8 +249,15 @@ public:
 		m_reserved2 = m_File.ReadUInt32();
 		m_frameCount = m_File.ReadUInt16();
 
-		// read a counted string
+		// read a counted string. totoal 32 max.
 		m_compressorname.clear();
+        uint8 compressornameLen = 0;
+        m_File.PeekBytes(&compressornameLen, 1);
+        if (compressornameLen > 31)
+        {
+            osLog(LOG_ERROR, "MP4VideoBox: type %s, Compressor Name length error.\n", m_type);
+            compressornameLen = 31;
+        }
 		char * pStr = m_File.ReadCountedString();
 		osAssert(pStr);
 		if (pStr)
@@ -258,7 +265,12 @@ public:
 			m_compressorname.append(pStr);
 		}
 		m_File.FreeString(pStr);
-		
+        if (compressornameLen < 31)
+        {
+            uint8 zeros[32] = { 0 };
+            m_File.ReadBytes(zeros, 31 - compressornameLen);
+        }
+
 		m_depth = m_File.ReadUInt16();
 		m_pre_defined = m_File.ReadUInt16();
 		osAssert(0xFFFF == m_pre_defined);
