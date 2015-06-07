@@ -50,6 +50,7 @@ void MP4MdhdBox::ReadProperties()
 	m_code[0] = ((data & 0x7c00) >> 10) + 0x60;
 	m_code[1] = ((data & 0x03e0) >> 5) + 0x60;
 	m_code[2] = ((data & 0x001f)) + 0x60;
+    m_code[3] = 0;
 }
 
 void MP4MdhdBox::DumpProperties(uint8_t indent, bool dumpImplicits)
@@ -71,7 +72,7 @@ void MP4MdhdBox::DumpProperties(uint8_t indent, bool dumpImplicits)
 		osDump(indent, "Duration: %"PRIu32"(0x%"PRIx32")\n", (uint32)m_duration, (uint32)m_duration);
 	}
 
-	osDump(indent, "Volume: %s (0x%"PRIx16")\n", m_code, m_language);
+	osDump(indent, "Language: %s (0x%"PRIx16")\n", m_code, m_language);
 }
 
 

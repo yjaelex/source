@@ -132,8 +132,8 @@ void MP4TkhdBox::DumpProperties(uint8_t indent, bool dumpImplicits)
 		m_matrix[3], m_matrix[4], m_matrix[5],
 		m_matrix[6], m_matrix[7], m_matrix[8]);
 
-	osDump(indent, "Width: %d(0x%x)\n", m_width, m_width);
-	osDump(indent, "Height: %d(0x%x)\n", m_height, m_height);
+	osDump(indent, "Width: %d(0x%x >>16)\n", m_width>>16, m_width);
+	osDump(indent, "Height: %d(0x%x >>16)\n", m_height>>16, m_height);
 
 }
 

@@ -527,7 +527,7 @@ public:
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits)
 	{
 		char tempStr[5] = { 0 };
-
+        MP4Box::DumpProperties(indent, dumpImplicits);
 		INT32TOSTR(m_majorBrand, tempStr);
 		osDump(indent, "MajorBrand: %s(0x%x)\n", tempStr, m_majorBrand);
 		osDump(indent, "MinorVersion: %d(0x%x)\n", m_minorVersion, m_minorVersion);
@@ -645,7 +645,7 @@ public:
 	//unsigned int(5)[3] language;
 	uint16					m_language;
 	uint16					m_pre_defined;
-	char					m_code[3];
+	char					m_code[4];
 private:
     MP4MdhdBox();
     MP4MdhdBox( const MP4MdhdBox &src );
