@@ -231,6 +231,8 @@ public:
         m_width = m_height = 0;
         m_horizresolution = m_vertresolution = m_reserved2 = 0;
         m_frameCount = 0;
+
+        ExpectChildBox("avcC", Optional, OnlyOne);
     }
 
     void Read()

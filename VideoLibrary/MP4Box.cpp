@@ -453,12 +453,12 @@ void MP4Box::Dump(uint8_t indent, bool dumpImplicits)
             //osDump(indent + 1, MP4_LOG_VERBOSE1, "\"%s\": <table entries suppressed>",
             //         GetFile().GetFilename().c_str() );
 
-	this->DumpProperties(indent + 4, dumpImplicits);
+	this->DumpProperties(indent + 6, dumpImplicits);
 
     // dump our children
     size = m_vChildBoxs.size();
     for (i = 0; i < size; i++) {
-		m_vChildBoxs[i]->Dump(indent + 2, dumpImplicits);
+		m_vChildBoxs[i]->Dump(indent + 4, dumpImplicits);
     }
 }
 

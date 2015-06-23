@@ -40,4 +40,23 @@ private:
     MP4FileClass &operator= (const MP4FileClass &src);
 };
 
+class MP4TrackStream : public AVStream
+{
+    MP4TrackStream()
+    {
+
+    }
+
+private:
+    MP4FileClass *      m_File;
+    uint32              m_TrackID;
+    uint32              m_TrackType;
+
+    MP4SttsBox *        m_DecodeTimeToSampleBox;
+    MP4StssBox *        m_SyncSampleBox;
+    MP4StscBox *        m_SampleToChunkBox;
+
+};
+
+
 #endif

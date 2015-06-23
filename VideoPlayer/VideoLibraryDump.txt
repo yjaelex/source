@@ -1,289 +1,302 @@
  "sample.mp4": Dumping MP4 file meta data information...  
-    Start offset: 0(0x0)
-    Full Size   : 17762051(0x0)
-    Box Type    : (0x0)
-  "sample.mp4": type ftyp (ftyp)
-      MajorBrand: isom(0x69736f6d)
-      MinorVersion: 512(0x200)
-      MajorBrand: isom(0x69736f6d)
-      MajorBrand: iso2(0x69736f32)
-      MajorBrand: avc1(0x61766331)
-      MajorBrand: mp41(0x6d703431)
-  "sample.mp4": type moov (moov)
-      Start offset: 32(0x0)
-      Full Size   : 119856(0x0)
-      Box Type    : moov(0x6d6f6f76)
-    "sample.mp4": type mvhd (moov.mvhd)
-        Start offset: 40(0x0)
-        Full Size   : 100(0x0)
-        Box Type    : mvhd(0x6d766864)
-        Version:        0(0x       0)
-        Flags  : 0(0x0)
-        Creation Time: 0(0x0)
-        Modification Time: 0(0x0)
-        Time Scale: 1000(0x3e8)
-        Duration: 301873(0x49b31)
-        Rate: (0x10000 0x10000)
-        Volume: 256(0x100)
-        Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
-        Next TrackID: 3(0x3)
-    "sample.mp4": type trak (moov.trak)
-        Start offset: 148(0x0)
-        Full Size   : 61291(0x0)
-        Box Type    : trak(0x7472616b)
-      "sample.mp4": type tkhd (moov.trak.tkhd)
-          Start offset: 156(0x0)
-          Full Size   : 84(0x0)
-          Box Type    : tkhd(0x746b6864)
-          Version:        0(0x       0)
-          Flags  : 15(0xf)
-          Creation Time: 0(0x0)
-          Modification Time: 0(0x0)
-          Track Id: 1(0x1)
-          Reserved: 0(0x0)
-          Duration: 301873(0x49b31)
-          Reserved[2]: (0x0 0x0)
-          Layer: 0(0x0)
-          Alternate Group: 0(0x0)
-          Duration: 301873(0x0)
-          Volume: 0(0x0)
-          Reserved2: 0(0x0)
-          Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
-          Width: 41943040(0x2800000)
-          Height: 23592960(0x1680000)
-      "sample.mp4": type mdia (moov.trak.mdia)
-          Start offset: 248(0x0)
-          Full Size   : 61191(0x0)
-          Box Type    : mdia(0x6d646961)
-        "sample.mp4": type mdhd (moov.trak.mdia.mdhd)
-            Start offset: 256(0x0)
-            Full Size   : 24(0x0)
-            Box Type    : mdhd(0x6d646864)
-            Version:        0(0x       0)
-            Flags  : 0(0x0)
-            Creation Time: 0(0x0)
-            Modification Time: 0(0x0)
-            Time Scale: 1000(0x3e8)
-            Duration: 301873(0x49b31)
-            Volume: und═¤¤¤¤ллллллллю■ю■ (0x55c4)
-        "sample.mp4": type hdlr (moov.trak.mdia.hdlr)
-            Start offset: 288(0x0)
-            Full Size   : 37(0x0)
-            Box Type    : hdlr(0x68646c72)
-            Version:        0(0x       0)
-            Flags  : 0(0x0)
-            Handler Type: vide(0x76696465)
-            Name: VideoHandler
-        "sample.mp4": type minf (moov.trak.mdia.minf)
-            Start offset: 333(0x0)
-            Full Size   : 61106(0x0)
-            Box Type    : minf(0x6d696e66)
-          "sample.mp4": type vmhd (moov.trak.mdia.minf.vmhd)
-              Start offset: 341(0x0)
-              Full Size   : 12(0x0)
-              Box Type    : vmhd(0x766d6864)
-              Version:        0(0x       0)
-              Flags  : 1(0x1)
-          "sample.mp4": type dinf (moov.trak.mdia.minf.dinf)
-              Start offset: 361(0x0)
-              Full Size   : 28(0x0)
-              Box Type    : dinf(0x64696e66)
-            "sample.mp4": type dref (moov.trak.mdia.minf.dinf.dref)
-                Start offset: 369(0x0)
-                Full Size   : 20(0x0)
-                Box Type    : dref(0x64726566)
-                Version:        0(0x       0)
-                Flags  : 0(0x0)
-                Entry Count: 1(0x1)
-              "sample.mp4": type url  (moov.trak.mdia.minf.dinf.dref.url )
-                  Start offset: 385(0x0)
-                  Full Size   : 4(0x0)
-                  Box Type    : url (0x75726c20)
-                  Version:        0(0x       0)
-                  Flags  : 1(0x1)
-          "sample.mp4": type stbl (moov.trak.mdia.minf.stbl)
-              Start offset: 397(0x0)
-              Full Size   : 61042(0x0)
-              Box Type    : stbl(0x7374626c)
-            "sample.mp4": type stsd (moov.trak.mdia.minf.stbl.stsd)
-                Start offset: 405(0x0)
-                Full Size   : 142(0x0)
-                Box Type    : stsd(0x73747364)
-                Version:        0(0x       0)
-                Flags  : 0(0x0)
-                Entry Count: 1(0x1)
-              "sample.mp4": type avc1 (moov.trak.mdia.minf.stbl.stsd.avc1)
-                  Data Reference Index: 1(0x1)
-                  Sound Version: 640(0x280)
-                  Channel Count: 360(0x168)
-                  Sample Rate: 4718592(0x480000)
-                  Sample Rate: 4718592(0x480000)
-                  Sample Size: 1(0x1)
-                  Sample Size: 24(0x18)
-            "sample.mp4": type stts (moov.trak.mdia.minf.stbl.stts)
-                Entry Count: 2(0x2)
-                Index     - SampleCount - Delta   
-                0      - 7546       - 40   
-                1      - 1       - 33   
-            "sample.mp4": type stss (moov.trak.mdia.minf.stbl.stss)
-                Entry Count: 101(0x65)
-                Index     - SampleCount
-                0      - 1       
-                1      - 76       
-                2      - 151       
-                3      - 226       
-                4      - 301       
-                5      - 376       
-                6      - 451       
-                7      - 526       
-            "sample.mp4": type stsc (moov.trak.mdia.minf.stbl.stsc)
-                Entry Count: 1(0x1)
-                Index     - FirstChunk - SamplesPerChunk - SampleDescIndex  
-                0      - 1       - 1   
-            "sample.mp4": type stsz (moov.trak.mdia.minf.stbl.stsz)
-                Sample Size: 0(0x0)
-                Sample Count: 7547(0x1d7b)
-                Index     - SampleSize
-                0      - 9526       
-                1      - 1402       
-                2      - 1219       
-                3      - 1417       
-                4      - 1813       
-                5      - 2235       
-                6      - 2009       
-                7      - 1674       
-            "sample.mp4": type stco (moov.trak.mdia.minf.stbl.stco)
-                Entry Count: 7547(0x1d7b)
-                Index     - Chunk Offset
-                0      - 119904       
-                1      - 129814       
-                2      - 131408       
-                3      - 133011       
-                4      - 134812       
-                5      - 136817       
-                6      - 139436       
-                7      - 141829       
-    "sample.mp4": type trak (moov.trak)
-        Start offset: 61447(0x0)
-        Full Size   : 58441(0x0)
-        Box Type    : trak(0x7472616b)
-      "sample.mp4": type tkhd (moov.trak.tkhd)
-          Start offset: 61455(0x0)
-          Full Size   : 84(0x0)
-          Box Type    : tkhd(0x746b6864)
-          Version:        0(0x       0)
-          Flags  : 15(0xf)
-          Creation Time: 0(0x0)
-          Modification Time: 0(0x0)
-          Track Id: 2(0x2)
-          Reserved: 0(0x0)
-          Duration: 301872(0x49b30)
-          Reserved[2]: (0x0 0x0)
-          Layer: 0(0x0)
-          Alternate Group: 0(0x0)
-          Duration: 301872(0x0)
-          Volume: 256(0x100)
-          Reserved2: 0(0x0)
-          Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
-          Width: 0(0x0)
-          Height: 0(0x0)
-      "sample.mp4": type mdia (moov.trak.mdia)
-          Start offset: 61547(0x0)
-          Full Size   : 58341(0x0)
-          Box Type    : mdia(0x6d646961)
-        "sample.mp4": type mdhd (moov.trak.mdia.mdhd)
-            Start offset: 61555(0x0)
-            Full Size   : 24(0x0)
-            Box Type    : mdhd(0x6d646864)
-            Version:        0(0x       0)
-            Flags  : 0(0x0)
-            Creation Time: 0(0x0)
-            Modification Time: 0(0x0)
-            Time Scale: 1000(0x3e8)
-            Duration: 301872(0x49b30)
-            Volume: und═¤¤¤¤ллллллллю■ю■ (0x55c4)
-        "sample.mp4": type hdlr (moov.trak.mdia.hdlr)
-            Start offset: 61587(0x0)
-            Full Size   : 37(0x0)
-            Box Type    : hdlr(0x68646c72)
-            Version:        0(0x       0)
-            Flags  : 0(0x0)
-            Handler Type: soun(0x736f756e)
-            Name: SoundHandler
-        "sample.mp4": type minf (moov.trak.mdia.minf)
-            Start offset: 61632(0x0)
-            Full Size   : 58256(0x0)
-            Box Type    : minf(0x6d696e66)
-          "sample.mp4": type smhd (moov.trak.mdia.minf.smhd)
-              Start offset: 61640(0x0)
-              Full Size   : 8(0x0)
-              Box Type    : smhd(0x736d6864)
+      Start offset: 0(0x0)
+      Full Size   : 17762051(0x0)
+      Box Type    : (0x0)
+    "sample.mp4": type ftyp (ftyp)
+          Start offset: 0(0x0)
+          Full Size   : 24(0x0)
+          Box Type    : ftyp(0x66747970)
+          MajorBrand: isom(0x69736f6d)
+          MinorVersion: 512(0x200)
+          MajorBrand: isom(0x69736f6d)
+          MajorBrand: iso2(0x69736f32)
+          MajorBrand: avc1(0x61766331)
+          MajorBrand: mp41(0x6d703431)
+    "sample.mp4": type moov (moov)
+          Start offset: 32(0x0)
+          Full Size   : 119856(0x0)
+          Box Type    : moov(0x6d6f6f76)
+        "sample.mp4": type mvhd (moov.mvhd)
+              Start offset: 40(0x0)
+              Full Size   : 100(0x0)
+              Box Type    : mvhd(0x6d766864)
               Version:        0(0x       0)
               Flags  : 0(0x0)
-          "sample.mp4": type dinf (moov.trak.mdia.minf.dinf)
-              Start offset: 61656(0x0)
-              Full Size   : 28(0x0)
-              Box Type    : dinf(0x64696e66)
-            "sample.mp4": type dref (moov.trak.mdia.minf.dinf.dref)
-                Start offset: 61664(0x0)
-                Full Size   : 20(0x0)
-                Box Type    : dref(0x64726566)
-                Version:        0(0x       0)
-                Flags  : 0(0x0)
-                Entry Count: 1(0x1)
-              "sample.mp4": type url  (moov.trak.mdia.minf.dinf.dref.url )
-                  Start offset: 61680(0x0)
-                  Full Size   : 4(0x0)
-                  Box Type    : url (0x75726c20)
+              Creation Time: 0(0x0)
+              Modification Time: 0(0x0)
+              Time Scale: 1000(0x3e8)
+              Duration: 301873(0x49b31)
+              Rate: (0x10000 0x10000)
+              Volume: 256(0x100)
+              Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
+              Next TrackID: 3(0x3)
+        "sample.mp4": type trak (moov.trak)
+              Start offset: 148(0x0)
+              Full Size   : 61291(0x0)
+              Box Type    : trak(0x7472616b)
+            "sample.mp4": type tkhd (moov.trak.tkhd)
+                  Start offset: 156(0x0)
+                  Full Size   : 84(0x0)
+                  Box Type    : tkhd(0x746b6864)
                   Version:        0(0x       0)
-                  Flags  : 1(0x1)
-          "sample.mp4": type stbl (moov.trak.mdia.minf.stbl)
-              Start offset: 61692(0x0)
-              Full Size   : 58196(0x0)
-              Box Type    : stbl(0x7374626c)
-            "sample.mp4": type stsd (moov.trak.mdia.minf.stbl.stsd)
-                Start offset: 61700(0x0)
-                Full Size   : 44(0x0)
-                Box Type    : stsd(0x73747364)
-                Version:        0(0x       0)
-                Flags  : 0(0x0)
-                Entry Count: 1(0x1)
-              "sample.mp4": type .mp3 (moov.trak.mdia.minf.stbl.stsd..mp3)
-                  Data Reference Index: 1(0x1)
-                  Sound Version: 0(0x0)
-                  Channel Count: 2(0x2)
-                  Sample Size: 16(0x10)
-                  Sample Rate: -1149239296(0xbb800000)
-            "sample.mp4": type stts (moov.trak.mdia.minf.stbl.stts)
-                Entry Count: 969(0x3c9)
-                Index     - SampleCount - Delta   
-                0      - 26       - 24   
-                1      - 1       - 23   
-                2      - 3       - 24   
-                3      - 1       - 25   
-                4      - 7       - 24   
-                5      - 1       - 23   
-                6      - 3       - 24   
-                7      - 1       - 25   
-            "sample.mp4": type stsc (moov.trak.mdia.minf.stbl.stsc)
-                Entry Count: 1(0x1)
-                Index     - FirstChunk - SamplesPerChunk - SampleDescIndex  
-                0      - 1       - 1   
-            "sample.mp4": type stsz (moov.trak.mdia.minf.stbl.stsz)
-                Sample Size: 192(0xc0)
-                Sample Count: 12578(0x3122)
-            "sample.mp4": type stco (moov.trak.mdia.minf.stbl.stco)
-                Entry Count: 12578(0x3122)
-                Index     - Chunk Offset
-                0      - 129430       
-                1      - 129622       
-                2      - 131216       
-                3      - 132627       
-                4      - 132819       
-                5      - 134428       
-                6      - 134620       
-                7      - 136625       
-  "sample.mp4": type mdat (mdat)
-      Start offset: 119896(0x0)
-      Full Size   : 17642147(0x0)
-      Box Type    : mdat(0x6d646174)
+                  Flags  : 15(0xf)
+                  Creation Time: 0(0x0)
+                  Modification Time: 0(0x0)
+                  Track Id: 1(0x1)
+                  Reserved: 0(0x0)
+                  Duration: 301873(0x49b31)
+                  Reserved[2]: (0x0 0x0)
+                  Layer: 0(0x0)
+                  Alternate Group: 0(0x0)
+                  Duration: 301873(0x0)
+                  Volume: 0(0x0)
+                  Reserved2: 0(0x0)
+                  Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
+                  Width: 640(0x2800000 >>16)
+                  Height: 360(0x1680000 >>16)
+            "sample.mp4": type mdia (moov.trak.mdia)
+                  Start offset: 248(0x0)
+                  Full Size   : 61191(0x0)
+                  Box Type    : mdia(0x6d646961)
+                "sample.mp4": type mdhd (moov.trak.mdia.mdhd)
+                      Start offset: 256(0x0)
+                      Full Size   : 24(0x0)
+                      Box Type    : mdhd(0x6d646864)
+                      Version:        0(0x       0)
+                      Flags  : 0(0x0)
+                      Creation Time: 0(0x0)
+                      Modification Time: 0(0x0)
+                      Time Scale: 1000(0x3e8)
+                      Duration: 301873(0x49b31)
+                      Language: und (0x55c4)
+                "sample.mp4": type hdlr (moov.trak.mdia.hdlr)
+                      Start offset: 288(0x0)
+                      Full Size   : 37(0x0)
+                      Box Type    : hdlr(0x68646c72)
+                      Version:        0(0x       0)
+                      Flags  : 0(0x0)
+                      Handler Type: vide(0x76696465)
+                      Name: VideoHandler
+                "sample.mp4": type minf (moov.trak.mdia.minf)
+                      Start offset: 333(0x0)
+                      Full Size   : 61106(0x0)
+                      Box Type    : minf(0x6d696e66)
+                    "sample.mp4": type vmhd (moov.trak.mdia.minf.vmhd)
+                          Start offset: 341(0x0)
+                          Full Size   : 12(0x0)
+                          Box Type    : vmhd(0x766d6864)
+                          Version:        0(0x       0)
+                          Flags  : 1(0x1)
+                    "sample.mp4": type dinf (moov.trak.mdia.minf.dinf)
+                          Start offset: 361(0x0)
+                          Full Size   : 28(0x0)
+                          Box Type    : dinf(0x64696e66)
+                        "sample.mp4": type dref (moov.trak.mdia.minf.dinf.dref)
+                              Start offset: 369(0x0)
+                              Full Size   : 20(0x0)
+                              Box Type    : dref(0x64726566)
+                              Version:        0(0x       0)
+                              Flags  : 0(0x0)
+                              Entry Count: 1(0x1)
+                            "sample.mp4": type url  (moov.trak.mdia.minf.dinf.dref.url )
+                                  Start offset: 385(0x0)
+                                  Full Size   : 4(0x0)
+                                  Box Type    : url (0x75726c20)
+                                  Version:        0(0x       0)
+                                  Flags  : 1(0x1)
+                    "sample.mp4": type stbl (moov.trak.mdia.minf.stbl)
+                          Start offset: 397(0x0)
+                          Full Size   : 61042(0x0)
+                          Box Type    : stbl(0x7374626c)
+                        "sample.mp4": type stsd (moov.trak.mdia.minf.stbl.stsd)
+                              Start offset: 405(0x0)
+                              Full Size   : 142(0x0)
+                              Box Type    : stsd(0x73747364)
+                              Version:        0(0x       0)
+                              Flags  : 0(0x0)
+                              Entry Count: 1(0x1)
+                            "sample.mp4": type avc1 (moov.trak.mdia.minf.stbl.stsd.avc1)
+                                  Data Reference Index: 1(0x1)
+                                  Sound Version: 640(0x280)
+                                  Channel Count: 360(0x168)
+                                  Sample Rate: 4718592(0x480000)
+                                  Sample Rate: 4718592(0x480000)
+                                  Sample Size: 1(0x1)
+                                  Sample Size: 24(0x18)
+                                "sample.mp4": type avcC (moov.trak.mdia.minf.stbl.stsd.avc1.avcC)
+                                      Configuration Version: 1(0x1)
+                                      AVCProfile Indication: 100(0x64)
+                                      Profile Compatibility: 0(0x0)
+                                      AVC Level Indication: 30(0x1e)
+                                      LengthSize MinusOne: 3(0x3)
+                                      Num Of Sequence Parameter Sets: 1(0x1)
+                                        67   64   0   1e   ac   2c   cc   a   2   ff   96   10   0   0   3   0   10   0   0   3   3   28   f1   62   ee  
+                                      Num Of Picture Parameter Sets: 1(0x1)
+                                        68   ee   3c   b0  
+                        "sample.mp4": type stts (moov.trak.mdia.minf.stbl.stts)
+                              Entry Count: 2(0x2)
+                              Index     - SampleCount - Delta   
+                              0      - 7546       - 40   
+                              1      - 1       - 33   
+                        "sample.mp4": type stss (moov.trak.mdia.minf.stbl.stss)
+                              Entry Count: 101(0x65)
+                              Index     - SampleCount
+                              0      - 1       
+                              1      - 76       
+                              2      - 151       
+                              3      - 226       
+                              4      - 301       
+                              5      - 376       
+                              6      - 451       
+                              7      - 526       
+                        "sample.mp4": type stsc (moov.trak.mdia.minf.stbl.stsc)
+                              Entry Count: 1(0x1)
+                              Index     - FirstChunk - SamplesPerChunk - SampleDescIndex  
+                              0      - 1       - 1   
+                        "sample.mp4": type stsz (moov.trak.mdia.minf.stbl.stsz)
+                              Sample Size: 0(0x0)
+                              Sample Count: 7547(0x1d7b)
+                              Index     - SampleSize
+                              0      - 9526       
+                              1      - 1402       
+                              2      - 1219       
+                              3      - 1417       
+                              4      - 1813       
+                              5      - 2235       
+                              6      - 2009       
+                              7      - 1674       
+                        "sample.mp4": type stco (moov.trak.mdia.minf.stbl.stco)
+                              Entry Count: 7547(0x1d7b)
+                              Index     - Chunk Offset
+                              0      - 119904       
+                              1      - 129814       
+                              2      - 131408       
+                              3      - 133011       
+                              4      - 134812       
+                              5      - 136817       
+                              6      - 139436       
+                              7      - 141829       
+        "sample.mp4": type trak (moov.trak)
+              Start offset: 61447(0x0)
+              Full Size   : 58441(0x0)
+              Box Type    : trak(0x7472616b)
+            "sample.mp4": type tkhd (moov.trak.tkhd)
+                  Start offset: 61455(0x0)
+                  Full Size   : 84(0x0)
+                  Box Type    : tkhd(0x746b6864)
+                  Version:        0(0x       0)
+                  Flags  : 15(0xf)
+                  Creation Time: 0(0x0)
+                  Modification Time: 0(0x0)
+                  Track Id: 2(0x2)
+                  Reserved: 0(0x0)
+                  Duration: 301872(0x49b30)
+                  Reserved[2]: (0x0 0x0)
+                  Layer: 0(0x0)
+                  Alternate Group: 0(0x0)
+                  Duration: 301872(0x0)
+                  Volume: 256(0x100)
+                  Reserved2: 0(0x0)
+                  Matrix: { 0x100,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x40 }
+                  Width: 0(0x0 >>16)
+                  Height: 0(0x0 >>16)
+            "sample.mp4": type mdia (moov.trak.mdia)
+                  Start offset: 61547(0x0)
+                  Full Size   : 58341(0x0)
+                  Box Type    : mdia(0x6d646961)
+                "sample.mp4": type mdhd (moov.trak.mdia.mdhd)
+                      Start offset: 61555(0x0)
+                      Full Size   : 24(0x0)
+                      Box Type    : mdhd(0x6d646864)
+                      Version:        0(0x       0)
+                      Flags  : 0(0x0)
+                      Creation Time: 0(0x0)
+                      Modification Time: 0(0x0)
+                      Time Scale: 1000(0x3e8)
+                      Duration: 301872(0x49b30)
+                      Language: und (0x55c4)
+                "sample.mp4": type hdlr (moov.trak.mdia.hdlr)
+                      Start offset: 61587(0x0)
+                      Full Size   : 37(0x0)
+                      Box Type    : hdlr(0x68646c72)
+                      Version:        0(0x       0)
+                      Flags  : 0(0x0)
+                      Handler Type: soun(0x736f756e)
+                      Name: SoundHandler
+                "sample.mp4": type minf (moov.trak.mdia.minf)
+                      Start offset: 61632(0x0)
+                      Full Size   : 58256(0x0)
+                      Box Type    : minf(0x6d696e66)
+                    "sample.mp4": type smhd (moov.trak.mdia.minf.smhd)
+                          Start offset: 61640(0x0)
+                          Full Size   : 8(0x0)
+                          Box Type    : smhd(0x736d6864)
+                          Version:        0(0x       0)
+                          Flags  : 0(0x0)
+                    "sample.mp4": type dinf (moov.trak.mdia.minf.dinf)
+                          Start offset: 61656(0x0)
+                          Full Size   : 28(0x0)
+                          Box Type    : dinf(0x64696e66)
+                        "sample.mp4": type dref (moov.trak.mdia.minf.dinf.dref)
+                              Start offset: 61664(0x0)
+                              Full Size   : 20(0x0)
+                              Box Type    : dref(0x64726566)
+                              Version:        0(0x       0)
+                              Flags  : 0(0x0)
+                              Entry Count: 1(0x1)
+                            "sample.mp4": type url  (moov.trak.mdia.minf.dinf.dref.url )
+                                  Start offset: 61680(0x0)
+                                  Full Size   : 4(0x0)
+                                  Box Type    : url (0x75726c20)
+                                  Version:        0(0x       0)
+                                  Flags  : 1(0x1)
+                    "sample.mp4": type stbl (moov.trak.mdia.minf.stbl)
+                          Start offset: 61692(0x0)
+                          Full Size   : 58196(0x0)
+                          Box Type    : stbl(0x7374626c)
+                        "sample.mp4": type stsd (moov.trak.mdia.minf.stbl.stsd)
+                              Start offset: 61700(0x0)
+                              Full Size   : 44(0x0)
+                              Box Type    : stsd(0x73747364)
+                              Version:        0(0x       0)
+                              Flags  : 0(0x0)
+                              Entry Count: 1(0x1)
+                            "sample.mp4": type .mp3 (moov.trak.mdia.minf.stbl.stsd..mp3)
+                                  Data Reference Index: 1(0x1)
+                                  Sound Version: 0(0x0)
+                                  Channel Count: 2(0x2)
+                                  Sample Size: 16(0x10)
+                                  Sample Rate: -1149239296(0xbb800000)
+                        "sample.mp4": type stts (moov.trak.mdia.minf.stbl.stts)
+                              Entry Count: 969(0x3c9)
+                              Index     - SampleCount - Delta   
+                              0      - 26       - 24   
+                              1      - 1       - 23   
+                              2      - 3       - 24   
+                              3      - 1       - 25   
+                              4      - 7       - 24   
+                              5      - 1       - 23   
+                              6      - 3       - 24   
+                              7      - 1       - 25   
+                        "sample.mp4": type stsc (moov.trak.mdia.minf.stbl.stsc)
+                              Entry Count: 1(0x1)
+                              Index     - FirstChunk - SamplesPerChunk - SampleDescIndex  
+                              0      - 1       - 1   
+                        "sample.mp4": type stsz (moov.trak.mdia.minf.stbl.stsz)
+                              Sample Size: 192(0xc0)
+                              Sample Count: 12578(0x3122)
+                        "sample.mp4": type stco (moov.trak.mdia.minf.stbl.stco)
+                              Entry Count: 12578(0x3122)
+                              Index     - Chunk Offset
+                              0      - 129430       
+                              1      - 129622       
+                              2      - 131216       
+                              3      - 132627       
+                              4      - 132819       
+                              5      - 134428       
+                              6      - 134620       
+                              7      - 136625       
+    "sample.mp4": type mdat (mdat)
+          Start offset: 119896(0x0)
+          Full Size   : 17642147(0x0)
+          Box Type    : mdat(0x6d646174)
