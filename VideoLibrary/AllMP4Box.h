@@ -816,12 +816,13 @@ typedef struct SampletoChunkEntry
 public:
 	SampletoChunkEntry()
 	{
-		first_chunk = samples_per_chunk = sample_description_index =  0;
+        first_chunk = samples_per_chunk = sample_description_index = 0;
 	}
 
 	uint32 first_chunk;
 	uint32 samples_per_chunk;
 	uint32 sample_description_index;
+    uint32 firstSample;
 }SampletoChunkEntry;
 
 class MP4StscBox : public MP4FullBox {
@@ -839,6 +840,29 @@ public:
             osDump(indent, "%d      - %d       - %d   \n", i, m_vSampletoChunkTable[i].first_chunk,
                 m_vSampletoChunkTable[i].samples_per_chunk, m_vSampletoChunkTable[i].sample_description_index);
         }
+    }
+
+    uint32 GetChunkStscIndex(uint32 chunkId)
+    {
+        uint32_t stscIndex;
+        uint32_t numStscs = m_entryCount;
+
+        osAssert(chunkId);
+        osAssert(numStscs > 0);
+
+        for (stscIndex = 0; stscIndex < numStscs; stscIndex++) {
+            if (chunkId < m_vSampletoChunkTable[stscIndex].first_chunk)
+            {
+                osAssert(stscIndex != 0);
+                break;
+            }
+        }
+        return stscIndex - 1;
+    }
+
+    SampletoChunkEntry & GetSampletoChunkEntry(uint32 stscIndex)
+    {
+        return m_vSampletoChunkTable[stscIndex];
     }
 
 	/*aligned(8) class SampleToChunkBox
@@ -878,6 +902,18 @@ public:
     void Read();
     virtual void WriteProperties();
     virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
+
+    uint32 GetSampleSize(uint32 sampleIndex)
+    {
+        if (m_sample_size == 0)
+        {
+            return m_vSampleSizeTable[sampleIndex];
+        }
+        else
+        {
+            return m_sample_size;
+        }
+    }
 
     /*unsigned int(32) sample_size;
     unsigned int(32) sample_count;
@@ -1444,6 +1480,13 @@ public:
 		m_entry_count = 0;
 		m_vSyncSampleTable.clear();
 	}
+
+    uint32 GetNumOfSyncSamples()
+    {
+        osAssert(m_entry_count == m_vSyncSampleTable.size());
+        return m_entry_count;
+    }
+
 	void Read()
 	{
 		MP4FullBox::ReadProperties();

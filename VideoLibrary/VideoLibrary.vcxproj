@@ -101,6 +101,7 @@
     <ClCompile Include="MP4Box.cpp" />
     <ClCompile Include="MP4FileClass.cpp" />
     <ClCompile Include="MP4FileClass_IO.cpp" />
+    <ClCompile Include="MP4Track.cpp" />
     <ClCompile Include="VideoFileClass.cpp" />
     <ClCompile Include="vpUtil.cpp" />
   </ItemGroup>
@@ -109,6 +110,7 @@
     <ClInclude Include="AVC.h" />
     <ClInclude Include="MP4Box.h" />
     <ClInclude Include="MP4FileClass.h" />
+    <ClInclude Include="MP4Track.h" />
     <ClInclude Include="VideoFileClass.h" />
     <ClInclude Include="vpUtil.h" />
   </ItemGroup>
