@@ -870,6 +870,11 @@ public:
         return stscIndex - 1;
     }
 
+    uint32 GetSampleToChunkTableCount()
+    {
+        return m_entryCount;
+    }
+
     SampletoChunkEntry & GetSampletoChunkEntry(uint32 stscIndex)
     {
         return m_vSampletoChunkTable[stscIndex];

@@ -132,64 +132,153 @@ uint32 MP4TrackStream::GetNextSyncSample(uint32 sampleId)
     return MP4_INVALID_SAMPLE_ID;
 }
 
-uint32_t MP4TrackStream::GetSampleStscIndex(MP4SampleId sampleId)
+uint32_t MP4TrackStream::GetSampleStscIndex(uint32 sampleId)
 {
     uint32_t stscIndex;
-    uint32_t numStscs = m_pStscCountProperty->GetValue();
+    uint32_t numStscs = m_SampleToChunkBox->GetSampleToChunkTableCount();
 
-    if (numStscs == 0) {
-        throw new Exception("No data chunks exist", __FILE__, __LINE__, __FUNCTION__);
+    if (numStscs == 0)
+    {
+        osLog(LOG_ERROR, "No data chunks exist: file %s, line %d, %s\n", __FILE__, __LINE__, __FUNCTION__);
+        osAssert(!"No data chunks exist");
     }
 
-    for (stscIndex = 0; stscIndex < numStscs; stscIndex++) {
-        if (sampleId < m_pStscFirstSampleProperty->GetValue(stscIndex)) {
-            ASSERT(stscIndex != 0);
+    SampletoChunkEntry entry;
+    for (stscIndex = 0; stscIndex < numStscs; stscIndex++)
+    {
+        entry = m_SampleToChunkBox->GetSampletoChunkEntry(stscIndex);
+        if (sampleId < entry.firstSample)
+        {
+            osAssert(stscIndex != 0);
             stscIndex -= 1;
             break;
         }
     }
-    if (stscIndex == numStscs) {
-        ASSERT(stscIndex != 0);
+    if (stscIndex == numStscs)
+    {
+        osAssert(stscIndex != 0);
         stscIndex -= 1;
     }
 
     return stscIndex;
 }
 
-uint64_t MP4TrackStream::GetSampleFileOffset(uint32 sampleId)
+uint64_t MP4TrackStream::GetSampleFileOffset(uint32 sampleId, uint32_t * pChunkID)
 {
-    uint32_t stscIndex =
-        GetSampleStscIndex(sampleId);
+    uint32_t stscIndex = GetSampleStscIndex(sampleId);
+    SampletoChunkEntry & entry = m_SampleToChunkBox->GetSampletoChunkEntry(stscIndex);
 
     // firstChunk is the chunk index of the first chunk with
     // samplesPerChunk samples in the chunk.  There may be multiples -
     // ie: several chunks with the same number of samples per chunk.
-    uint32_t firstChunk =
-        m_pStscFirstChunkProperty->GetValue(stscIndex);
-
-    MP4SampleId firstSample =
-        m_pStscFirstSampleProperty->GetValue(stscIndex);
-
-    uint32_t samplesPerChunk =
-        m_pStscSamplesPerChunkProperty->GetValue(stscIndex);
+    uint32_t firstChunk = entry.first_chunk;
+    uint32_t firstSample = entry.firstSample;
+    uint32_t samplesPerChunk = entry.samples_per_chunk;
 
     // chunkId tells which is the absolute chunk number that this sample
     // is stored in.
-    MP4ChunkId chunkId = firstChunk +
-        ((sampleId - firstSample) / samplesPerChunk);
+    uint32_t chunkId = firstChunk + ((sampleId - firstSample) / samplesPerChunk);
+    if (pChunkID)   *pChunkID = chunkId;
 
     // chunkOffset is the file offset (absolute) for the start of the chunk
-    uint64_t chunkOffset = m_pChunkOffsetProperty->GetValue(chunkId - 1);
+    uint64_t chunkOffset = GetChunkOffset(chunkId);
 
-    MP4SampleId firstSampleInChunk =
-        sampleId - ((sampleId - firstSample) % samplesPerChunk);
+    uint32_t firstSampleInChunk = sampleId - ((sampleId - firstSample) % samplesPerChunk);
 
     // need cumulative samples sizes from firstSample to sampleId - 1
     uint32_t sampleOffset = 0;
-    for (MP4SampleId i = firstSampleInChunk; i < sampleId; i++) {
+    for (uint32_t i = firstSampleInChunk; i < sampleId; i++)
+    {
         sampleOffset += GetSampleSize(i);
     }
 
     return chunkOffset + sampleOffset;
 }
 
+uint32 MP4TrackStream::ReadChunk(uint32_t chunkId, uint8_t* pChunkBuffer, uint32_t bufferSize)
+{
+    bool readSuccess = false;
+    osAssert(chunkId);
+    osAssert(pChunkBuffer);
+
+    uint64_t chunkOffset = GetChunkOffset(chunkId);
+    uint32 chunkSize = GetChunkSize(chunkId);
+    if (chunkSize > bufferSize) return 0;
+
+    uint64_t oldPos = m_File->GetPosition(); // only used in mode == 'w'
+    m_File->SetPosition(chunkOffset);
+    readSuccess = m_File->ReadBytes(pChunkBuffer, chunkSize);
+
+    if (m_File->IsWriteMode())   m_File->SetPosition(oldPos);
+
+    if (!readSuccess)
+    {
+        return -1;
+    }
+
+    return chunkSize;
+}
+
+uint32 MP4TrackStream::ReadSample(uint32 sampleId, uint8_t* pBuffer, uint32_t bufferSize, bool* pIsSyncSample,
+    uint64* pStartTime, uint64*  pDuration, uint64*  pRenderingOffset)
+{
+    bool readSuccess = false;
+    if (sampleId == MP4_INVALID_SAMPLE_ID)
+    {
+        osAssert(!"sample id can't be zero");
+    }
+
+    // handle unusual case of wanting to read a sample
+    // that is still sitting in the write chunk buffer
+
+    uint64_t fileOffset = GetSampleFileOffset(sampleId);
+
+    uint32_t sampleSize = GetSampleSize(sampleId);
+    if (bufferSize < sampleSize)
+    {
+        return 0;
+    }
+
+    uint64_t oldPos = m_File->GetPosition(); // only used in mode == 'w'
+    m_File->SetPosition(fileOffset);
+    readSuccess = m_File->ReadBytes(pBuffer, sampleSize);
+
+    if (pStartTime || pDuration)
+    {
+        GetSampleTimes(sampleId, pStartTime, pDuration);
+    }
+    if (pRenderingOffset)
+    {
+        *pRenderingOffset = GetSampleRenderingOffset(sampleId);
+    }
+    if (pIsSyncSample)
+    {
+        *pIsSyncSample = IsSyncSample(sampleId);
+    }
+
+    if (m_File->IsWriteMode())  m_File->SetPosition(oldPos);
+    if (!readSuccess)
+    {
+        return -1;
+    }
+
+    return sampleSize;
+}
+
+bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
+{
+    if (pFile = NULL)   return false;
+    if (pTrakBox = NULL) return false;
+    m_File = pFile;
+    m_TrackID = m_TrackType = 0;
+    m_NumOfSamples = 0;
+
+    m_TrakBox = pTrakBox;
+    m_MdhdBox = NULL;
+    m_DecodeTimeToSampleBox = NULL;
+    m_SyncSampleBox = NULL;
+    m_SampleToChunkBox = NULL;
+    m_SampleSizeBox = NULL;
+    m_pChunkOffsetTable = NULL;
+    m_pChunkOffsetTable64 = NULL;
+}

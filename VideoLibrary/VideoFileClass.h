@@ -144,6 +144,24 @@ public:
         return m_FileName;
     }
 
+    bool IsWriteMode()
+    {
+        if (!m_file)
+            return false;
+
+        switch (m_file->mode) {
+        case File::MODE_READ:
+            return false;
+
+        case File::MODE_MODIFY:
+        case File::MODE_CREATE:
+        default:
+            break;
+        }
+
+        return true;
+    }
+
     virtual bool Open(const char* fileName, File::Mode mode, FileProvider* provider);
 
     // Read video file metadata; construct file structure.
