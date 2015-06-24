@@ -15,7 +15,7 @@ class MP4FileClass;
 #define OnlyOne     true
 #define Many        false
 #define Counted     true
-
+#define MP4_INVALID_SAMPLE_ID   0
 
 typedef vector<MP4Box*>::iterator MP4BoxArrayIndex;
 typedef vector<MP4BoxInfo*>::iterator MP4BoxInfoArrayIndex;

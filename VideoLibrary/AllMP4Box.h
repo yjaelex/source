@@ -637,6 +637,16 @@ public:
 	virtual void ReadProperties();
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
 
+    uint64 GetDuration()
+    {
+        return m_duration;
+    }
+
+    uint32 GetTimeScale()
+    {
+        return m_timescale;
+    }
+
 	uint64					m_creationTime;
 	uint64					m_modificationTime;
 	uint32					m_timescale;
@@ -1395,6 +1405,16 @@ public:
 		}
 	}
 
+    uint32 GetTimeToSampleTableCount()
+    {
+        return m_entry_count;
+    }
+
+    DecodingTimeToSampleEntry & GetTimeToSampleEntry(uint32 sttsIndex)
+    {
+        return m_vTimeToSampleTable[sttsIndex];
+    }
+
 protected:
 	/*aligned(8) class TimeToSampleBox
 		extends FullBox(¡¯stts¡¯, version = 0, 0) {
@@ -1485,6 +1505,11 @@ public:
     {
         osAssert(m_entry_count == m_vSyncSampleTable.size());
         return m_entry_count;
+    }
+
+    uint32 GetSyncSampleID(uint32 stssIndex)
+    {
+        return m_vSyncSampleTable[stssIndex];
     }
 
 	void Read()

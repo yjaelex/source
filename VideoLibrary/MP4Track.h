@@ -22,6 +22,8 @@ public:
     uint32 sampleSizeInBytes;
 }SampleInfo;
 
+// TrackID, SampleID, ChunkID all start with 1. 0 is invalid num.
+
 class MP4TrackStream : public AVStream
 {
     MP4TrackStream()
@@ -61,9 +63,22 @@ class MP4TrackStream : public AVStream
         }
     }
 
-    uint32 GetChunkSize(uint32 chunkId);
+    uint64 GetDuration()
+    {
+        return m_MdhdBox->GetDuration();
+    }
 
+    uint32 GetTimeScale()
+    {
+        return m_MdhdBox->GetTimeScale();
+    }
+
+    uint32 GetChunkSize(uint32 chunkId);
+    bool GetSampleTimes(uint32 sampleId, uint64* pStartTime, uint64* pDuration);
     bool GetSampleInfo(uint32 smpleIndex);
+    bool IsSyncSample(uint32 sampleId);
+    uint32 GetNextSyncSample(uint32 sampleId);
+    uint64_t GetSampleFileOffset(uint32 sampleId);
 
 private:
     MP4FileClass *      m_File;
@@ -71,6 +86,7 @@ private:
     uint32              m_TrackType;
     uint32              m_NumOfSamples;
 
+    MP4MdhdBox *        m_MdhdBox;
     MP4SttsBox *        m_DecodeTimeToSampleBox;
     MP4StssBox *        m_SyncSampleBox;
     MP4StscBox *        m_SampleToChunkBox;
@@ -80,6 +96,10 @@ private:
 
     //vector<SampleInfo>  m_vSampleInfoTable;
 
+    //cached value
+    uint32              m_cachedSttsSid;
+    uint32              m_cachedSttsElapsed;
+    uint32              m_cachedSttsIndex;
 };
 
 
