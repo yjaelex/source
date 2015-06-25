@@ -1027,6 +1027,16 @@ public:
 	virtual void ReadProperties();
 	virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
 
+    uint32 GetTrackID()
+    {
+        return m_trackId;
+    }
+
+    uint64_t GetDurationTime()
+    {
+        return m_duration;
+    }
+
 protected:
     //The default value of the track header flags for media tracks is 7 (track_enabled, track_in_movie,
     //track_in_preview).If in a presentation all tracks have neither track_in_movie nor track_in_preview set, then all

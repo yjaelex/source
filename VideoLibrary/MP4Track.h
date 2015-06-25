@@ -141,6 +141,7 @@ private:
     uint32              m_NumOfSamples;
 
     MP4Box*             m_TrakBox;                  // moov.trak[]
+    MP4TkhdBox *        m_TkhdBox;
     MP4MdhdBox *        m_MdhdBox;
     MP4SttsBox *        m_DecodeTimeToSampleBox;
     MP4StssBox *        m_SyncSampleBox;

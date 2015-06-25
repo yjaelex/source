@@ -274,11 +274,19 @@ bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
     m_NumOfSamples = 0;
 
     m_TrakBox = pTrakBox;
-    m_MdhdBox = NULL;
-    m_DecodeTimeToSampleBox = NULL;
-    m_SyncSampleBox = NULL;
-    m_SampleToChunkBox = NULL;
-    m_SampleSizeBox = NULL;
+    m_TkhdBox = (MP4TkhdBox *) m_TrakBox->FindChildBox("tkhd");
+    m_TrackID = m_TkhdBox->GetTrackID();
+
+    m_MdhdBox = (MP4MdhdBox *)m_TrakBox->FindBox("trak.mdia.mdhd");
+
+    MP4Box * pStblBox = m_TrakBox->FindBox("trak.mdia.minf.stbl");
+    m_DecodeTimeToSampleBox = (MP4SttsBox *)pStblBox->FindBox("stbl.stts");
+    m_SyncSampleBox = (MP4StssBox *)pStblBox->FindBox("stbl.stss");
+    m_SampleToChunkBox = (MP4StscBox *)pStblBox->FindBox("stbl.stsc");
+    m_SampleSizeBox = (MP4StszBox *)pStblBox->FindBox("stbl.stsz");
+
+    MP4Box *
+
     m_pChunkOffsetTable = NULL;
     m_pChunkOffsetTable64 = NULL;
 }
