@@ -69,7 +69,7 @@ void MP4FileClass::ReadFromFile()
     m_pRootBox->Read();
 
     // create MP4Track's for any tracks in the file
-    // GenerateTracks();
+    GenerateTracks();
 }
 
 void MP4FileClass::Dump(bool dumpImplicits)

@@ -24,8 +24,11 @@ typedef enum VP_COLORFORMAT
 typedef enum VP_STREAMTYPE
 {
     VP_STREAM_UNKOWN = 0,
+    VP_STREAM_VIDEO,
     VP_STREAM_AUDIO,
-    VP_STREAM_VIDEO
+    VP_STREAM_HINT,			//¡®hint¡¯ Hint track
+    VP_STREAM_META,			//¡®meta¡¯ Timed Metadata track
+    VP_STREAM_AUXV			//¡®auxv¡¯ Auxiliary Video track
 };
 
 // stream class, similar with track concept in MP4 file.
@@ -34,11 +37,12 @@ class AVStream
 public:
     AVStream()
     {
+        m_StreamFileFormat = VP_FILE_RAW;
         m_pMediaInfo = NULL;
         m_pStreamBuffer = NULL;
         m_Type = VP_STREAM_UNKOWN;
         m_colorFormat = VP_UNKNOWN_COLOR;
-        m_nNumSamples = m_nDurationTime = m_nTimeScale = 0;
+        m_NumOfSamples = m_nDurationTime = m_nTimeScale = 0;
     }
 
     ~AVStream()
@@ -46,19 +50,41 @@ public:
 
     }
 
+    uint32 GetNumOfSamples()
+    {
+        return m_NumOfSamples;
+    }
+
+    VP_STREAMTYPE GetType()
+    {
+        return m_Type;
+    }
+
+    uint64 GetDuration()
+    {
+        return m_nDurationTime;
+    }
+
+    uint32 GetTimeScale()
+    {
+        return m_nTimeScale;
+    }
+
 private:
     pvoid               m_pMediaInfo;
     pvoid               m_pStreamBuffer;
+    uint64              m_nByteSize;
 
+protected:
     // sample maybe different with different file type
     // RAW:         Frame
     // H.264 RAW:   NALU
     // MP4:         mp4 Samples
-    uint32              m_nNumSamples;
+    uint32              m_NumOfSamples;
 
+    VP_FILETYPE         m_StreamFileFormat;
     VP_STREAMTYPE       m_Type;
-    uint64              m_nByteSize;
-    uint32              m_nDurationTime;
+    uint64              m_nDurationTime;
     uint32              m_nTimeScale;
     VP_COLORFORMAT		m_colorFormat;
 };

@@ -26,12 +26,13 @@ public:
 
 class MP4TrackStream : public AVStream
 {
+public:
     MP4TrackStream()
     {
         m_File = NULL;
-        m_TrackID = m_TrackType = 0;
+        m_TrackID = 0;
         m_NumOfSamples = 0;
-
+        m_StreamFileFormat = VP_FILE_MP4;
         m_TrakBox = NULL;
         m_MdhdBox = NULL;
         m_DecodeTimeToSampleBox = NULL;
@@ -40,7 +41,7 @@ class MP4TrackStream : public AVStream
         m_SampleSizeBox = NULL;
         m_pChunkOffsetTable = NULL;
         m_pChunkOffsetTable64 = NULL;
-
+        m_pAVCConfig = NULL;
         m_cachedSttsSid = m_cachedSttsElapsed = m_cachedSttsIndex = 0;
     }
 
@@ -51,15 +52,14 @@ class MP4TrackStream : public AVStream
         return m_SyncSampleBox->GetNumOfSyncSamples();
     }
 
-    uint32 GetNumOfSamples()
-    {
-        return m_NumOfSamples;
-    }
-
     uint32 GetSampleSize(uint32 sampleId)
     {
         osAssert(sampleId > 0);
         return m_SampleSizeBox->GetSampleSize(sampleId - 1);
+    }
+    uint32_t GetMaxSampleSize()
+    {
+        return m_SampleSizeBox->GetMaxSampleSize();
     }
 
     uint64_t GetChunkOffset(uint32 chunkId)
@@ -96,21 +96,16 @@ class MP4TrackStream : public AVStream
         }
     }
 
-    uint64 GetDuration()
-    {
-        return m_MdhdBox->GetDuration();
-    }
-
-    uint32 GetTimeScale()
-    {
-        return m_MdhdBox->GetTimeScale();
-    }
-
     uint64 GetSampleRenderingOffset(uint32 sampleId)
     {
         //ctts time.
         /// TODO:
         return 0;
+    }
+
+    uint32 GetTrackId()
+    {
+        return m_TrackID;
     }
 
     uint32 GetChunkSize(uint32 chunkId);
@@ -137,9 +132,7 @@ private:
 private:
     MP4FileClass *      m_File;
     uint32              m_TrackID;
-    uint32              m_TrackType;
-    uint32              m_NumOfSamples;
-
+    
     MP4Box*             m_TrakBox;                  // moov.trak[]
     MP4TkhdBox *        m_TkhdBox;
     MP4MdhdBox *        m_MdhdBox;
@@ -150,6 +143,7 @@ private:
     vector<uint32>*     m_pChunkOffsetTable;
     vector<uint64>*     m_pChunkOffsetTable64;
 
+    AVCDecoderConfigurationRecord *     m_pAVCConfig;
     //vector<SampleInfo>  m_vSampleInfoTable;
 
     //cached value

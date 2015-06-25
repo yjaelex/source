@@ -1,4 +1,3 @@
-
 #include "MP4Track.h"
 
 uint32 MP4TrackStream::GetChunkSize(uint32 chunkId)
@@ -267,10 +266,10 @@ uint32 MP4TrackStream::ReadSample(uint32 sampleId, uint8_t* pBuffer, uint32_t bu
 
 bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
 {
-    if (pFile = NULL)   return false;
-    if (pTrakBox = NULL) return false;
+    if (pFile == NULL)   return false;
+    if (pTrakBox == NULL) return false;
     m_File = pFile;
-    m_TrackID = m_TrackType = 0;
+    m_TrackID = 0;
     m_NumOfSamples = 0;
 
     m_TrakBox = pTrakBox;
@@ -284,9 +283,30 @@ bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
     m_SyncSampleBox = (MP4StssBox *)pStblBox->FindBox("stbl.stss");
     m_SampleToChunkBox = (MP4StscBox *)pStblBox->FindBox("stbl.stsc");
     m_SampleSizeBox = (MP4StszBox *)pStblBox->FindBox("stbl.stsz");
+    MP4Box * pAVCBox = pStblBox->FindBox("stbl.stsd.avc1");
 
-    MP4Box *
+    MP4Box * pStcoBox = pStblBox->FindBox("stbl.stco");
+    if (pStcoBox)
+    {
+        m_pChunkOffsetTable = ((MP4StcoBox *)pStcoBox)->GetChunkOffsetTable();
+        osAssert(m_pChunkOffsetTable);
+        m_pChunkOffsetTable64 = NULL;
+    }
+    else
+    {
+        pStcoBox = pStblBox->FindBox("stbl.co64");
+        osAssert(pStcoBox);
+        m_pChunkOffsetTable64 = ((MP4Co64Box *)pStcoBox)->GetChunkOffsetTable();
+        osAssert(m_pChunkOffsetTable64);
+    }
 
-    m_pChunkOffsetTable = NULL;
-    m_pChunkOffsetTable64 = NULL;
+    MP4HdlrBox * pHdlrBox = (MP4HdlrBox *)m_TrakBox->FindBox("trak.mdia.hdlr");
+    m_Type = (VP_STREAMTYPE) (pHdlrBox->m_Tracktype);
+    m_NumOfSamples = m_SampleSizeBox->GetNumOfSamples();
+    m_nDurationTime =  m_MdhdBox->GetDuration();
+    m_nTimeScale =  m_MdhdBox->GetTimeScale();
+
+    osAssert(pAVCBox);    // Only support AVC codec now.
+    pAVCBox = pStblBox->FindBox("stbl.stsd.avc1.avcC");
+    m_pAVCConfig = ((MP4AvcCBox *)pAVCBox)->GetAVCConfig();
 }

@@ -358,6 +358,11 @@ public:
     void Read();
     virtual void DumpProperties(uint8_t indent, bool dumpImplicits);
 
+    AVCDecoderConfigurationRecord * GetAVCConfig()
+    {
+        return &m_avcConfig;
+    }
+
     AVCDecoderConfigurationRecord                   m_avcConfig;
 
 private:
@@ -928,6 +933,31 @@ public:
         {
             return m_sample_size;
         }
+    }
+    uint32 GetMaxSampleSize()
+    {
+        if (m_sample_size == 0)
+        {
+            uint32_t maxSampleSize = 0;
+            for (uint32 sid = 0; sid < m_vSampleSizeTable.size(); sid++)
+            {
+                uint32_t sampleSize = m_vSampleSizeTable[sid];
+                if (sampleSize > maxSampleSize)
+                {
+                    maxSampleSize = sampleSize;
+                }
+            }
+
+            return maxSampleSize;
+        }
+        else
+        {
+            return m_sample_size;
+        }
+    }
+    uint32 GetNumOfSamples()
+    {
+        return m_sample_count;
     }
 
     /*unsigned int(32) sample_size;
@@ -1607,6 +1637,11 @@ public:
         }
     }
 
+    vector<uint32> * GetChunkOffsetTable()
+    {
+        return &m_vChunkOffsetTable;
+    }
+
 protected:
 
     uint32								m_entry_count;
@@ -1650,6 +1685,11 @@ public:
         {
             osDump(indent, "%d      - %I64u       \n", i, m_vChunkOffsetTable[i]);
         }
+    }
+
+    vector<uint64> * GetChunkOffsetTable()
+    {
+        return &m_vChunkOffsetTable;
     }
 
 protected:
