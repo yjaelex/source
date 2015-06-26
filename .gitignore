@@ -225,4 +225,7 @@ pip-log.txt
 *.gch
 *.pch
 *.mp4
+VideoLibraryDump.txt
+*.264
+*.ts
 
