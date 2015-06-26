@@ -27,28 +27,32 @@ void dumpFileInfo(const char * name)
     mp4File->ReadFromFile();
     mp4File->Dump(false);
 
-    uint32 maxSize = mp4File->GetTrackMaxSampleSize(1);
-    uint32 sampleCount = mp4File->GetNumOfSamples(1);
-    uint32 sampleSize = 0;
-    uint8 * pBuffer = (uint8 *)osMalloc(maxSize + 8);
-    osDump(0, "\n Dumping MP4 file Sample Data...  \n");
-    for (uint32 i = 0; i < sampleCount; i++)
+    static bool bDumpSamples = false;
+    if (bDumpSamples)
     {
-        memset(pBuffer, 0, maxSize + 8);
-        sampleSize = 0;
-        sampleSize = mp4File->ReadSample(1, i + 1, pBuffer, maxSize + 1, NULL, NULL, NULL, NULL);
-        osAssert(sampleSize && (sampleSize != (uint32)-1));
-        osDump(0, "SampleID : %d \n", i+1);
-        for (uint32 j = 0; j < sampleSize; j = j + 8)
+        uint32 maxSize = mp4File->GetTrackMaxSampleSize(1);
+        uint32 sampleCount = mp4File->GetNumOfSamples(1);
+        uint32 sampleSize = 0;
+        uint8 * pBuffer = (uint8 *)osMalloc(maxSize + 8);
+        osDump(0, "\n Dumping MP4 file Sample Data...  \n");
+        for (uint32 i = 0; i < sampleCount; i++)
         {
-            osDump(4, "%x  %x  %x  %x  %x  %x  %x  %x\n", pBuffer[j], pBuffer[j + 1], pBuffer[j + 2], pBuffer[j + 3],
-                pBuffer[j + 4], pBuffer[j + 5], pBuffer[j + 6], pBuffer[j + 7]);
+            memset(pBuffer, 0, maxSize + 8);
+            sampleSize = 0;
+            sampleSize = mp4File->ReadSample(1, i + 1, pBuffer, maxSize + 1, NULL, NULL, NULL, NULL);
+            osAssert(sampleSize && (sampleSize != (uint32)-1));
+            osDump(0, "SampleID : %d \n", i + 1);
+            for (uint32 j = 0; j < sampleSize; j = j + 8)
+            {
+                osDump(4, "%x  %x  %x  %x  %x  %x  %x  %x\n", pBuffer[j], pBuffer[j + 1], pBuffer[j + 2], pBuffer[j + 3],
+                    pBuffer[j + 4], pBuffer[j + 5], pBuffer[j + 6], pBuffer[j + 7]);
+            }
         }
     }
 
     char h264FileName[64] = { 0 };
     sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", name);
-    mp4File->Extract264RawData(h264FileName;
+    mp4File->Extract264RawData(h264FileName);
 
     delete mp4File;
 }

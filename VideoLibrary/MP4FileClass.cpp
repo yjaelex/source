@@ -133,7 +133,8 @@ bool MP4FileClass::Extract264RawData(const char * fileName)
         return false;
     }
 
-    uint32 size = 0;
+    uint32 SPSSize = 0;
+    uint32 PPSSize = 0;
     int64_t outSize = 0;
     uint32 trackId = 1;
     uint32 maxSize = GetTrackMaxSampleSize(trackId);
@@ -146,26 +147,38 @@ bool MP4FileClass::Extract264RawData(const char * fileName)
     pFile->write(H264Separator, sizeof(H264Separator), outSize);
 
     //Write SPS
-    uint8* pSPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetSPS(&size);
-    pFile->write(pSPS, size, outSize);
+    uint8* pSPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetSPS(&SPSSize);
+    pFile->write(pSPS, SPSSize, outSize);
 
     //Write PPS
     pFile->write(H264Separator, sizeof(H264Separator), outSize);
-    uint8* pPPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetPPS(&size);
-    pFile->write(pPPS, size, outSize);
+    uint8* pPPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetPPS(&PPSSize);
+    pFile->write(pPPS, PPSSize, outSize);
 
     //Write samples.
     uint8 lengthSize = (m_vMP4Track[FindTrackIndex(trackId)])->GetLengthSizeMinusOne() + 1;
+    bool isSyncSample = false;
     for (uint32 i = 0; i < sampleCount; i++)
     {
         memset(pBuffer, 0, maxSize + 1);
         sampleSize = 0;
-        sampleSize = ReadSample(trackId, i + 1, pBuffer, maxSize + 1, NULL, NULL, NULL, NULL);
+        isSyncSample = false;
+        sampleSize = ReadSample(trackId, i + 1, pBuffer, maxSize + 1, &isSyncSample, NULL, NULL, NULL);
         osAssert(sampleSize && (sampleSize != (uint32)-1));
+
+        if (isSyncSample && i)
+        {
+            pFile->write(H264Separator, sizeof(H264Separator), outSize);
+            pFile->write(pSPS, SPSSize, outSize);
+            pFile->write(H264Separator, sizeof(H264Separator), outSize);
+            pFile->write(pPPS, PPSSize, outSize);
+        }
 
         pFile->write(H264Separator, sizeof(H264Separator), outSize);
         pFile->write(pBuffer + lengthSize, sampleSize - lengthSize, outSize);
     }
+    pFile->close();
+    delete pFile;
 
     return true;
 }
