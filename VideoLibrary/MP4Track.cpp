@@ -273,7 +273,7 @@ bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
     m_NumOfSamples = 0;
 
     m_TrakBox = pTrakBox;
-    m_TkhdBox = (MP4TkhdBox *) m_TrakBox->FindChildBox("tkhd");
+    m_TkhdBox = (MP4TkhdBox *)m_TrakBox->FindChildBox("tkhd");
     m_TrackID = m_TkhdBox->GetTrackID();
 
     m_MdhdBox = (MP4MdhdBox *)m_TrakBox->FindBox("trak.mdia.mdhd");
@@ -301,12 +301,15 @@ bool MP4TrackStream::Create(MP4FileClass * pFile, MP4Box * pTrakBox)
     }
 
     MP4HdlrBox * pHdlrBox = (MP4HdlrBox *)m_TrakBox->FindBox("trak.mdia.hdlr");
-    m_Type = (VP_STREAMTYPE) (pHdlrBox->m_Tracktype);
+    m_Type = (VP_STREAMTYPE)(pHdlrBox->m_Tracktype);
     m_NumOfSamples = m_SampleSizeBox->GetNumOfSamples();
-    m_nDurationTime =  m_MdhdBox->GetDuration();
-    m_nTimeScale =  m_MdhdBox->GetTimeScale();
+    m_nDurationTime = m_MdhdBox->GetDuration();
+    m_nTimeScale = m_MdhdBox->GetTimeScale();
 
-    osAssert(pAVCBox);    // Only support AVC codec now.
-    pAVCBox = pStblBox->FindBox("stbl.stsd.avc1.avcC");
-    m_pAVCConfig = ((MP4AvcCBox *)pAVCBox)->GetAVCConfig();
+    if (m_Type == VP_STREAM_VIDEO)
+    {
+        osAssert(pAVCBox);    // Only support AVC codec now.
+        pAVCBox = pStblBox->FindBox("stbl.stsd.avc1.avcC");
+        m_pAVCConfig = ((MP4AvcCBox *)pAVCBox)->GetAVCConfig();
+    }
 }

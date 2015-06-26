@@ -126,6 +126,36 @@ public:
     uint32 ReadSample(uint32 sampleId, uint8_t* pBuffer, uint32_t bufferSize, bool* pIsSyncSample,
         uint64* pStartTime, uint64*  pDuration, uint64*  pRenderingOffset);
 
+    uint32 GetNumOfSPS()
+    {
+        if (m_Type != VP_STREAM_VIDEO) return 0;
+        return m_pAVCConfig->GetNumOfSPS();
+    }
+
+    uint32 GetNumOfPPS()
+    {
+        if (m_Type != VP_STREAM_VIDEO) return 0;
+        return m_pAVCConfig->GetNumOfPPS();
+    }
+
+    uint8 * GetSPS(uint32 * pSize, uint32 index = 0)
+    {
+        if (m_Type != VP_STREAM_VIDEO) return NULL;
+        return m_pAVCConfig->GetSPS(pSize, index);
+    }
+
+    uint8 * GetPPS(uint32 * pSize, uint32 index = 0)
+    {
+        if (m_Type != VP_STREAM_VIDEO) return NULL;
+        return m_pAVCConfig->GetPPS(pSize, index);
+    }
+
+    uint8 GetLengthSizeMinusOne()
+    {
+        if (m_Type != VP_STREAM_VIDEO) return -1;
+        return m_pAVCConfig->GetLengthSizeMinusOne();
+    }
+
 private:
     uint32_t GetSampleStscIndex(uint32 sampleId);
 

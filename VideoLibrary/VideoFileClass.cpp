@@ -37,7 +37,12 @@ void VideoFileClass::ReadFromFile()
 
 void VideoFileClass::Close()
 {
-
+    if (m_file)
+    {
+        m_file->close();
+        delete m_file;
+        m_file = NULL;
+    }
 }
 
 uint32 VideoFileClass::GetSampleByteSize(uint32 sampleIndex)

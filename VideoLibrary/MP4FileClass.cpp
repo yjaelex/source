@@ -120,3 +120,52 @@ uint32 MP4FileClass::ReadSample(uint32 trackId, uint32 sampleId, uint8_t* pBuffe
     return m_vMP4Track[FindTrackIndex(trackId)]->ReadSample(sampleId, pBuffer, bufferSize,
         pIsSyncSample, pStartTime, pDuration, NULL);
 }
+
+
+bool MP4FileClass::Extract264RawData(const char * fileName)
+{
+    osAssert(fileName);
+    File* pFile = new File(fileName, File::Mode::MODE_CREATE);
+    if (!pFile) return false;
+    if (pFile->open())
+    {
+        osAssert(!"Open File failed!");
+        return false;
+    }
+
+    uint32 size = 0;
+    int64_t outSize = 0;
+    uint32 trackId = 1;
+    uint32 maxSize = GetTrackMaxSampleSize(trackId);
+    uint32 sampleCount = GetNumOfSamples(trackId);
+    uint32 sampleSize = 0;
+    uint8 * pBuffer = (uint8 *)osMalloc(maxSize + 1);
+
+    uint8 H264Separator[] = { 0, 0, 0, 1 };
+    // Write start code
+    pFile->write(H264Separator, sizeof(H264Separator), outSize);
+
+    //Write SPS
+    uint8* pSPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetSPS(&size);
+    pFile->write(pSPS, size, outSize);
+
+    //Write PPS
+    pFile->write(H264Separator, sizeof(H264Separator), outSize);
+    uint8* pPPS = (m_vMP4Track[FindTrackIndex(trackId)])->GetPPS(&size);
+    pFile->write(pPPS, size, outSize);
+
+    //Write samples.
+    uint8 lengthSize = (m_vMP4Track[FindTrackIndex(trackId)])->GetLengthSizeMinusOne() + 1;
+    for (uint32 i = 0; i < sampleCount; i++)
+    {
+        memset(pBuffer, 0, maxSize + 1);
+        sampleSize = 0;
+        sampleSize = ReadSample(trackId, i + 1, pBuffer, maxSize + 1, NULL, NULL, NULL, NULL);
+        osAssert(sampleSize && (sampleSize != (uint32)-1));
+
+        pFile->write(H264Separator, sizeof(H264Separator), outSize);
+        pFile->write(pBuffer + lengthSize, sampleSize - lengthSize, outSize);
+    }
+
+    return true;
+}

@@ -49,7 +49,20 @@ void MP4FileClass::WriteMpegLength(uint32_t value, bool compact)
     } while (i > 0);
 }
 
+void MP4FileClass::Close()
+{
+    MP4TrackStream * pTrack = NULL;
+    for (uint32 i = 0; i < m_vMP4Track.size(); i++)
+    {
+        pTrack = m_vMP4Track[i];
+        if (pTrack)
+        {
+            delete pTrack;
+            pTrack = NULL;
+        }
+    }
 
+}
 
 void MP4FileClass::ReadFromFile()
 {

@@ -60,24 +60,31 @@ public:
         return m_PPSTable.size();
     }
 
-    uint8 * GetSPS(uint32 index = 0)
+    uint8 * GetSPS(uint32 * pSize, uint32 index = 0)
     {
         if (index < m_SPSTable.size())
         {
+            *pSize = m_SPSTable[index].sequenceParameterSetLength;
             return m_SPSTable[index].sequenceParameterSetNALUnit.data();
         }
 
         return NULL;
     }
 
-    uint8 * GetPPS(uint32 index = 0)
+    uint8 * GetPPS(uint32 * pSize, uint32 index = 0)
     {
         if (index < m_PPSTable.size())
         {
+            *pSize = m_PPSTable[index].pictureParameterSetLength;
             return m_PPSTable[index].pictureParameterSetNALUnit.data();
         }
 
         return NULL;
+    }
+
+    uint8 GetLengthSizeMinusOne()
+    {
+        return m_lengthSizeMinusOne;
     }
 
     uint8                           m_configurationVersion;           // shall be 1

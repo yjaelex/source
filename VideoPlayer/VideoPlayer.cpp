@@ -38,14 +38,17 @@ void dumpFileInfo(const char * name)
         sampleSize = 0;
         sampleSize = mp4File->ReadSample(1, i + 1, pBuffer, maxSize + 1, NULL, NULL, NULL, NULL);
         osAssert(sampleSize && (sampleSize != (uint32)-1));
-
-        for (uint32 j = 0; j < sampleSize; j = j + 16)
+        osDump(0, "SampleID : %d \n", i+1);
+        for (uint32 j = 0; j < sampleSize; j = j + 8)
         {
-            osDump(0, "SampleID %d: \n");
             osDump(4, "%x  %x  %x  %x  %x  %x  %x  %x\n", pBuffer[j], pBuffer[j + 1], pBuffer[j + 2], pBuffer[j + 3],
                 pBuffer[j + 4], pBuffer[j + 5], pBuffer[j + 6], pBuffer[j + 7]);
         }
     }
+
+    char h264FileName[64] = { 0 };
+    sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", name);
+    mp4File->Extract264RawData(h264FileName;
 
     delete mp4File;
 }

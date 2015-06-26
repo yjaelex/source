@@ -23,17 +23,8 @@ public:
 
 	~MP4FileClass()
 	{
-        MP4TrackStream * pTrack = NULL;
-        for (uint32 i = 0; i < m_vMP4Track.size(); i++)
-        {
-            pTrack = m_vMP4Track[i];
-            if (pTrack)
-            {
-                delete pTrack;
-                pTrack = NULL;
-            }
-        }
 	}
+    virtual void Close();
 
     uint32_t ReadMpegLength();
     void WriteMpegLength(uint32_t value, bool compact = false);
@@ -52,6 +43,7 @@ public:
     bool IsSampleSync(uint32 trackId, uint32 sampleId);
     uint32 ReadSample(uint32 trackId, uint32 sampleId, uint8_t* pBuffer, uint32_t bufferSize, bool* pIsSyncSample,
         uint64* pStartTime, uint64*  pDuration, uint64*  pRenderingOffset);
+    bool Extract264RawData(const char * fileName);
 
 private:
 	MP4Box *            m_pRootBox;
