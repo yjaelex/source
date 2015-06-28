@@ -105,6 +105,9 @@
     <ClCompile Include="MP4Track.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MpegTS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MP4Box.h">
@@ -126,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MP4Track.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MpegTS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

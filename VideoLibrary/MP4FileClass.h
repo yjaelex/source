@@ -23,6 +23,7 @@ public:
 
 	~MP4FileClass()
 	{
+        Close();
 	}
     virtual void Close();
 

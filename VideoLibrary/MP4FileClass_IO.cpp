@@ -61,7 +61,11 @@ void MP4FileClass::Close()
             pTrack = NULL;
         }
     }
-
+    if (m_pRootBox)
+    {
+        delete m_pRootBox;
+        m_pRootBox = NULL;
+    }
 }
 
 void MP4FileClass::ReadFromFile()
