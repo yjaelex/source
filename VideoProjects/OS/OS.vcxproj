@@ -20,7 +20,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -77,12 +77,15 @@
   <ItemGroup>
     <ClInclude Include="..\..\OS\os.h" />
     <ClInclude Include="..\..\OS\osFile.h" />
+    <ClInclude Include="..\..\OS\osThread.h" />
+    <ClInclude Include="..\..\OS\osThreadWindows.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\OS\osFile.cpp" />
     <ClCompile Include="..\..\OS\osFile_posix.cpp" />
     <ClCompile Include="..\..\OS\osLog.cpp" />
     <ClCompile Include="..\..\OS\osMisc.cpp" />
+    <ClCompile Include="..\..\OS\osThread.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
