@@ -185,6 +185,47 @@ public:
     void setMode( Mode mode );
 };
 
+class URLFile : public FileProvider
+{
+public:
+    explicit URLFile(std::string name = "", Mode mode = MODE_UNDEFINED, File* file = NULL);
+
+    ~URLFile();
+
+    bool open(std::string name = "", Mode mode = MODE_UNDEFINED);
+
+    bool close();
+
+    bool seek(Size pos);
+
+    bool read(void* buffer, Size size, Size& nin, Size maxChunkSize = 0);
+
+    bool write(const void* buffer, Size size, Size& nout, Size maxChunkSize = 0);
+
+    int64_t getSize();
+
+private:
+    std::string   _name;
+    bool          _isOpen;
+    Mode          _mode;
+    Size          _size;
+    Size          _position;
+    FileProvider& _provider;
+
+    bool          _bMultiThread;
+    uint8 *       _pDataBuffer;
+
+public:
+    const std::string& name;      //!< read-only: file pathname or empty-string if not applicable
+    const bool&        isOpen;    //!< read-only: true if file is open
+    const Mode&        mode;      //!< read-only: file mode
+    const Size&        size;      //!< read-only: file size
+    const Size&        position;  //!< read-only: file position
+
+public:
+    void setName(const std::string& name);
+    void setMode(Mode mode);
+};
 
 #endif
 

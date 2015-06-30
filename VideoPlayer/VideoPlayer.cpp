@@ -8,6 +8,8 @@
 #include "MP4FileClass.h"
 #include <os.h>
 
+#include <curl/curl.h>
+
 //Screen attributes
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -18,6 +20,40 @@ static bool g_bPause = false;
 void playVideo(const char * file)
 {
 
+}
+
+size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
+    return fwrite(ptr, size, nmemb, stream);
+}
+
+void testCurl()
+{
+    const char * urlStr = "http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-06-17-14-007.mp4";
+    std::string str = string(urlStr);
+    std::size_t found = str.find_last_of("/\\");
+    std::string fileName = str.substr(found + 1);
+    FILE *fp = NULL;
+    fopen_s(&fp, fileName.c_str(), "ab+");
+
+    CURLcode retCode = curl_global_init(CURL_GLOBAL_ALL);
+    osAssert(retCode == CURLE_OK);
+    CURL * curl = curl_easy_init();
+    retCode = curl_easy_setopt(curl, CURLOPT_URL, urlStr);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+    osAssert(retCode == CURLE_OK);
+    retCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+    retCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_func);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    char errbuf[CURL_ERROR_SIZE];
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+    errbuf[0] = 0;
+
+    retCode = curl_easy_perform(curl);
+
+    fclose(fp);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
 }
 
 void dumpFileInfo(const char * name)
@@ -62,7 +98,8 @@ int main(int, char**)
     SDL_Surface *screen = NULL;
     SDL_Surface *image = NULL;
 
-    dumpFileInfo("sample.mp4");
+    //dumpFileInfo("sample.mp4");
+    testCurl();
     return 0;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
