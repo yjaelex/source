@@ -2,6 +2,9 @@
 #define _VP_OSFILE_H
 
 #include "vptypes.h"
+#include "osRingBuffer.h"
+#include "osThread.h"
+#include <curl/curl.h>
 
 class FileProvider
 {
@@ -185,10 +188,17 @@ public:
     void setMode( Mode mode );
 };
 
+typedef struct CurlData
+{
+    uint8 * pBuffer;             /* buffer to store cached data*/
+    size_t  buffer_len;          /* currently allocated buffers length */
+    size_t  buffer_pos;          /* end of data in buffer*/
+}CurlData;
+
 class URLFile : public FileProvider
 {
 public:
-    explicit URLFile(std::string name = "", Mode mode = MODE_UNDEFINED, File* file = NULL);
+    explicit URLFile(std::string name = "", Mode mode = MODE_UNDEFINED, bool saveToFile = false);
 
     ~URLFile();
 
@@ -210,10 +220,6 @@ private:
     Mode          _mode;
     Size          _size;
     Size          _position;
-    FileProvider& _provider;
-
-    bool          _bMultiThread;
-    uint8 *       _pDataBuffer;
 
 public:
     const std::string& name;      //!< read-only: file pathname or empty-string if not applicable
@@ -221,6 +227,18 @@ public:
     const Mode&        mode;      //!< read-only: file mode
     const Size&        size;      //!< read-only: file size
     const Size&        position;  //!< read-only: file position
+
+    CURL*         _curl;
+    bool          _bSaveToFile;
+    File*         _file;
+    bool          _bASync;           // sync io means read/write
+    osEventHandle _eventHandle;
+    osLockHandle  _lock;
+    bool          _threadActive;
+    volatile size_t        _curlWriteSize;
+    volatile bool          _curlJobDone;
+    OSRingBufferWithLock    _ringBuffer;
+    CurlData*     _pCurCurlData;
 
 public:
     void setName(const std::string& name);

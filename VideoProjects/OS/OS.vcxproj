@@ -47,12 +47,19 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Include; ..\..\deps\Include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>..\..\deps\Lib</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -77,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\OS\os.h" />
     <ClInclude Include="..\..\OS\osFile.h" />
+    <ClInclude Include="..\..\OS\osRingBuffer.h" />
     <ClInclude Include="..\..\OS\osThread.h" />
     <ClInclude Include="..\..\OS\osThreadWindows.h" />
   </ItemGroup>
@@ -85,7 +93,9 @@
     <ClCompile Include="..\..\OS\osFile_posix.cpp" />
     <ClCompile Include="..\..\OS\osLog.cpp" />
     <ClCompile Include="..\..\OS\osMisc.cpp" />
+    <ClCompile Include="..\..\OS\osRingBuffer.cpp" />
     <ClCompile Include="..\..\OS\osThread.cpp" />
+    <ClCompile Include="..\..\OS\osURL.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

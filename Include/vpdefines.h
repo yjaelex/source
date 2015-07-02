@@ -16,9 +16,6 @@
 #define INLINE    __forceinline         ///< Function is inlined (compiler decision)
 #define FINLINE   __forceinline         ///< Function is inlined (always)
 #define NAKED     __declspec(naked)     ///< Function is naked
-#ifndef APIENTRY
-#define APIENTRY  __stdcall             ///< Calling convention for function exposed in the API
-#endif
 #define WINCONV   __cdecl               ///< Calling convention for WINAPIV functions
 
 #else

@@ -56,10 +56,18 @@ void testCurl()
     curl_global_cleanup();
 }
 
-void dumpFileInfo(const char * name)
+void dumpFileInfo(const char * name, bool isURL)
 {
+    FileProvider * provider = NULL;
+    if (isURL)
+    {
+        std::string str = string(name);
+        URLFile * urlFile = new URLFile(str, FileProvider::MODE_READ);
+        provider = (FileProvider*)urlFile;
+    }
+
     MP4FileClass * mp4File = new MP4FileClass();
-    mp4File->Open(name, File::MODE_READ, NULL);
+    mp4File->Open(name, File::MODE_READ, provider);
     mp4File->ReadFromFile();
     mp4File->Dump(false);
 
@@ -87,10 +95,35 @@ void dumpFileInfo(const char * name)
     }
 
     char h264FileName[64] = { 0 };
-    sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", name);
+    std::string fileName;
+    if (isURL)
+    {
+        std::string str = string(name);
+        std::size_t found = str.find_last_of("/\\");
+        fileName = str.substr(found + 1);
+    }
+    else
+    {
+        fileName.assign(name);
+    }
+    sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", fileName.c_str());
     mp4File->Extract264RawData(h264FileName);
 
     delete mp4File;
+}
+
+void testURL()
+{
+    const char * urlStr = "http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-06-17-14-007.mp4";
+    std::string str = string(urlStr);
+    URLFile * urlFile = new URLFile(str, FileProvider::MODE_READ);
+
+    FileProvider::Size nin = 0;
+    uint8* buffer = (uint8*)osMalloc(1024 * 1024);
+    urlFile->open();
+    urlFile->read(buffer, 1024, nin);
+    urlFile->close();
+    delete urlFile;
 }
 
 int main(int, char**)
@@ -99,7 +132,10 @@ int main(int, char**)
     SDL_Surface *image = NULL;
 
     //dumpFileInfo("sample.mp4");
-    testCurl();
+    //testCurl();
+    //testURL();
+    const char * urlStr = "http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-06-17-14-007.mp4";
+    dumpFileInfo(urlStr, true);
     return 0;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0)

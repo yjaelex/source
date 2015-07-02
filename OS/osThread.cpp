@@ -57,4 +57,53 @@ osThreadLocalGet(osThreadLocalKey key)
 }
 #endif
 
+osLockHandle CONV
+osLockCreate(const char *lockName)
+{
+    static osLock zeroLock = { 0 }; // For quick zeroing of structures
+    osLock *lock = (osLock*)osMalloc(sizeof(*lock));
+    *lock = zeroLock;
 
+    if (lockName)
+    {
+        OS_NAMED_LOCK_CREATE(lock, lockName);
+        lock->namedLock = true;
+    }
+    else
+    {
+        OS_LOCK_CREATE(lock);
+        lock->namedLock = false;
+    }
+    return (osLockHandle)lock;
+}
+
+//
+//  Destroy lock resources
+//
+void CONV
+osLockDestroy(osLockHandle lockHandle)
+{
+    osLock* lock = (osLock*)lockHandle;
+
+    if (lock->namedLock)
+    {
+        OS_NAMED_LOCK_DESTROY(lock);
+    }
+    else
+    {
+        OS_LOCK_DESTROY(lock);
+    }
+    osFree(lockHandle);
+}
+
+void osAcquireLock(osLockHandle lockHandle)
+{
+    osLock* lock = (osLock*)lockHandle;
+    OS_LOCK_ENTER(lock);
+}
+
+void osReleaseLock(osLockHandle lockHandle)
+{
+    osLock* lock = (osLock*)lockHandle;
+    OS_LOCK_LEAVE(lock);
+}

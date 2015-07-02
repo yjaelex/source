@@ -303,6 +303,36 @@ EXTERN void * CONV
 osGetProcAddress(osLibraryHandle handle, const char *name);
 
 
+typedef int32(*tCallback)(uintp data);
+
+typedef enum
+{
+    THREAD_CMD_NONE = 0,
+    THREAD_CMD_COPY_DATA = 1 << 0,
+}ThreadCommandType;
+
+
+typedef struct OSThreadCommandRec
+{
+    ThreadCommandType   op;            ///< indicate the command type.
+    uintp               data;          ///< the data need to pass to callback.
+    tCallback           callback;      ///< the callback function that used to handle the comand.
+    OSThreadCommandRec()
+    {
+        op = THREAD_CMD_NONE;
+        data = 0;
+        callback = NULL;
+    }
+}OSThreadCommand;
+
+typedef void* osLockHandle;
+
+osLockHandle CONV osLockCreate(const char *lockName);
+void CONV osLockDestroy(osLockHandle lockHandle);
+void osAcquireLock(osLockHandle lockHandle);
+void osReleaseLock(osLockHandle lockHandle);
+FINLINE bool OS_LOCK_CAS(volatile uint32 *dst, uint32 OldValue, uint32 NewValue);
+
 #endif
 
 

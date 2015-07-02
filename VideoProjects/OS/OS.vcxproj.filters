@@ -30,6 +30,9 @@
     <ClInclude Include="..\..\OS\osThreadWindows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\OS\osRingBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\OS\osLog.cpp">
@@ -45,6 +48,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\OS\osThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\osRingBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\osURL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

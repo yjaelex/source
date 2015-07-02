@@ -218,4 +218,50 @@ void * CONV osGetProcAddress(osLibraryHandle handle, const char *name)
     return (void *)GetProcAddress((HMODULE)handle, name);
 }
 
+typedef struct osLock
+{
+    bool             namedLock;
+    CRITICAL_SECTION slock;    /* structure-lock to protect this structure */
+    HANDLE           event;    /* event to signal lock's availability */
+    HANDLE           mlock;    /* mutex lock used for interprocess synchronisation */
+}osLock;
+
+#define OS_LOCK_CREATE(_lock_)      InitializeCriticalSection((&(_lock_)->slock))
+#define OS_LOCK_DESTROY(_lock_)     DeleteCriticalSection(&((_lock_)->slock))
+#define OS_LOCK_ENTER(_lock_)       if ((_lock_)->mlock) \
+                                        WaitForSingleObject(((_lock_)->mlock), INFINITE); \
+                                                                        else \
+                                        EnterCriticalSection(&((_lock_)->slock))
+
+#define OS_LOCK_LEAVE(_lock_)       if ((_lock_)->mlock) \
+                                        ReleaseMutex((_lock_)->mlock); \
+                                                                        else \
+                                        LeaveCriticalSection(&((_lock_)->slock))
+
+#define OS_EVENT_CREATE(_lock_)     ((_lock_)->event = CreateEvent(NULL, FALSE, FALSE, NULL))
+#define OS_EVENT_DESTROY(_lock_)    CloseHandle((_lock_)->event)
+#define OS_EVENT_WAIT(_lock_)       WaitForSingleObject(((_lock_)->event), INFINITE)
+#define OS_EVENT_SET(_lock_)        SetEvent((_lock_)->event)
+
+#define OS_NAMED_LOCK_CREATE(_lock_, _name_) ((_lock_)->mlock) = CreateMutex(NULL, FALSE, (LPCSTR)_name_);
+#define OS_NAMED_LOCK_DESTROY(_lock_)        CloseHandle((_lock_)->mlock);
+
+FINLINE bool OS_LOCK_CAS(volatile uint32 *dst, uint32 OldValue, uint32 NewValue)
+{
+#ifdef _WIN64
+    return (OldValue == InterlockedCompareExchange64((volatile long*)dst, NewValue, OldValue));
+#else
+    uint32 __ret;
+    _asm
+    {
+        __asm mov eax, OldValue
+        __asm mov edx, NewValue
+        __asm mov edi, dst
+        __asm lock cmpxchg dword ptr[edi], edx
+        __asm mov __ret, eax
+    }
+    return __ret == OldValue;
+#endif // _WIN64
+}
+
 #endif
