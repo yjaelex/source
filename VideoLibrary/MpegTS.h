@@ -9,6 +9,10 @@
 #define EIT_PID         0x0012
 #define TDT_PID         0x0014
 
+// user defined PIDs
+#define PMT_PID         0x1000
+#define AVSTREAM_START_PID         0x100
+
 /* TIDs */
 #define SDT_TID         0x42
 #define EIT_TID         0x4e
@@ -114,12 +118,14 @@ public:
     }
 };
 
+#define MPEGTS_FLAG_REEMIT_PAT_PMT  0x01
+#define MPEGTS_FLAG_AAC_LATM        0x02
 typedef struct MpegTSProgramInfo
 {
     uint32              progNum;
+    uint32              pcr_pid;
+    uint32              flags;
     vector<AVStream*>   avStream;
-
-
 };
 
 class MpegTSClass : public VideoFileClass

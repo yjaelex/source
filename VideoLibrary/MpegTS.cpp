@@ -206,7 +206,7 @@ bool tsWriteTableSection(MpegTSSection *s, uint8 tid, uint32 id, uint32 version,
     q = section;
     *q++ = tid;
     put16(&q, flags | (len + 5 + 4));       /* 5 byte header + 4 byte CRC */
-    put16(&q, id);
+    put16(&q, id);                          // transport_stream_id
     *q++ = 0xc1 | (version << 1);           /* current_next_indicator = 1 */
     *q++ = sec_num;
     *q++ = last_sec_num;
@@ -232,27 +232,60 @@ void tsWritePAT(uint16 * programId, uint16 * pmtPID, uint32 numOfProg)
         put16(&q, programId[i]);
         put16(&q, 0xe000 | pmtPID[i]);
     }
-    bool tsWriteTableSection(MpegTSSection *s, uint8 tid, uint32 id, uint32 version,
-        (&ts->pat, PAT_TID, ts->tsid, ts->tables_version, 0, 0,
+
+    MpegTSSection pat;
+    pat.pid = PAT_PID;
+    tsWriteTableSection(&pat, PAT_TID, 1, 0, 0, 0, data, q - data);
+}
+
+void tsWriteSDT()
+{
+    uint8_t data[SECTION_LENGTH], *q, *desc_list_len_ptr, *desc_len_ptr;
+    int i, running_status, free_ca_mode, val;
+
+    q = data;
+    put16(&q, ts->onid);
+    *q++ = 0xff;
+        put16(&q, service->sid);
+        *q++ = 0xfc | 0x00; /* currently no EIT info */
+        desc_list_len_ptr = q;
+        q += 2;
+        running_status = 4; /* running */
+        free_ca_mode = 0;
+
+        /* write only one descriptor for the service name and provider */
+        *q++ = 0x48;
+        desc_len_ptr = q;
+        q++;
+        *q++ = ts->service_type;
+        putstr8(&q, service->provider_name);
+        putstr8(&q, service->name);
+        desc_len_ptr[0] = q - desc_len_ptr - 1;
+
+        /* fill descriptor length */
+        val = (running_status << 13) | (free_ca_mode << 12) |
+            (q - desc_list_len_ptr - 2);
+        desc_list_len_ptr[0] = val >> 8;
+        desc_list_len_ptr[1] = val;
+    }
+    mpegts_write_section1(&ts->sdt, SDT_TID, ts->tsid, ts->tables_version, 0, 0,
         data, q - data);
 }
 
-static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
+static int tsWritePMT(MpegTSProgramInfo * prog)
 {
     uint8_t data[SECTION_LENGTH], *q, *desc_length_ptr, *program_info_length_ptr;
     int val, stream_type, i, err = 0;
 
     q = data;
-    put16(&q, 0xe000 | service->pcr_pid);
-
+    put16(&q, 0xe000 | prog->pcr_pid);
     program_info_length_ptr = q;
     q += 2; /* patched after */
-
     /* put program info here */
-
     val = 0xf000 | (q - program_info_length_ptr - 2);
     program_info_length_ptr[0] = val >> 8;
     program_info_length_ptr[1] = val;
+
     uint32 nb_streams = prog->avStream.size();
     for (i = 0; i < nb_streams; i++)
     {
@@ -291,7 +324,7 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
             stream_type = STREAM_TYPE_AUDIO_MPEG1;
             break;
         case AV_CODEC_ID_AAC:
-            stream_type = (flags & MPEGTS_FLAG_AAC_LATM)
+            stream_type = (prog->flags & MPEGTS_FLAG_AAC_LATM)
                 ? STREAM_TYPE_AUDIO_AAC_LATM
                 : STREAM_TYPE_AUDIO_AAC;
             break;
@@ -313,7 +346,7 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
         }
 
         *q++ = stream_type;
-        put16(&q, 0xe000 | ts_st->pid);
+        put16(&q, 0xe000 | (AVSTREAM_START_PID+1));
         desc_length_ptr = q;
         q += 2; /* patched after */
 
@@ -334,50 +367,13 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
                 *q++ = 'S';
                 *q++ = 'D';
             }
-
-            if (lang) {
-                char *p;
-                char *next = lang->value;
-                uint8_t *len_ptr;
-
-                *q++ = 0x0a; /* ISO 639 language descriptor */
-                len_ptr = q++;
-                *len_ptr = 0;
-
-                for (p = lang->value; next && *len_ptr < 255 / 4 * 4; p = next + 1) {
-                    if (q - data > SECTION_LENGTH - 4) {
-                        err = 1;
-                        break;
-                    }
-                    next = strchr(p, ',');
-                    if (strlen(p) != 3 && (!next || next != p + 3))
-                        continue; /* not a 3-letter code */
-
-                    *q++ = *p++;
-                    *q++ = *p++;
-                    *q++ = *p++;
-
-                    if (st->disposition & AV_DISPOSITION_CLEAN_EFFECTS)
-                        *q++ = 0x01;
-                    else if (st->disposition & AV_DISPOSITION_HEARING_IMPAIRED)
-                        *q++ = 0x02;
-                    else if (st->disposition & AV_DISPOSITION_VISUAL_IMPAIRED)
-                        *q++ = 0x03;
-                    else
-                        *q++ = 0; /* undefined type */
-
-                    *len_ptr += 4;
-                }
-
-                if (*len_ptr == 0)
-                    q -= 2; /* no language codes were written */
-            }
             break;
         case VP_STREAM_SUBTITLE:
         {
             const char default_language[] = "und";
-            const char *language = lang && strlen(lang->value) >= 3 ? lang->value : default_language;
-
+            /// TODO:
+            const char *language = default_language;
+#if 0
             if (codec_id == AV_CODEC_ID_DVB_SUBTITLE)
             {
                 uint8_t *len_ptr;
@@ -457,6 +453,7 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
 
                 *len_ptr = q - len_ptr - 1;
             }
+#endif
         }
             break;
         case VP_STREAM_VIDEO:
@@ -469,7 +466,7 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
                 *q++ = 'c';
             }
             break;
-        case AVMEDIA_TYPE_DATA:
+        case VP_STREAM_DATA:
             if (codec_id == AV_CODEC_ID_SMPTE_KLV) {
                 *q++ = 0x05; /* MPEG-2 registration descriptor */
                 *q++ = 4;
@@ -487,13 +484,16 @@ static int tsWritePMT(MpegTSProgramInfo * prog, uint32 flags)
     }
 
     if (err)
-        av_log(s, AV_LOG_ERROR,
-        "The PMT section cannot fit stream %d and all following streams.\n"
-        "Try reducing the number of languages in the audio streams "
-        "or the total number of streams.\n", i);
+    {
+        osLog(LOG_ERROR,
+            "The PMT section cannot fit stream %d and all following streams.\n"
+            "Try reducing the number of languages in the audio streams "
+            "or the total number of streams.\n", i);
+    }
 
-    mpegts_write_section1(&service->pmt, PMT_TID, service->sid, ts->tables_version, 0, 0,
-        data, q - data);
+    MpegTSSection pmt;
+    pmt.pid = PMT_PID;
+    tsWriteTableSection(&pmt, PMT_TID, 1, 0, 0, 0, data, q - data);
     return 0;
 }
 

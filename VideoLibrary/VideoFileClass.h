@@ -56,6 +56,7 @@ typedef enum VP_STREAMTYPE
     VP_STREAM_META,			//¡®meta¡¯ Timed Metadata track
     VP_STREAM_AUXV,			//¡®auxv¡¯ Auxiliary Video track
     VP_STREAM_SUBTITLE,
+    VP_STREAM_DATA
 };
 
 enum AVCodecID {
