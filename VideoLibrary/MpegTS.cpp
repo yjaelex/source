@@ -220,7 +220,6 @@ bool tsWriteTableSection(MpegTSSection *s, uint8 tid, uint32 id, uint32 version,
 //Program num	    16	Relates to the Table ID extension in the associated PMT.A value of 0 is reserved for a NIT packet identifier.
 //Reserved bits	    3	Set to 0x07 (all bits on)
 //Program map PID	13	The packet identifier that contains the associated PMT
-#if 0
 void tsWritePAT(uint16 * programId, uint16 * pmtPID, uint32 numOfProg)
 {
     uint8_t data[SECTION_LENGTH], *q;
@@ -238,6 +237,7 @@ void tsWritePAT(uint16 * programId, uint16 * pmtPID, uint32 numOfProg)
     tsWriteTableSection(&pat, PAT_TID, 1, 0, 0, 0, data, q - data);
 }
 
+#if 0
 void tsWriteSDT()
 {
     uint8_t data[SECTION_LENGTH], *q, *desc_list_len_ptr, *desc_len_ptr;
@@ -271,6 +271,7 @@ void tsWriteSDT()
     mpegts_write_section1(&ts->sdt, SDT_TID, ts->tsid, ts->tables_version, 0, 0,
         data, q - data);
 }
+#endif
 
 static int tsWritePMT(MpegTSProgramInfo * prog)
 {
@@ -497,4 +498,4 @@ static int tsWritePMT(MpegTSProgramInfo * prog)
     return 0;
 }
 
-#endif
+
