@@ -142,6 +142,10 @@ static osThreadExitCode threadFunc(uintp param)
             pThread->_threadStatus = IO_THREAD_STATUS_IDLE;
         }*/
 
+        uint64 startTime, endTime = 0;
+        startTime = osQueryNanosecondTimer();
+        osDump(8, "*** CURL START TIME: %lld ns \n", startTime);
+
         CURLcode retCode = curl_easy_perform(urlFile->_curl);
         if (retCode != CURLE_OK)
         {
@@ -149,6 +153,10 @@ static osThreadExitCode threadFunc(uintp param)
             return OS_THREAD_FAILED;
         }
         urlFile->_curlJobDone = true;
+
+        endTime = osQueryNanosecondTimer();
+        osDump(8, "*** CURL END TIME  : %lld ns. Total: %f s. \n", endTime, ((float)(endTime - startTime)) / 1000000000);
+
         return OS_THREAD_SUCCESS;
     }
     return OS_THREAD_SUCCESS;

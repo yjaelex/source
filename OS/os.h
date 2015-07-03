@@ -36,13 +36,20 @@ inline void OS_ASSERT_FUNC(const char * condition, const unsigned int level,
 	}
 
 #define osAssert(condition) osAssertLevel(condition, 0)			///< osAssert defaults to assert level 0
-#endif
 
 #define osWARNING(expr) \
     if (expr) { \
         osLog(LOG_ERROR, "Warning (%s) in %s at line %u.\n", \
                          STRINGIFY(expr), __FILE__, __LINE__); \
             }
+
+#else
+
+#define osAssert(condition)
+#define osWARNING(expr)
+
+#endif
+
 
 inline void* osMalloc(size_t size) {
     if (size == 0) return NULL;
@@ -90,5 +97,8 @@ inline void osFree(void * p)
 
 void osDump(unsigned int indent, const char *lpszFormat, ...);
 int64_t osGetLocalTimeSeconds();
+EXTERN uint64 CONV osQueryTimer();
+EXTERN uint64 CONV osQueryTimerFrequency();
+EXTERN uint64 CONV osQueryNanosecondTimer();
 
 #endif

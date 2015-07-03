@@ -60,6 +60,7 @@ void MP4FileClass::Close()
             delete pTrack;
             pTrack = NULL;
         }
+        m_vMP4Track.clear();
     }
     if (m_pRootBox)
     {

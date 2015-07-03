@@ -200,7 +200,7 @@ class URLFile : public FileProvider
 public:
     explicit URLFile(std::string name = "", Mode mode = MODE_UNDEFINED, bool saveToFile = false);
 
-    ~URLFile();
+    virtual ~URLFile();
 
     bool open(std::string name = "", Mode mode = MODE_UNDEFINED);
 
@@ -213,6 +213,16 @@ public:
     bool write(const void* buffer, Size size, Size& nout, Size maxChunkSize = 0);
 
     int64_t getSize();
+
+    void setAsync(bool bAsync)
+    {
+        _bASync = bAsync;
+    }
+
+    void setSaveToFile(bool savetofile)
+    {
+        _bSaveToFile = savetofile;
+    }
 
 private:
     std::string   _name;
