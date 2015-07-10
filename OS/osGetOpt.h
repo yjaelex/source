@@ -27,6 +27,10 @@ typedef enum OptArgType {
     OPT_TYPE_MULTI
 } OptArgType;
 
+#ifndef osPrintf
+#define osPrintf    printf
+#endif
+
 typedef struct CmdOpt {
     /*! ID to return for this flag. Optional but must be >= 0 */
     int nId;
@@ -40,7 +44,16 @@ typedef struct CmdOpt {
     int nArgType;
 }CmdOpt;
 
+// Multiple args callback; this function may be called many times.(once per arg)
+typedef bool(*pfnDoMultiArgsCB) (int Id, const char * pOptText, uint32 nArgIndex, char * pArgsText);
+
+// Other arg callback; ArgsText may be NULL.
+typedef bool(*pfnDoArgsCB) (int Id, const char * pOptText, char * pArgsText);
+
 pvoid osCreateCmdLineOptHandler(int argc, char ** argv, CmdOpt * pCmdOpt, uint32 nNumOfOpts);
+bool osGetOpt(pvoid handler, int * pID, bool * pErr);
+bool osDoMultiArgs(pvoid handler, int  nMultiArgs, pfnDoMultiArgsCB pFunc);
+bool osDoArgs(pvoid handler, pfnDoArgsCB pFunc);
 
 #endif
 

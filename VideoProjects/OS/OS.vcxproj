@@ -95,6 +95,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\OS\osFile.cpp" />
     <ClCompile Include="..\..\OS\osFile_posix.cpp" />
+    <ClCompile Include="..\..\OS\osGetOpt.cpp" />
     <ClCompile Include="..\..\OS\osLog.cpp" />
     <ClCompile Include="..\..\OS\osMisc.cpp" />
     <ClCompile Include="..\..\OS\osRingBuffer.cpp" />

@@ -101,4 +101,6 @@ EXTERN uint64 CONV osQueryTimer();
 EXTERN uint64 CONV osQueryTimerFrequency();
 EXTERN uint64 CONV osQueryNanosecondTimer();
 
+#include "osGetOpt.h"
+
 #endif

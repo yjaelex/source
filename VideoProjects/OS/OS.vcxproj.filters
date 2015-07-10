@@ -65,5 +65,8 @@
     <ClCompile Include="..\..\OS\osURL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\OS\osGetOpt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
