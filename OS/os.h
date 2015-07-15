@@ -94,6 +94,29 @@ inline void osFree(void * p)
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
+#ifdef WIN32
+#include <Windows.h>
+#else
+#ifdef LINUX
+#include <errno.h>
+#else
+#error "Unsupported OS!"
+#endif
+#endif
+
+INLINE uint32 osGetLastError()
+{
+#ifdef WIN32
+    return ::GetLastError();
+#else
+#ifdef LINUX
+    return errno;
+#else
+    return 0;
+#endif
+#endif
+}
+
 
 void osDump(unsigned int indent, const char *lpszFormat, ...);
 int64_t osGetLocalTimeSeconds();

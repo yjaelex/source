@@ -104,6 +104,7 @@
     <ClCompile Include="MP4FileClass_IO.cpp" />
     <ClCompile Include="MP4Track.cpp" />
     <ClCompile Include="MpegTS.cpp" />
+    <ClCompile Include="TransformVideoFile.cpp" />
     <ClCompile Include="VideoFileClass.cpp" />
     <ClCompile Include="vpUtil.cpp" />
   </ItemGroup>
