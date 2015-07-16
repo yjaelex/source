@@ -115,6 +115,7 @@
     <ClInclude Include="MP4FileClass.h" />
     <ClInclude Include="MP4Track.h" />
     <ClInclude Include="MpegTS.h" />
+    <ClInclude Include="TransformVideoFile.h" />
     <ClInclude Include="VideoFileClass.h" />
     <ClInclude Include="vpUtil.h" />
   </ItemGroup>

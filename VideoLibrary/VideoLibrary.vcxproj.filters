@@ -137,5 +137,8 @@
     <ClInclude Include="MpegTS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TransformVideoFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

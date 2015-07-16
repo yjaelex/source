@@ -102,7 +102,7 @@ class AbstractRequest
 
 public:
     // Constructor
-    AbstractRequest() : m_bAborted( false ), m_usRequestID( 0u ){}
+    AbstractRequest() : m_bAborted(false), m_bReqProcessed(false), m_usRequestID(0u){}
     // Destructor
     virtual ~AbstractRequest(){}
     // Thread procedure to be override in derived class. This function should return if request aborted.
@@ -125,6 +125,7 @@ public:
     {
         AutoLock LockRequest( m_LockWorkerThread );
         m_bAborted = true;
+        m_bReqProcessed = true;
     }
     // Clear abort flag for re-posting the same request.
     void ClearAbortFlag()
@@ -133,6 +134,10 @@ public:
         m_bAborted = false;
     }
 
+    bool IsReqProcessed()
+    {
+        return m_bReqProcessed;
+    }
 protected:
     // Check for the abort request
     bool IsAborted()
@@ -146,7 +151,7 @@ protected:
 protected:
     // Synchronization object for resource locking.
     SyncObject m_LockWorkerThread;
-
+    bool            m_bReqProcessed;
 private:
     // Abort flag.
     bool m_bAborted;
