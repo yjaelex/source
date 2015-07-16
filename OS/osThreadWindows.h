@@ -103,6 +103,17 @@ osThreadSetPriority(osThreadHandle thread, int32 priority)
     SetThreadPriority((thread == NULL) ? GetCurrentThread() : (HANDLE)thread, priority);
 }
 
+void CONV
+osThreadDestroy(osThreadHandle handle)
+{
+    BOOL success;
+
+    osAssert(handle != NULL);
+
+    success = CloseHandle((HANDLE)handle);
+    osAssert(success);
+}
+
 osEventHandle CONV osEventCreate(bool manualReset)
 {
     HANDLE eventHandle;
@@ -191,16 +202,43 @@ void CONV osNamedEventDestroy(osEventHandle handle, const char *semName)
     osEventDestroy(handle);
 }
 
-osEventHandle CONV osSemaphoreCreate(uint32 initialCount, uint32 maxCount, const char *semName)
+osSemHandle CONV osSemaphoreCreate(uint32 initialCount, uint32 maxCount, const char *semName)
 {
-    HANDLE eventHandle = CreateSemaphore(NULL, initialCount, maxCount, semName);
-    return (osEventHandle)eventHandle;
+    HANDLE semHandle = CreateSemaphore(NULL, initialCount, maxCount, semName);
+    return (osSemHandle)semHandle;
 }
-
-bool CONV osSemaphoreRelease(osEventHandle handle, uint32 releaseCount, long *previousCount)
+// semaphore ++.
+bool CONV osSemaphoreRelease(osSemHandle handle, uint32 releaseCount, long *previousCount)
 {
     BOOL ret = ReleaseSemaphore((HANDLE)handle, releaseCount, (LPLONG)previousCount);
     return ret ? true : false;
+}
+// semaphore --.
+void CONV osSemWait(osSemHandle handle)
+{
+    DWORD ret;
+
+    ret = WaitForSingleObject((HANDLE)handle, INFINITE);
+    osAssert(ret == WAIT_OBJECT_0);
+}
+
+bool CONV osSemTimedWait(osSemHandle handle, uint32 timeout)
+{
+    DWORD ret;
+
+    ret = WaitForSingleObject((HANDLE)handle, timeout);
+    osAssert(ret == WAIT_OBJECT_0 || ret == WAIT_TIMEOUT);
+    return (ret == WAIT_OBJECT_0);
+}
+
+bool CONV osSemDestroy(osSemHandle handle)
+{
+    BOOL success;
+
+    osAssert(handle != NULL);
+
+    success = CloseHandle((HANDLE)handle);
+    return (success);
 }
 
 osLibraryHandle CONV osOpenLibrary(const char *name)

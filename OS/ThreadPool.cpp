@@ -129,7 +129,7 @@ bool ThreadPool::Create( const unsigned short usThreadCount_i)
     m_usPendingReqCount = 0u;
     m_usThreadCount = usThreadCount_i;
     // Create semaphore for thread count management.
-    m_hSemaphore = CreateSemaphore( NULL, 0, m_usThreadCount, NULL );
+    m_hSemaphore = osSemaphoreCreate(0, m_usThreadCount, NULL);
     if( NULL == m_hSemaphore )
     {
         LogError( "Semaphore creation failed" );
@@ -169,7 +169,7 @@ bool ThreadPool::Destroy()
             AutoLock LockThread( m_LockWorkerThread );
             if( m_lActiveThread < m_usThreadCount )
             {
-                if( NULL == ReleaseSemaphore( m_hSemaphore, m_usThreadCount - m_lActiveThread, NULL ))
+                if (false == osSemaphoreRelease(m_hSemaphore, m_usThreadCount - m_lActiveThread, NULL))
                 {
                     LogError( "Failed to release Semaphore" );
                     return false;
@@ -274,7 +274,7 @@ bool ThreadPool::NotifyThread()
 {
     AutoLock LockThread( m_LockWorkerThread );
     // Release semaphore by one to process this request.
-    if( NULL == ReleaseSemaphore( m_hSemaphore, 1, NULL ))
+    if (false == osSemaphoreRelease(m_hSemaphore, 1, NULL))
     {
         LogError( "ReleaseSemaphore failed" );
         return false;
@@ -354,12 +354,7 @@ bool ThreadPool::ProcessRequests()
 bool ThreadPool::WaitForRequest()
 {
     // Wait released when requested queued.
-    DWORD dwReturn = WaitForSingleObject( m_hSemaphore, INFINITE );
-    if( WAIT_OBJECT_0 != dwReturn )
-    {
-        LogError( "WaitForSingleObject failed" );
-        return false;
-    }
+    osSemWait(m_hSemaphore);
     AutoLock LockThread( m_LockWorkerThread );
     m_usSemaphoreCount--;
     return true;
@@ -371,29 +366,22 @@ bool ThreadPool::WaitForRequest()
     */
 bool ThreadPool::DestroyPool()
 {
-    // Wait for the exist of threads.
-    DWORD dwReturn = WaitForMultipleObjects( m_usThreadCount, (HANDLE*)m_phThreadList, TRUE, INFINITE );
-    if( WAIT_OBJECT_0 != dwReturn )
+    for (uint32 i = 0; i < m_usThreadCount; i++)
     {
-        LogError( "WaitForMultipleObjects failed" );
-        return false;
-    }
-    // Close all threads.
-    for( USHORT uIdx = 0u; uIdx < m_usThreadCount; uIdx++ )
-    {
-        if( TRUE != CloseHandle( HANDLE(m_phThreadList[uIdx]) ))
+        while (osThreadGetExitCode(m_phThreadList[i]) == OS_THREAD_STILL_ACTIVE)
         {
-            LogError( "CloseHandle failed for threads" );
-            return false;
+            osThreadSuspend(1);
         }
+        osThreadDestroy(m_phThreadList[i]);
     }
+
     // Clear memory allocated for threads.
     delete[] m_phThreadList;
     m_phThreadList = 0;
     // Close the semaphore
-    if( TRUE != CloseHandle( m_hSemaphore ))
+    if (true != osSemDestroy(m_hSemaphore))
     {
-        LogError( "CloseHandle failed for semaphore" );
+        LogError( "osSemDestroy failed for semaphore" );
         return false;
     }
     // Clear request queue.

@@ -248,7 +248,7 @@ private:
     // Active thread count.
     unsigned short                          m_usPendingReqCount;
     // Manage active thread count in pool.
-    HANDLE                                  m_hSemaphore;
+    osSemHandle                             m_hSemaphore;
     // Hold thread handles.
     osThreadHandle*                         m_phThreadList;
     // Request queue.

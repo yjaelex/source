@@ -31,10 +31,13 @@ typedef uintp osThreadHandle;
 
 #if defined(WIN32)
 typedef uintp osEventHandle;
+typedef uintp osSemHandle;
 #elif defined(OS_ANDROID)
 typedef pvoid osEventHandle;
+typedef pvoid osSemHandle;
 #elif defined(OS_LINUX)
 typedef uintp osEventHandle;
+typedef uintp osSemHandle;
 #else
 #error Unsupported OS.
 #endif
@@ -117,6 +120,8 @@ osThreadGetExitCode(osThreadHandle thread);
 ///
 EXTERN void CONV
 osThreadSuspend(uint32 msec);
+
+EXTERN void CONV osThreadDestroy(osThreadHandle handle);
 
 ///
 /// @fn osThreadSetAffinityMask(uintp mask)
@@ -249,11 +254,11 @@ osEventReset(osEventHandle handle);
 ///
 /// @return If the function succeeds, the return value is a handle to the semaphore. If the function fails, the return value is NULL
 ///
-EXTERN osEventHandle CONV
+EXTERN osSemHandle CONV
 osSemaphoreCreate(uint32 initialCount, uint32 maxCount, const char *semName = 0);
 
 ///
-/// @fn osSemaphoreRelease(osEventHandle handle, uint32 releaseCount, long *previousCount)
+/// @fn osSemaphoreRelease(osSemHandle handle, uint32 releaseCount, long *previousCount)
 ///
 /// @brief The function returns when the specified object is in the signaled state or up to some maximum time-out.
 ///
@@ -266,7 +271,11 @@ osSemaphoreCreate(uint32 initialCount, uint32 maxCount, const char *semName = 0)
 ///
 /// @return true if the lock succeeded, false if the operation failed.
 EXTERN bool CONV
-osSemaphoreRelease(osEventHandle handle, uint32 releaseCount, long *previousCount);
+osSemaphoreRelease(osSemHandle handle, uint32 releaseCount, long *previousCount);
+
+void CONV osSemWait(osSemHandle handle);
+bool CONV osSemTimedWait(osSemHandle handle, uint32 timeout);
+bool CONV osSemDestroy(osSemHandle handle);
 
 ///
 /// @fn osOpenLibrary(const char *libraryName);
