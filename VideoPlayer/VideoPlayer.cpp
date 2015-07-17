@@ -161,10 +161,39 @@ bool transformVideoFile(vector<string> & urlStrVec)
     return true;
 }
 
-int main(int, char**)
+CmdOpt g_rgOptions[] =
+{
+    { OPT_HELP, ("-?"), OPT_TYPE_NONE },
+    { OPT_HELP, ("-h"), OPT_TYPE_NONE },
+    { OPT_HELP, ("-help"), OPT_TYPE_NONE },
+    { OPT_HELP, ("--help"), OPT_TYPE_NONE },
+    { 1, ("-o"), OPT_TYPE_REQ_SEP },
+    { 2, ("--url"), OPT_TYPE_REQ_SEP },
+    { 3, ("trans"), OPT_TYPE_NONE },
+    { OPT_MULTI, ("--multiURL"), OPT_TYPE_MULTI },
+    { OPT_STOP, ("--"), OPT_TYPE_NONE }
+};
+
+static void ShowUsage()
+{
+    osPrintf(
+        "Usage: VideoPlayer [OPTIONS] [URLs]\n"
+        "\n"
+        "-o format          Set output video file format. (raw ts) \n"
+        "--url ARG          URL of remote input video file\n"
+        "--multi N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n"
+        "\n"
+        "-?  -h  -help  --help                       Output this help.\n"
+        "\n"
+        );
+}
+
+int main(int argc, char** argv)
 {
     SDL_Surface *screen = NULL;
     SDL_Surface *image = NULL;
+
+    pvoid hCmdOpt = osCreateCmdLineOptHandler(argc, argv, g_rgOptions, sizeof(g_rgOptions) / sizeof(CmdOpt));
 
     //dumpFileInfo("sample.mp4");
     //testCurl();
@@ -179,6 +208,7 @@ int main(int, char**)
     transformVideoFile(vecStr);
     return 0;
 
+#if 0
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         osLog(LOG_ERROR, "SDL_Init Error: %s. \n", SDL_GetError());
@@ -242,5 +272,7 @@ int main(int, char**)
     SDL_FreeSurface(image);
     SDL_DestroyWindow(window);
     SDL_Quit();
+#endif
+
     return 0;
 }
