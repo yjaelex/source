@@ -54,6 +54,7 @@ pvoid osCreateCmdLineOptHandler(int argc, char ** argv, CmdOpt * pCmdOpt, uint32
 bool osGetOpt(pvoid handler, int * pID, bool * pErr);
 bool osDoMultiArgs(pvoid handler, int  nMultiArgs, pfnDoMultiArgsCB pFunc);
 bool osDoArgs(pvoid handler, pfnDoArgsCB pFunc);
+void osOptArgsStop(pvoid handler);
 
 #endif
 

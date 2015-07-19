@@ -90,6 +90,20 @@ pvoid VideoLibraryJobMgr::PushJobRequest(uint32 jobType, uint32 argc, char ** ar
     return NULL;
 }
 
+void VideoLibraryJobMgr::WaitAll()
+{
+    for (uint32 i = 0; i < m_JobReqList.size(); i++)
+    {
+        TransformVideoRequest * req = (TransformVideoRequest*)m_JobReqList.front();
+        m_JobReqList.pop_front();
+
+        while (req->IsReqProcessed() == false)
+        {
+            osThreadSuspend(1000);
+        }
+    }
+}
+
 void VideoLibraryJobMgr::AbortJob(pvoid job)
 {
     AbstractRequest * req = (AbstractRequest*)job;

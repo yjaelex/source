@@ -28,6 +28,7 @@ public:
 
     void AbortJob(pvoid job);
     void AbortAllJobs();
+    void WaitAll();
 
 private:
     list <pvoid>                  m_JobReqList;

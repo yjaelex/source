@@ -6,6 +6,7 @@
 
 #include "VideoFileClass.h"
 #include "MP4FileClass.h"
+#include "TransformVideoFile.h"
 #include <os.h>
 
 #include <curl/curl.h>
@@ -171,6 +172,7 @@ CmdOpt g_rgOptions[] =
     { 2, ("--url"), OPT_TYPE_REQ_SEP },
     { 3, ("trans"), OPT_TYPE_NONE },
     { OPT_MULTI, ("--multiURL"), OPT_TYPE_MULTI },
+    { OPT_MULTI2,("--urls"), OPT_TYPE_MULTI },
     { OPT_STOP, ("--"), OPT_TYPE_NONE }
 };
 
@@ -181,11 +183,82 @@ static void ShowUsage()
         "\n"
         "-o format          Set output video file format. (raw ts) \n"
         "--url ARG          URL of remote input video file\n"
-        "--multi N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n"
+        "--multiURL N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n"
+        "           N:          number of urls.\n"
+        "           ARG-(1~N) : urls list\n"
+        "--urls urlFormatStr numberOfurls      a formatted url string, just like printf.\n"
         "\n"
         "-?  -h  -help  --help                       Output this help.\n"
         "\n"
         );
+}
+
+static vector<string> urlStrings;
+static uint32 outPutForamt = 0;     // 0 : raw; 1 : ts
+
+bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgsText)
+{
+    osAssert(pOptText && pArgsText);
+
+    if (Id == OPT_MULTI2)
+    {
+        static string tempStr;
+        char buffer[256] = { 0 };
+        if (nArgIndex == 0)
+        {
+            urlStrings.clear();
+            tempStr.assign(pArgsText);
+        }
+        else if (1 == nArgIndex)
+        {
+            int num = atoi(pArgsText);
+            for (int i = 0; i < num; i++)
+            {
+                buffer[0] = 0;
+                sprintf_s(buffer, sizeof(buffer), tempStr.c_str(), i);
+                urlStrings.push_back(string(buffer));
+            }
+        }
+    }
+    else if (Id == OPT_MULTI)
+    {
+        if (nArgIndex == 0)
+        {
+            urlStrings.clear();
+        }
+        urlStrings.push_back(string(pArgsText));
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DoArgsCB(int Id, const char * pOptText, char * pArgsText)
+{
+    switch (Id)
+    {
+    case 1:
+        // Set output video file format. (raw ts)
+        osAssert(pArgsText);
+        outPutForamt = (uint32)atoi(pArgsText);
+        break;
+    case 2:
+        // Single URL of remote input video file.
+        osAssert(pArgsText);
+        urlStrings.clear();
+        urlStrings.push_back(string(pArgsText));
+        break;
+    case 3:
+        // Video Cmd to use. transform only currently.
+        break;
+    default:
+        break;
+    }
+
+    return true;
 }
 
 int main(int argc, char** argv)
@@ -193,7 +266,44 @@ int main(int argc, char** argv)
     SDL_Surface *screen = NULL;
     SDL_Surface *image = NULL;
 
+    int optID = 0;
+    bool bError = false;
     pvoid hCmdOpt = osCreateCmdLineOptHandler(argc, argv, g_rgOptions, sizeof(g_rgOptions) / sizeof(CmdOpt));
+    while (osGetOpt(hCmdOpt, &optID, &bError))
+    {
+        if (bError)
+        {
+            continue;
+        }
+
+        switch (optID)
+        {
+        case OPT_HELP:
+            ShowUsage();
+            return 0;
+        case OPT_MULTI:
+            osDoMultiArgs(hCmdOpt, -1, DoMultiArgsCB);
+            break;
+        case OPT_MULTI2:
+            osDoMultiArgs(hCmdOpt, 2, DoMultiArgsCB);
+            break;
+        case OPT_STOP:
+            osOptArgsStop(hCmdOpt);
+        default:
+            osDoArgs(hCmdOpt, DoArgsCB);
+            break;
+        }
+    }
+
+    VideoLibraryJobMgr jobMgr;
+    for (uint32 i = 0; i < urlStrings.size(); i++)
+    {
+        char * pStr = const_cast<char*>(urlStrings[i].c_str());
+        jobMgr.PushJobRequest(VP_JOB_TRANSFORM_FILES, 1, &(pStr));
+        osThreadSuspend(1000);
+    }
+    jobMgr.WaitAll();
+    return 0;
 
     //dumpFileInfo("sample.mp4");
     //testCurl();

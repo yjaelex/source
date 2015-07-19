@@ -144,45 +144,66 @@ static const TCHAR * GetLastErrorText(int a_nError)
     }
 }
 
+typedef struct CmdOptHandle
+{
+    char** myArgv = NULL;
+    CSimpleOpt::SOption * pOptions = NULL;
+    CSimpleOpt * pArgs;
+}CmdOptHandle;
+
 pvoid osCreateCmdLineOptHandler(int argc, char ** argv, CmdOpt * pCmdOpt, uint32 nNumOfOpts)
 {
     int myArgc = argc + sizeof(g_rgFlags) / sizeof(CSimpleOpt::SOption) - 1;
-    char** myArgv = (char**)osMalloc(sizeof(char*)*(myArgc));
+
+    CmdOptHandle * handler = new CmdOptHandle();
+    if (handler == NULL) return NULL;
+
+    handler->myArgv = (char**)osMalloc(sizeof(char*)*(myArgc));
     uint32 i = 0;
 
-    if (myArgv == NULL) return NULL;
-    memcpy(myArgv, argv, sizeof(char*)*argc);
+    if (handler->myArgv == NULL) return NULL;
+    memcpy(handler->myArgv, argv, sizeof(char*)*argc);
     while (g_rgFlags[i].nId != -1)
     {
-        myArgv[i + argc] = const_cast<char*>(g_rgFlags[i].pszArg);
+        handler->myArgv[i + argc] = const_cast<char*>(g_rgFlags[i].pszArg);
         i++;
     }
     osAssert((i + argc) == myArgc);
 
-    int nFlags = SO_O_USEALL;
-    CSimpleOpt * pArgs = new CSimpleOpt(myArgc, myArgv, g_rgFlags, SO_O_NOERR | SO_O_EXACT);
-    if (pArgs == NULL) return NULL;
-    while (pArgs->Next())
+    handler->pOptions = (CSimpleOpt::SOption*) osMalloc(sizeof(CSimpleOpt::SOption)*(nNumOfOpts + 1));
+    if (handler->pOptions == NULL)
     {
-        nFlags |= pArgs->OptionId();
+        osFree(handler->myArgv);
+        return NULL;
     }
 
-    CSimpleOpt::SOption * pOptions = (CSimpleOpt::SOption*) osMalloc(sizeof(CSimpleOpt::SOption)*(nNumOfOpts+1));
-    if (pOptions == NULL) return NULL;
-    memcpy(pOptions, pCmdOpt, sizeof(CSimpleOpt::SOption)*(nNumOfOpts));
-    pOptions[nNumOfOpts] = g_endOpt;
+    memcpy(handler->pOptions, pCmdOpt, sizeof(CSimpleOpt::SOption)*(nNumOfOpts));
+    handler->pOptions[nNumOfOpts] = g_endOpt;
 
-    pArgs->Init(pArgs->FileCount(), pArgs->Files(), pOptions, nFlags);
-    osFree(myArgv);
-    osFree(pOptions);
+    int nFlags = SO_O_USEALL;
+    handler->pArgs = new CSimpleOpt(myArgc, handler->myArgv, handler->pOptions, SO_O_NOERR | SO_O_EXACT);
+    if (handler->pArgs == NULL)
+    {
+        osFree(handler->myArgv);
+        osFree(handler->pOptions);
+        handler->myArgv = NULL;
+        handler->pOptions = NULL;
+        return NULL;
+    }
 
-    return pArgs;
+    return handler;
+}
+
+void osOptArgsStop(pvoid handler)
+{
+    CSimpleOpt * pArgs = ((CmdOptHandle *)handler)->pArgs;
+    pArgs->Stop();
 }
 
 bool osGetOpt(pvoid handler, int * pID, bool * pErr)
 {
     osAssert(handler && pID);
-    CSimpleOpt * pArgs = (CSimpleOpt *)handler;
+    CSimpleOpt * pArgs = ((CmdOptHandle *)handler)->pArgs;
     bool ret = pArgs->Next();
     if (!ret) return ret;
 
@@ -201,7 +222,7 @@ bool osGetOpt(pvoid handler, int * pID, bool * pErr)
 bool osDoMultiArgs(pvoid handler, int  nMultiArgs, pfnDoMultiArgsCB pFunc)
 {
     osAssert(handler && pFunc);
-    CSimpleOpt * pArgs = (CSimpleOpt *)handler;
+    CSimpleOpt * pArgs = ((CmdOptHandle *)handler)->pArgs;
     TCHAR ** rgpszArg = NULL;
 
     // get the number of arguments if necessary
@@ -239,7 +260,7 @@ bool osDoMultiArgs(pvoid handler, int  nMultiArgs, pfnDoMultiArgsCB pFunc)
 bool osDoArgs(pvoid handler, pfnDoArgsCB pFunc)
 {
     osAssert(handler && pFunc);
-    CSimpleOpt * pArgs = (CSimpleOpt *)handler;
+    CSimpleOpt * pArgs = ((CmdOptHandle *)handler)->pArgs;
     char * pArgStr = pArgs->OptionArg();
 
     pFunc(pArgs->OptionId(), pArgs->OptionText(), pArgs->OptionArg());
@@ -249,7 +270,9 @@ bool osDoArgs(pvoid handler, pfnDoArgsCB pFunc)
 void osDestroyCmdLineOptHandler(pvoid handler)
 {
     osAssert(handler);
-    CSimpleOpt * pArgs = (CSimpleOpt *)handler;
+    CSimpleOpt * pArgs = (CSimpleOpt *)((CmdOptHandle *)handler)->pArgs;
+    osFree(((CmdOptHandle *)handler)->myArgv);
+    osFree(((CmdOptHandle *)handler)->pOptions);
     delete pArgs;
 }
 
