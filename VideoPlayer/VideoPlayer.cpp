@@ -207,7 +207,13 @@ bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgs
         if (nArgIndex == 0)
         {
             urlStrings.clear();
-            tempStr.assign(pArgsText);
+            // formatted url string "http://.../.../.../...%d.mp4"
+            string s;
+            s.assign(pArgsText);
+            std::size_t found = s.find_last_of("%");
+            tempStr = s.substr(0, found + 1);
+            tempStr.append("03");
+            tempStr.append((s.substr(found + 1)).c_str());
         }
         else if (1 == nArgIndex)
         {
