@@ -15,8 +15,8 @@
 
 static CSimpleOpt::SOption g_rgFlags[] =
 {
-    { SO_O_CLUMP, _T("--clump"), SO_NONE },
-    { SO_O_ICASE_SHORT, _T("--icase-short"), SO_NONE },
+    //{ SO_O_CLUMP, _T("--clump"), SO_NONE },
+    //{ SO_O_ICASE_SHORT, _T("--icase-short"), SO_NONE },
     SO_END_OF_OPTIONS,
 };
 

@@ -19,6 +19,8 @@ public:
 	MP4FileClass()
 	{
         m_vMP4Track.clear();
+        m_pRootBox = NULL;
+        m_createFlags = 0;
 	}
 
 	~MP4FileClass()

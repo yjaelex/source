@@ -2,7 +2,7 @@
 #define _OS_GETOPT_H
 #include "os.h"
 
-enum { OPT_HELP = 0, OPT_MULTI = 100, OPT_MULTI0, OPT_MULTI1, OPT_MULTI2, OPT_STOP };
+enum { OPT_HELP = 0, OPT_MULTI = 100, OPT_MULTI0, OPT_MULTI1, OPT_MULTI2, OPT_MULTI3, OPT_MULTI4, OPT_STOP };
 
 typedef enum OptArgType {
     /*! No argument. Just the option flags.

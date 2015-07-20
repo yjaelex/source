@@ -242,6 +242,7 @@ public:
     bool          _bSaveToFile;
     File*         _file;
     bool          _bASync;           // sync io means read/write
+    uint64        _err_code;
     osEventHandle _eventHandle;
     osLockHandle  _lock;
     bool          _threadActive;

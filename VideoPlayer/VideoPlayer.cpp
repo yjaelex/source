@@ -172,7 +172,7 @@ CmdOpt g_rgOptions[] =
     { 2, ("--url"), OPT_TYPE_REQ_SEP },
     { 3, ("trans"), OPT_TYPE_NONE },
     { OPT_MULTI, ("--multiURL"), OPT_TYPE_MULTI },
-    { OPT_MULTI2,("--urls"), OPT_TYPE_MULTI },
+    { OPT_MULTI3,("--urls"), OPT_TYPE_MULTI },
     { OPT_STOP, ("--"), OPT_TYPE_NONE }
 };
 
@@ -186,9 +186,9 @@ static void ShowUsage()
         "--multiURL N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n"
         "           N:          number of urls.\n"
         "           ARG-(1~N) : urls list\n"
-        "--urls urlFormatStr numberOfurls      a formatted url string, just like printf.\n"
+        "--urls urlFormatStr beginNum  numberOfurls   a formatted url string, just like printf.\n"
         "\n"
-        "-?  -h  -help  --help                       Output this help.\n"
+        "-?  -h  -help  --help                        Output this help.\n"
         "\n"
         );
 }
@@ -200,13 +200,15 @@ bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgs
 {
     osAssert(pOptText && pArgsText);
 
-    if (Id == OPT_MULTI2)
+    if (Id == OPT_MULTI3)
     {
         static string tempStr;
+        static int beginNum = 0;
         char buffer[256] = { 0 };
         if (nArgIndex == 0)
         {
             urlStrings.clear();
+            beginNum = 0;
             // formatted url string "http://.../.../.../...%d.mp4"
             string s;
             s.assign(pArgsText);
@@ -217,8 +219,12 @@ bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgs
         }
         else if (1 == nArgIndex)
         {
+            beginNum = atoi(pArgsText);
+        }
+        else if (2 == nArgIndex)
+        {
             int num = atoi(pArgsText);
-            for (int i = 0; i < num; i++)
+            for (int i = beginNum; i < beginNum + num; i++)
             {
                 buffer[0] = 0;
                 sprintf_s(buffer, sizeof(buffer), tempStr.c_str(), i);
@@ -290,8 +296,8 @@ int main(int argc, char** argv)
         case OPT_MULTI:
             osDoMultiArgs(hCmdOpt, -1, DoMultiArgsCB);
             break;
-        case OPT_MULTI2:
-            osDoMultiArgs(hCmdOpt, 2, DoMultiArgsCB);
+        case OPT_MULTI3:
+            osDoMultiArgs(hCmdOpt, 3, DoMultiArgsCB);
             break;
         case OPT_STOP:
             osOptArgsStop(hCmdOpt);

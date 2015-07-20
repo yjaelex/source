@@ -110,7 +110,6 @@ bool VideoFileClass::ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file)
         return true;
 
     osAssert(buf);
-    osWARNING(m_numReadBits > 0);
 
     if (m_memoryBuffer) {
         if (m_memoryBufferPosition + bufsiz > m_memoryBufferSize)

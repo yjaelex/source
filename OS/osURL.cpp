@@ -24,6 +24,7 @@ URLFile::URLFile(std::string name_, Mode mode_, bool saveToFile)
     _file = NULL;
     _curlJobDone = false;
     _curlWriteSize = 0;
+    _err_code = 0;
 }
 
 URLFile::~URLFile()
@@ -146,10 +147,14 @@ static osThreadExitCode threadFunc(uintp param)
         startTime = osQueryNanosecondTimer();
         osDump(8, "*** CURL START TIME: %lld ns \n", startTime);
 
+        uint32 http_code = 0;
         CURLcode retCode = curl_easy_perform(urlFile->_curl);
+        curl_easy_getinfo(urlFile->_curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (retCode != CURLE_OK)
         {
             osLog(LOG_ERROR, "CURL: write fail.");
+            urlFile->_err_code = (retCode << 32) | http_code;
+            urlFile->_curlJobDone = false;
             return OS_THREAD_FAILED;
         }
         urlFile->_curlJobDone = true;
@@ -222,14 +227,30 @@ URLFile::open(std::string name_, Mode mode_)
     curl_easy_setopt(_curl, CURLOPT_HEADER, 1);
     curl_easy_setopt(_curl,CURLOPT_NOBODY,1);
     retCode = curl_easy_perform(_curl);
+    uint32 http_code = 0;
     if (retCode == CURLE_OK)
     {
         curl_easy_getinfo(_curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &filesize);
-        _size = (filesize < 0.0001) ? -1 : (uint64_t)filesize;
+        curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &http_code);
+        if (http_code == 200 && retCode != CURLE_ABORTED_BY_CALLBACK)
+        {
+            //Succeeded
+            _size = (filesize < 0.0001) ? -1 : (uint64_t)filesize;
+        }
+        else
+        {
+            //Failed
+            osLog(LOG_ERROR, "CURL: open fail. Error Code: %d", http_code);
+            _err_code = (retCode << 32) | http_code;
+            _size = 0;
+            return true;
+        }
+
     }
     else
     {
         osLog(LOG_ERROR, "CURL: open fail.");
+        _size = 0;
         return true;
     }
 
