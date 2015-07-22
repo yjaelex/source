@@ -11,6 +11,8 @@
 
 #include <curl/curl.h>
 
+#include <curses.h>
+
 //Screen attributes
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -273,10 +275,68 @@ bool DoArgsCB(int Id, const char * pOptText, char * pArgsText)
     return true;
 }
 
+int curses_row, curses_col;				/* to store the number of rows and *
+                                         * the number of colums of the screen */
+char * strBuf = NULL;
+
+void initCurses()
+{
+    char mesg[] = "***  Video Library Demo Interface  ***";
+    WINDOW* _window = initscr();				/* start the curses mode */
+    getmaxyx(stdscr, curses_row, curses_col);   /* get the number of rows and columns */
+
+    /* Resize the terminal to something larger than the physical screen */
+    resize_term(2000, 2000);
+    /* Get the largest physical screen dimensions */
+    getmaxyx(_window, curses_row, curses_col);
+
+    curses_row = curses_row * 3 / 4;
+    curses_col = curses_col * 3 / 4;
+
+    /* Resize so it fits */
+    resize_term(curses_row - 1, curses_col - 1);
+    /* Get the screen dimensions that fit */
+    getmaxyx(_window, curses_row, curses_col);
+
+    if (has_colors() == TRUE)
+    {
+        start_color();			                    /* Start color 			*/
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        attron(COLOR_PAIR(1));
+    }
+
+    mvprintw((curses_row / 2), (curses_col - strlen(mesg)) / 2, "%s", mesg);
+    /* print the message at the center of the screen */
+    strBuf = (char*)osMalloc(2*curses_col);
+    memset(strBuf, '_', curses_col);
+    strBuf[curses_col] = 0;
+    mvprintw((curses_row / 2) - 1, 0, "%s", strBuf);
+    refresh();
+}
+
+int doCurses(int argc, char** argv)
+{
+    strBuf[0] = 0;
+    getstr(strBuf);
+
+    return 0;
+}
+
+void exitCurses()
+{
+    if (strBuf)     osFree(strBuf);
+    endwin();			            /* End curses mode		  */
+    curses_row = curses_col = 0;
+}
+
 int main(int argc, char** argv)
 {
-    SDL_Surface *screen = NULL;
-    SDL_Surface *image = NULL;
+    //SDL_Surface *screen = NULL;
+    //SDL_Surface *image = NULL;
+
+    initCurses();
+
+    while (1);
 
     int optID = 0;
     bool bError = false;
