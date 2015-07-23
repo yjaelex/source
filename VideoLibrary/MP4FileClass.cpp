@@ -164,7 +164,12 @@ bool MP4FileClass::Extract264RawData(const char * fileName)
         sampleSize = 0;
         isSyncSample = false;
         sampleSize = ReadSample(trackId, i + 1, pBuffer, maxSize + 1, &isSyncSample, NULL, NULL, NULL);
-        osAssert(sampleSize && (sampleSize != (uint32)-1));
+        if (!sampleSize || (sampleSize == (uint32)-1))
+        {
+            pFile->close();
+            delete pFile;
+            return false;
+        }
 
         if (isSyncSample && i)
         {
