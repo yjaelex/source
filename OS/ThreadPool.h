@@ -121,7 +121,7 @@ public:
         return m_usRequestID;
     }
     // Abort the processing of the request.
-    void Abort()
+    virtual void Abort()
     {
         AutoLock LockRequest( m_LockWorkerThread );
         m_bAborted = true;

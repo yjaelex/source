@@ -25,6 +25,8 @@ URLFile::URLFile(std::string name_, Mode mode_, bool saveToFile)
     _curlJobDone = false;
     _curlWriteSize = 0;
     _err_code = 0;
+    _bJobAborted = false;
+    _bAborting = false;
 }
 
 URLFile::~URLFile()
@@ -51,6 +53,11 @@ static size_t write_callback(char *buffer,
     URLFile *urlFile = (URLFile *)userp;
     size *= nitems;
     osAssert(urlFile);
+
+    if (urlFile->_bAborting)
+    {
+        return 0;
+    }
 
     if (urlFile->_bSaveToFile)
     {
@@ -152,6 +159,14 @@ static osThreadExitCode threadFunc(uintp param)
         curl_easy_getinfo(urlFile->_curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (retCode != CURLE_OK)
         {
+            if ((CURLE_ABORTED_BY_CALLBACK == retCode) && urlFile->_bAborting)
+            {
+                urlFile->_bAborting = false;
+                urlFile->_bJobAborted = true;
+                urlFile->_curlJobDone = true;
+                return OS_THREAD_SUCCESS;
+            }
+
             osLog(LOG_ERROR, "CURL: write fail.");
             urlFile->_err_code = (retCode << 32) | http_code;
             urlFile->_curlJobDone = false;
@@ -342,12 +357,23 @@ URLFile::read(void* buffer, Size size, Size& nin, Size maxChunkSize)
             CURLcode retCode = curl_easy_perform(_curl);
             if (retCode != CURLE_OK)
             {
+                if ((CURLE_ABORTED_BY_CALLBACK == retCode) && _bAborting)
+                {
+                    _bAborting = false;
+                    _bJobAborted = true;
+                    _curlJobDone = true;
+                    osLog(LOG_INFO, "CURL: job aborted.");
+                    return true;
+                }
+
                 osLog(LOG_ERROR, "CURL: write fail.");
                 return true;
             }
             _curlJobDone = true;
         }
     }
+
+    if (isAborted())    return true;
 
     if (_bASync) osAcquireLock(_lock);
     if (_bSaveToFile)
@@ -397,12 +423,23 @@ URLFile::seek(Size pos)
             CURLcode retCode = curl_easy_perform(_curl);
             if (retCode != CURLE_OK)
             {
+                if ((CURLE_ABORTED_BY_CALLBACK == retCode) && _bAborting)
+                {
+                    _bAborting = false;
+                    _bJobAborted = true;
+                    _curlJobDone = true;
+                    osLog(LOG_INFO, "CURL: job aborted.");
+                    return true;
+                }
+
                 osLog(LOG_ERROR, "CURL: write fail.");
                 return true;
             }
             _curlJobDone = true;
         }
     }
+
+    if (isAborted())    return true;
 
     if (_bSaveToFile)
     {

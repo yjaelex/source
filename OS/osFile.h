@@ -224,6 +224,16 @@ public:
         _bSaveToFile = savetofile;
     }
 
+    void abort()
+    {
+        _bAborting = true;
+    }
+
+    bool isAborted()
+    {
+        return _bJobAborted && !_bAborting;
+    }
+
 private:
     std::string   _name;
     bool          _isOpen;
@@ -250,6 +260,8 @@ public:
     volatile bool          _curlJobDone;
     OSRingBufferWithLock    _ringBuffer;
     CurlData*     _pCurCurlData;
+    bool          _bAborting;
+    bool          _bJobAborted;
 
 public:
     void setName(const std::string& name);
