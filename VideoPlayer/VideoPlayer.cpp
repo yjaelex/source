@@ -314,10 +314,47 @@ void initCurses()
     refresh();
 }
 
+void showHelpInfo()
+{
+    printw("\n   List of commands:\n");
+    printw("   help   --   print this help info.\n");
+    printw("   trans  --   Tranform video files.\n");
+    printw("   abort  --   Abort current jobs.\n");
+    printw("   quit   --   Quit this program.\n");
+}
+
 int doCurses(int argc, char** argv)
 {
     strBuf[0] = 0;
-    getstr(strBuf);
+
+    while (1)
+    {
+        getstr(strBuf);
+
+        if (strncmp(strBuf, "quit", 8) == 0)
+        {
+            break;
+        }
+        else if (strncmp(strBuf, "help", 8) == 0)
+        {
+            showHelpInfo();
+        }
+        else if (strncmp(strBuf, "abort", 8) == 0)
+        {
+            //abortJobs();
+        }
+        else if (strncmp(strBuf, "abort", 8) == 0)
+        {
+            //abortJobs();
+        }
+        else
+        {
+            printw("Invalid command!");
+            showHelpInfo();
+        }
+
+        refresh();
+    }
 
     return 0;
 }
@@ -335,8 +372,9 @@ int main(int argc, char** argv)
     //SDL_Surface *image = NULL;
 
     initCurses();
-
-    while (1);
+    doCurses(argc, argv);
+    exitCurses();
+    return 0;
 
     int optID = 0;
     bool bError = false;
