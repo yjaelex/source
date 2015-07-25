@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Include; ..\..\deps\Include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Include; ..\..\deps\Include;..\..\pdcurses;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\OS\os.h" />
+    <ClInclude Include="..\..\OS\osCurses.h" />
     <ClInclude Include="..\..\OS\osFile.h" />
     <ClInclude Include="..\..\OS\osGetOpt.h" />
     <ClInclude Include="..\..\OS\osRingBuffer.h" />
@@ -94,6 +95,7 @@
     <ClInclude Include="..\..\OS\ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\OS\osCurses.cpp" />
     <ClCompile Include="..\..\OS\osFile.cpp" />
     <ClCompile Include="..\..\OS\osFile_posix.cpp" />
     <ClCompile Include="..\..\OS\osGetOpt.cpp" />

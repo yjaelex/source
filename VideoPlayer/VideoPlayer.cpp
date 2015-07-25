@@ -11,7 +11,7 @@
 
 #include <curl/curl.h>
 
-#include <curses.h>
+#include <osCurses.h>
 
 //Screen attributes
 const int SCREEN_WIDTH = 640;
@@ -275,6 +275,7 @@ bool DoArgsCB(int Id, const char * pOptText, char * pArgsText)
     return true;
 }
 
+#if 0
 int curses_row, curses_col;				/* to store the number of rows and *
                                          * the number of colums of the screen */
 char * strBuf = NULL;
@@ -365,15 +366,16 @@ void exitCurses()
     endwin();			            /* End curses mode		  */
     curses_row = curses_col = 0;
 }
+#endif
 
 int main(int argc, char** argv)
 {
     //SDL_Surface *screen = NULL;
     //SDL_Surface *image = NULL;
 
-    initCurses();
-    doCurses(argc, argv);
-    exitCurses();
+    osCLIHandle hcli = osCreateCmdLineInterface(800, 600, true);
+    osMainLoopCmdLineInterface(hcli, argc, argv);
+    osDesrotyCmdLineInterface(hcli);
     return 0;
 
     int optID = 0;
