@@ -177,26 +177,29 @@ CmdOpt g_rgOptions[] =
     { OPT_MULTI3,("--urls"), OPT_TYPE_MULTI },
     { OPT_STOP, ("--"), OPT_TYPE_NONE }
 };
+static vector<string> urlStrings;
+static uint32 outPutForamt = 0;     // 0 : raw; 1 : ts
+static pvoid cmdWin = NULL;
+static pvoid infoWin = NULL;
+static osCLIHandle hcli = NULL;
+static VideoLibraryJobMgr jobMgr;
 
 static void ShowUsage()
 {
-    osPrintf(
-        "Usage: VideoPlayer [OPTIONS] [URLs]\n"
-        "\n"
-        "-o format          Set output video file format. (raw ts) \n"
-        "--url ARG          URL of remote input video file\n"
-        "--multiURL N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n"
-        "           N:          number of urls.\n"
-        "           ARG-(1~N) : urls list\n"
-        "--urls urlFormatStr beginNum  numberOfurls   a formatted url string, just like printf.\n"
-        "\n"
-        "-?  -h  -help  --help                        Output this help.\n"
-        "\n"
-        );
-}
+    //osPrintf(
 
-static vector<string> urlStrings;
-static uint32 outPutForamt = 0;     // 0 : raw; 1 : ts
+    osPrintCmdLineInterface(hcli, cmdWin, "Usage: trans [OPTIONS] [URLs]\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "-o format          Set output video file format. (raw ts) \n");
+    osPrintCmdLineInterface(hcli, cmdWin, "--url ARG          URL of remote input video file\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "--multiURL N ARG-1 ARG-2 ... ARG-N   Multiple urls.\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "           N:          number of urls.\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "           ARG-(1~N) : urls list\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "--urls urlFormatStr beginNum  numberOfurls   a formatted url string, just like printf.\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "-?  -h  -help  --help                        Output this help.\n");
+    osPrintCmdLineInterface(hcli, cmdWin, "\n");
+}
 
 bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgsText)
 {
@@ -275,109 +278,14 @@ bool DoArgsCB(int Id, const char * pOptText, char * pArgsText)
     return true;
 }
 
-#if 0
-int curses_row, curses_col;				/* to store the number of rows and *
-                                         * the number of colums of the screen */
-char * strBuf = NULL;
-
-void initCurses()
+bool cliAbort(int argc, char** argv)
 {
-    char mesg[] = "***  Video Library Demo Interface  ***";
-    WINDOW* _window = initscr();				/* start the curses mode */
-    getmaxyx(stdscr, curses_row, curses_col);   /* get the number of rows and columns */
 
-    /* Resize the terminal to something larger than the physical screen */
-    resize_term(2000, 2000);
-    /* Get the largest physical screen dimensions */
-    getmaxyx(_window, curses_row, curses_col);
-
-    curses_row = curses_row * 3 / 4;
-    curses_col = curses_col * 3 / 4;
-
-    /* Resize so it fits */
-    resize_term(curses_row - 1, curses_col - 1);
-    /* Get the screen dimensions that fit */
-    getmaxyx(_window, curses_row, curses_col);
-
-    if (has_colors() == TRUE)
-    {
-        start_color();			                    /* Start color 			*/
-        init_pair(1, COLOR_RED, COLOR_BLACK);
-        attron(COLOR_PAIR(1));
-    }
-
-    mvprintw((curses_row / 2), (curses_col - strlen(mesg)) / 2, "%s", mesg);
-    /* print the message at the center of the screen */
-    strBuf = (char*)osMalloc(2*curses_col);
-    memset(strBuf, '_', curses_col);
-    strBuf[curses_col] = 0;
-    mvprintw((curses_row / 2) - 1, 0, "%s", strBuf);
-    refresh();
+    return true;
 }
 
-void showHelpInfo()
+bool cliTransform(int argc, char** argv)
 {
-    printw("\n   List of commands:\n");
-    printw("   help   --   print this help info.\n");
-    printw("   trans  --   Tranform video files.\n");
-    printw("   abort  --   Abort current jobs.\n");
-    printw("   quit   --   Quit this program.\n");
-}
-
-int doCurses(int argc, char** argv)
-{
-    strBuf[0] = 0;
-
-    while (1)
-    {
-        getstr(strBuf);
-
-        if (strncmp(strBuf, "quit", 8) == 0)
-        {
-            break;
-        }
-        else if (strncmp(strBuf, "help", 8) == 0)
-        {
-            showHelpInfo();
-        }
-        else if (strncmp(strBuf, "abort", 8) == 0)
-        {
-            //abortJobs();
-        }
-        else if (strncmp(strBuf, "abort", 8) == 0)
-        {
-            //abortJobs();
-        }
-        else
-        {
-            printw("Invalid command!");
-            showHelpInfo();
-        }
-
-        refresh();
-    }
-
-    return 0;
-}
-
-void exitCurses()
-{
-    if (strBuf)     osFree(strBuf);
-    endwin();			            /* End curses mode		  */
-    curses_row = curses_col = 0;
-}
-#endif
-
-int main(int argc, char** argv)
-{
-    //SDL_Surface *screen = NULL;
-    //SDL_Surface *image = NULL;
-
-    osCLIHandle hcli = osCreateCmdLineInterface(800, 600, true);
-    osMainLoopCmdLineInterface(hcli, argc, argv);
-    osDesrotyCmdLineInterface(hcli);
-    return 0;
-
     int optID = 0;
     bool bError = false;
     pvoid hCmdOpt = osCreateCmdLineOptHandler(argc, argv, g_rgOptions, sizeof(g_rgOptions) / sizeof(CmdOpt));
@@ -407,14 +315,39 @@ int main(int argc, char** argv)
         }
     }
 
-    VideoLibraryJobMgr jobMgr;
     for (uint32 i = 0; i < urlStrings.size(); i++)
     {
         char * pStr = const_cast<char*>(urlStrings[i].c_str());
         jobMgr.PushJobRequest(VP_JOB_TRANSFORM_FILES, 1, &(pStr));
         osThreadSuspend(1000);
     }
-    jobMgr.WaitAll();
+    //jobMgr.WaitAll();
+
+    osDestroyCmdLineOptHandler(hCmdOpt);
+    return true;
+}
+
+void cliInfoWinPrintCB(const char * pstr)
+{
+    osPrintCmdLineInterface(hcli, infoWin, pstr);
+}
+
+int main(int argc, char** argv)
+{
+    //SDL_Surface *screen = NULL;
+    //SDL_Surface *image = NULL;
+    hcli = osCreateCmdLineInterface(800, 600, true);
+    osCLIFuncCB cmbInfo[] = {
+            { string("abort"), string(""), cliAbort },
+            { string("trans"), string(""), cliTransform },
+    };
+    osSetCallBackFuncCmdLineInterface(hcli, sizeof(cmbInfo) / sizeof(osCLIFuncCB), cmbInfo);
+    cmdWin = osGetCmdWinCmdLineInterface(hcli);
+    infoWin = osGetInfoWinCmdLineInterface(hcli);
+    osLogSetPrintCB(cliInfoWinPrintCB);
+
+    osMainLoopCmdLineInterface(hcli, argc, argv);
+    osDesrotyCmdLineInterface(hcli);
     return 0;
 
     //dumpFileInfo("sample.mp4");

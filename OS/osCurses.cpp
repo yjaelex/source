@@ -1,4 +1,5 @@
 #include "osCurses.h"
+#include <sstream>
 
 class osCLI
 {
@@ -40,8 +41,9 @@ public:
         {
             m_downRow = m_upRow / 2;
             m_upRow = m_upRow - m_downRow - 1;
-            m_upWin = subwin(m_winSrc, m_upRow, m_nCol, 0, 0);
-            m_downWin = subwin(m_winSrc, m_downRow, m_nCol, 0, 0);
+            m_nCol = m_nCol - 1;
+            m_upWin = subwin(m_winSrc, m_upRow, m_nCol, 0, 1);
+            m_downWin = subwin(m_winSrc, m_downRow, m_nCol, m_upRow + 1, 1);
             if (!m_upWin || !m_downWin)
             {
                 m_upWin = m_downWin = NULL;
@@ -61,20 +63,22 @@ public:
             }
             m_upWin = NULL;
         }
-        if (m_upWin)    leaveok(m_upWin, TRUE);
+
         keypad(m_downWin, TRUE);   /* enable cursor keys */
         scrollok(m_downWin, TRUE); /* enable scrolling in main window */
 
         if (bSplit)
         {
+            scrollok(m_upWin, TRUE);
             /* print the message at the center of the screen */
             strBuf = (char*)osMalloc(2 * m_nCol);
             memset(strBuf, '_', m_nCol);
             strBuf[m_nCol] = 0;
-            mvprintw(m_downRow - 1, 0, "%s", strBuf);
+            mvprintw(m_upRow, 0, "%s", strBuf);
             refresh();
         }
 
+        move(getbegy(m_downWin), getbegx(m_downWin));
         return true;
     }
 
@@ -89,29 +93,98 @@ public:
         if (strBuf)     osFree(strBuf);
         strBuf = NULL;
         m_upWin = m_downWin = NULL;
+        m_vecCallBack.clear();
     }
 
     bool mainLoop(int argc, char** argv)
     {
         strBuf[0] = 0;
-
+        wmove(m_downWin, 0, 0);
         while (1)
         {
-            getstr(strBuf);
+            wgetstr(m_downWin, strBuf);
 
             if (strncmp(strBuf, "quit", 8) == 0)
             {
                 break;
             }
-            else
+            else if (strncmp(strBuf, "help", 8) == 0)
             {
-                printw("Invalid command!");
                 showHelpInfo();
             }
+            else
+            {
+                std::vector<char*>  args;
+                parseCmdArgs(strBuf, args);
+                if (args.empty())     continue;
 
-            refresh();
+                uint32 i = 0;
+                for (i = 0; i < m_vecCallBack.size(); i++)
+                {
+                    if (strncmp(args[0], m_vecCallBack[i].cmdName.c_str(), 8) == 0)
+                    {
+                        m_vecCallBack[i].pfnFunc(args.size(), &args[0]);
+                        break;
+                    }
+                }
+                freeCmdArgs(args);
+                if (i == m_vecCallBack.size())
+                {
+                    print(CLI_DOWN_WIN, "Invalid command!");
+                    showHelpInfo();
+                }
+            }
+
+            wrefresh(m_downWin);
         }
         return true;
+    }
+
+    void pushCmd(osCLIFuncCB * pCB)
+    {
+        if (!pCB)   return;
+        m_vecCallBack.push_back(*pCB);
+    }
+
+    void print(CLIArea area, const char * str, uint32 * curRow = NULL)
+    {
+        WINDOW * win = NULL;
+        switch (area)
+        {
+        case CLI_UP_WIN:
+            win = m_upWin;
+            break;
+        case CLI_DOWN_WIN:
+        case CLI_SRC:
+            win = m_downWin;
+            break;
+        default:
+            win = m_downWin;
+            break;
+        }
+        osAssert(win);
+        waddstr(win, str);
+        wrefresh(win);
+        if (curRow)     *curRow = getcury(win);
+    }
+
+    WINDOW* getwin(CLIArea area)
+    {
+        WINDOW * win = NULL;
+        switch (area)
+        {
+        case CLI_UP_WIN:
+            win = m_upWin;
+            break;
+        case CLI_DOWN_WIN:
+        case CLI_SRC:
+            win = m_downWin;
+            break;
+        default:
+            win = m_downWin;
+            break;
+        }
+        return win;
     }
 
 private:
@@ -134,16 +207,46 @@ private:
 #endif
     }
 
-    void showHelpInfo()
+    void print(WINDOW * win, const char * str, uint32 * curRow = NULL)
     {
-        waddstr(m_downWin, "\n   List of commands:\n");
-        waddstr(m_downWin, "   help   --   print this help info.\n");
-        waddstr(m_downWin, "   trans  --   Tranform video files.\n");
-        waddstr(m_downWin, "   abort  --   Abort current jobs.\n");
-        waddstr(m_downWin, "   quit   --   Quit this program.\n");
-        wrefresh(m_downWin);
+        osAssert(win);
+        waddstr(win, str);
+        wrefresh(win);
+        if (curRow)     *curRow = getcury(win);
     }
 
+    void showHelpInfo()
+    {
+        print(m_downWin, "\n   List of commands:\n");
+        print(m_downWin, "   help   --   print this help info.\n");
+        print(m_downWin, "   trans  --   Tranform video files.\n");
+        print(m_downWin, "   abort  --   Abort current jobs.\n");
+        print(m_downWin, "   quit   --   Quit this program.\n");
+    }
+
+    void parseCmdArgs(char * cmdStr, std::vector<char *> & args)
+    {
+        std::istringstream iss(cmdStr);
+        std::string token;
+        while (iss >> token)
+        {
+            char *arg = new char[token.size() + 1];
+            std::copy(token.begin(), token.end(), arg);
+            arg[token.size()] = '\0';
+            args.push_back(arg);
+        }
+
+        // now exec with &args[0], and then:
+    }
+
+    void freeCmdArgs(std::vector<char *> & args)
+    {
+        for (size_t i = 0; i < args.size(); i++)
+        {
+            delete[] args[i];
+            args[i] = NULL;
+        }
+    }
 
 private:
     WINDOW*                     m_winSrc;
@@ -155,6 +258,7 @@ private:
     uint32                      m_downRow;
     uint32                      m_nCol;
     char *                      strBuf;
+    vector<osCLIFuncCB>         m_vecCallBack;
 };
 
 osCLIHandle osCreateCmdLineInterface(uint32 width, uint32 height, bool bSplit)
@@ -177,5 +281,34 @@ void osDesrotyCmdLineInterface(osCLIHandle cliHandle)
     pCLI->close();
 
     delete pCLI;
+}
+
+void osSetCallBackFuncCmdLineInterface(osCLIHandle cliHandle, uint32 num, osCLIFuncCB * pCB)
+{
+    osCLI * pCLI = (osCLI*)cliHandle;
+    if (!pCB)   return;
+
+    for (uint32 i = 0; i < num; i++)
+    {
+        pCLI->pushCmd(pCB);
+        pCB++;
+    }
+}
+
+pvoid osGetCmdWinCmdLineInterface(osCLIHandle cliHandle)
+{
+    osCLI * pCLI = (osCLI*)cliHandle;
+    return (pvoid) pCLI->getwin(CLI_DOWN_WIN);
+}
+pvoid osGetInfoWinCmdLineInterface(osCLIHandle cliHandle)
+{
+    osCLI * pCLI = (osCLI*)cliHandle;
+    return (pvoid)pCLI->getwin(CLI_UP_WIN);
+}
+
+void osPrintCmdLineInterface(osCLIHandle cliHandle, pvoid win, const char * str)
+{
+    osCLI * pCLI = (osCLI*)cliHandle;
+    pCLI->print(CLI_DOWN_WIN, str);
 }
 

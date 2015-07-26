@@ -8,7 +8,7 @@ static char* pLogLevelStr[] = {
     "<LOG_WARN>:",
     "<LOG_ERR >:"
 };
-
+static osLogPrintCB pfnPrintCB = NULL;
 void
 osDump(unsigned int indent, const char *lpszFormat, ...)
 {
@@ -37,20 +37,41 @@ osDump(unsigned int indent, const char *lpszFormat, ...)
 	fflush(fp);
 }
 
+void osLogSetPrintCB(osLogPrintCB pfunc)
+{
+    pfnPrintCB = pfunc;
+}
 
+#define LOG_HEADER_STRING_LEN       16
 void osLog(LOG_LEVEL level, const char * pFormatStr, ...)
 {
     va_list arg;
     static char buf[512] = { 0 };
-
+    char * pStr = buf + LOG_HEADER_STRING_LEN;
     va_start(arg, pFormatStr);
-    vsprintf(buf, pFormatStr, arg);
+    vsprintf(pStr, pFormatStr, arg);
     va_end(arg);
 
     osAssert(level <= LOG_LAST);
 
     if (!g_bLogToFile)
     {
-        printf("%s %s \n", pLogLevelStr[level], buf);
+        if (!pfnPrintCB)
+        {
+            printf("%s %s \n", pLogLevelStr[level], pStr);
+        }
+        else
+        {
+            char* pHdr = pLogLevelStr[level];
+            uint32 len = strlen(pHdr);
+            len = min(len, LOG_HEADER_STRING_LEN);
+            pStr = pStr - len;
+            char * p = pStr;
+            while (len--)
+            {
+                *pStr++ = *pHdr++;
+            }
+            pfnPrintCB(p);
+        }
     }
 }

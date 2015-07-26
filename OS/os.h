@@ -12,7 +12,9 @@ typedef enum {
     LOG_LAST = LOG_ERROR
 } LOG_LEVEL;
 
+typedef void(*osLogPrintCB)(const char * str);
 void osLog(LOG_LEVEL level, const char * pFormatStr, ...);
+void osLogSetPrintCB(osLogPrintCB pfunc);
 
 #define STRINGIFY(x)  #x
 #define DO_ASSERT assert
