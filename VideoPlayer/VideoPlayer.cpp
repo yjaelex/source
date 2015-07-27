@@ -280,7 +280,7 @@ bool DoArgsCB(int Id, const char * pOptText, char * pArgsText)
 
 bool cliAbort(int argc, char** argv)
 {
-
+    jobMgr.AbortAllJobs();
     return true;
 }
 

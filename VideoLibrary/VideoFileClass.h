@@ -4,6 +4,7 @@
 #include "os.h"
 #include "vptypes.h"
 #include "vpUtil.h"
+#include "osException.h"
 
 #define WORD_SIZE sizeof(long)
 #if WORDS_BIGENDIAN

@@ -8,7 +8,8 @@ bool VideoFileClass::Open(const char* fileName, File::Mode mode, FileProvider* p
     m_file = new File(fileName, mode, provider ? provider : NULL);
     if (m_file->open())
     {
-        osAssert(!"Open File failed!");
+        //osAssert(!"Open File failed!");
+        osLog(LOG_ERROR, "Open File failed!! File: %s", fileName);
         return false;
     }
 
@@ -89,7 +90,11 @@ void VideoFileClass::SetPosition(uint64_t pos, File* file)
 
     osAssert(file);
     if (file->seek(pos))
-        osAssert(!"seek failed");
+    {
+        //osAssert(!"seek failed");
+        osLog(LOG_ERROR, "seek failed");
+        throw new osException("Seeking Failed!", __FILE__, __LINE__, __FUNCTION__);
+    }
 }
 
 uint64_t VideoFileClass::GetSize(File* file)
@@ -129,13 +134,17 @@ bool VideoFileClass::ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file)
     File::Size nin;
     if (file->read(buf, bufsiz, nin))
     {
-        osAssert(!"read failed");
+        //osAssert(!"read failed");
+        osLog(LOG_ERROR, "read failed");
+        throw new osException("Reading File Failed!", __FILE__, __LINE__, __FUNCTION__);
         return false;
     }
 
     if (nin != bufsiz)
     {
-        osAssert(!"not enough bytes, reached end-of-file");
+        //osAssert(!"not enough bytes, reached end-of-file");
+        osLog(LOG_ERROR, "not enough bytes, reached end-of-file");
+        throw new osException("not enough bytes, reached end-of-file", __FILE__, __LINE__, __FUNCTION__);
         return false;
     }
 

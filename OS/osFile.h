@@ -262,6 +262,8 @@ public:
     CurlData*     _pCurCurlData;
     bool          _bAborting;
     bool          _bJobAborted;
+    double          _lastRunTime;
+
 
 public:
     void setName(const std::string& name);

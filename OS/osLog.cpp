@@ -65,6 +65,9 @@ void osLog(LOG_LEVEL level, const char * pFormatStr, ...)
             char* pHdr = pLogLevelStr[level];
             uint32 len = strlen(pHdr);
             len = min(len, LOG_HEADER_STRING_LEN);
+            uint32 logStrLen = strlen(pStr);
+            pStr[logStrLen] = '\n';
+            pStr[logStrLen + 1] = 0;
             pStr = pStr - len;
             char * p = pStr;
             while (len--)

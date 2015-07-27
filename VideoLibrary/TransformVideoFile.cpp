@@ -19,27 +19,33 @@ static bool transformSingleVideoFile(MP4FileClass * mp4File, URLFile * urlFile)
     FileProvider* provider = (FileProvider*)urlFile;
     string urlStr = urlFile->name;
 
-    osDump(0, "Transform Video File start!\n");
-    osDump(4, "URL: %s \n", urlStr.c_str());
     startTime = osQueryNanosecondTimer();
-    osDump(4, "START TIME: %lld ns \n", startTime);
+    osLog(LOG_INFO, "Transform File: %s!", urlStr.c_str());
     
-    mp4File->Open(urlStr.c_str(), File::MODE_READ, provider);
-    mp4File->ReadFromFile();
-    if (urlFile->isAborted())     return false;
+    try{
+        mp4File->Open(urlStr.c_str(), File::MODE_READ, provider);
+        mp4File->ReadFromFile();
 
-    std::string fileName;
-    std::size_t found = urlStr.find_last_of("/\\");
-    fileName = urlStr.substr(found + 1);
-    char h264FileName[64] = { 0 };
-    sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", fileName.c_str());
-    mp4File->Extract264RawData(h264FileName);
-    mp4File->Close();
-    if (urlFile->isAborted())     return false;
+        std::string fileName;
+        std::size_t found = urlStr.find_last_of("/\\");
+        fileName = urlStr.substr(found + 1);
+        char h264FileName[64] = { 0 };
+        sprintf_s(h264FileName, sizeof(h264FileName), "%s.264", fileName.c_str());
+        mp4File->Extract264RawData(h264FileName);
+        mp4File->Close();
+    }
+    catch (osException * excep){
+        osLog(LOG_INFO, "Execptions: %s", excep->msg().c_str());
+        if (urlFile->isAborted())
+        {
+            osLog(LOG_INFO, "%s downloading aborted!", urlStr.c_str());
+        }
+        mp4File->Close();
+        return false;
+    }
 
     endTime = osQueryNanosecondTimer();
-    osDump(4, "END TIME  : %lld ns. Total: %f s. \n", endTime, ((float)(endTime - startTime)) / 1000000000);
-
+    osLog(LOG_INFO, "Transform Done. Total time: %f s. File: %s! ", ((float)(endTime - startTime)) / 1000000000, urlStr.c_str());
     return true;
 }
 
@@ -132,5 +138,13 @@ void VideoLibraryJobMgr::AbortJob(pvoid job)
 }
 void VideoLibraryJobMgr::AbortAllJobs()
 {
-
+    for (uint32 i = 0; i < m_JobReqList.size(); i++)
+    {
+        TransformVideoRequest * req = (TransformVideoRequest*)m_JobReqList.front();
+        if (req)
+        {
+            req->Abort();
+        }
+        m_JobReqList.pop_front();
+    }
 }

@@ -69,6 +69,7 @@ public:
 
         if (bSplit)
         {
+            //leaveok(m_upWin, TRUE);
             scrollok(m_upWin, TRUE);
             /* print the message at the center of the screen */
             strBuf = (char*)osMalloc(2 * m_nCol);
@@ -168,6 +169,14 @@ public:
         if (curRow)     *curRow = getcury(win);
     }
 
+    void print(WINDOW * win, const char * str, uint32 * curRow = NULL)
+    {
+        osAssert(win);
+        waddstr(win, str);
+        wrefresh(win);
+        if (curRow)     *curRow = getcury(win);
+    }
+
     WINDOW* getwin(CLIArea area)
     {
         WINDOW * win = NULL;
@@ -205,14 +214,6 @@ private:
         init_pair(7, COLOR_BLACK, COLOR_CYAN);
         init_pair(8, COLOR_WHITE, COLOR_BLACK);
 #endif
-    }
-
-    void print(WINDOW * win, const char * str, uint32 * curRow = NULL)
-    {
-        osAssert(win);
-        waddstr(win, str);
-        wrefresh(win);
-        if (curRow)     *curRow = getcury(win);
     }
 
     void showHelpInfo()
@@ -309,6 +310,6 @@ pvoid osGetInfoWinCmdLineInterface(osCLIHandle cliHandle)
 void osPrintCmdLineInterface(osCLIHandle cliHandle, pvoid win, const char * str)
 {
     osCLI * pCLI = (osCLI*)cliHandle;
-    pCLI->print(CLI_DOWN_WIN, str);
+    pCLI->print((WINDOW*)win, str);
 }
 

@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\OS\osCurses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\OS\osException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\OS\osMisc.cpp">
@@ -78,6 +81,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\OS\osLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OS\osException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\OS\os.h" />
     <ClInclude Include="..\..\OS\osCurses.h" />
+    <ClInclude Include="..\..\OS\osException.h" />
     <ClInclude Include="..\..\OS\osFile.h" />
     <ClInclude Include="..\..\OS\osGetOpt.h" />
     <ClInclude Include="..\..\OS\osRingBuffer.h" />
@@ -96,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\OS\osCurses.cpp" />
+    <ClCompile Include="..\..\OS\osException.cpp" />
     <ClCompile Include="..\..\OS\osFile.cpp" />
     <ClCompile Include="..\..\OS\osFile_posix.cpp" />
     <ClCompile Include="..\..\OS\osGetOpt.cpp" />

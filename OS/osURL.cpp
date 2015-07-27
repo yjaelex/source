@@ -54,11 +54,6 @@ static size_t write_callback(char *buffer,
     size *= nitems;
     osAssert(urlFile);
 
-    if (urlFile->_bAborting)
-    {
-        return 0;
-    }
-
     if (urlFile->_bSaveToFile)
     {
         FileProvider::Size outSize = 0;
@@ -118,6 +113,55 @@ static size_t write_callback(char *buffer,
     //}
 
     return size;
+}
+
+#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3
+
+static int xferinfo(void *p,
+    curl_off_t dltotal, curl_off_t dlnow,
+    curl_off_t ultotal, curl_off_t ulnow)
+{
+    URLFile *urlFile = (URLFile *)p;
+    CURL *curl = urlFile->_curl;
+    double curtime = 0;
+
+    if (urlFile->_bAborting)
+    {
+        return 1;
+    }
+
+    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &curtime);
+
+    /* under certain circumstances it may be desirable for certain functionality
+    to only run every N seconds, in order to do this the transaction time can
+    be used */
+    if ((curtime - urlFile->_lastRunTime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL)\
+    {
+        urlFile->_lastRunTime = curtime;
+        //fprintf(stderr, "TOTAL TIME: %f \r\n", curtime);
+    }
+
+    std::string fileName;
+    std::size_t found = urlFile->name.find_last_of("/\\");
+    fileName = urlFile->name.substr(found + 1);
+    osLog(LOG_INFO,
+        "File: %s"
+        //"UP: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
+        "  DOWN: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T,
+        fileName.c_str(), dlnow, dltotal);
+    return 0;
+}
+
+/* for libcurl older than 7.32.0 (CURLOPT_PROGRESSFUNCTION) */
+static int older_progress(void *p,
+    double dltotal, double dlnow,
+    double ultotal, double ulnow)
+{
+    return xferinfo(p,
+        (curl_off_t)dltotal,
+        (curl_off_t)dlnow,
+        (curl_off_t)ultotal,
+        (curl_off_t)ulnow);
 }
 
 static osThreadExitCode threadFunc(uintp param)
@@ -280,6 +324,25 @@ URLFile::open(std::string name_, Mode mode_)
     retCode = curl_easy_setopt(_curl, CURLOPT_WRITEDATA, this);
     retCode = curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, write_callback);
     osAssert(retCode == CURLE_OK);
+
+    curl_easy_setopt(_curl, CURLOPT_PROGRESSFUNCTION, older_progress);
+    /* pass the struct pointer into the progress function */
+    curl_easy_setopt(_curl, CURLOPT_PROGRESSDATA, this);
+#if LIBCURL_VERSION_NUM >= 0x072000
+    /* xferinfo was introduced in 7.32.0, no earlier libcurl versions will
+    compile as they won't have the symbols around.
+    If built with a newer libcurl, but running with an older libcurl:
+    curl_easy_setopt() will fail in run-time trying to set the new
+    callback, making the older callback get used.
+    New libcurls will prefer the new callback and instead use that one even
+    if both callbacks are set. */
+    curl_easy_setopt(_curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+    /* pass the struct pointer into the xferinfo function, note that this is
+    an alias to CURLOPT_PROGRESSDATA */
+    curl_easy_setopt(_curl, CURLOPT_XFERINFODATA, this);
+#endif
+    curl_easy_setopt(_curl, CURLOPT_NOPROGRESS, 0L);
+
     if (_bASync)
     {
         // start curl write thread.

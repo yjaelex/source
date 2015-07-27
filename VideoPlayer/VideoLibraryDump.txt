@@ -1,14 +1,4 @@
- Transform Video File start!
-    URL: http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-07-10-14-001.mp4 
-    START TIME: 5193918875876 ns 
- Transform Video File start!
-    URL: http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-07-10-14-002.mp4 
-    START TIME: 5194911844698 ns 
-        *** CURL START TIME: 5195128580175 ns 
- Transform Video File start!
-    URL: http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-07-10-14-003.mp4 
-    START TIME: 5195919248300 ns 
- Transform Video File start!
-    URL: http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-07-10-14-004.mp4 
-    START TIME: 5196933301566 ns 
-        *** CURL START TIME: 5197114192315 ns 
+        *** CURL START TIME: 4325404834771 ns 
+        *** CURL END TIME  : 4564684623912 ns. Total: 239.279785 s. 
+        *** CURL START TIME: 4599720891667 ns 
+        *** CURL START TIME: 4776403760135 ns 
