@@ -103,6 +103,7 @@ public:
         wmove(m_downWin, 0, 0);
         while (1)
         {
+            curs_set(1);
             wgetstr(m_downWin, strBuf);
 
             if (strncmp(strBuf, "quit", 8) == 0)
@@ -154,9 +155,11 @@ public:
         {
         case CLI_UP_WIN:
             win = m_upWin;
+            curs_set(0);
             break;
         case CLI_DOWN_WIN:
         case CLI_SRC:
+            curs_set(1);
             win = m_downWin;
             break;
         default:
@@ -172,6 +175,14 @@ public:
     void print(WINDOW * win, const char * str, uint32 * curRow = NULL)
     {
         osAssert(win);
+        if (win == m_upWin)
+        {
+            curs_set(0);
+        }
+        else
+        {
+            curs_set(1);
+        }
         waddstr(win, str);
         wrefresh(win);
         if (curRow)     *curRow = getcury(win);
