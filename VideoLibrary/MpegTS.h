@@ -116,6 +116,11 @@ public:
         * first packet we write. */
         cc = 15;
     }
+
+    void write_packet(const uint8_t *packet)
+    {
+
+    }
 };
 
 #define MPEGTS_FLAG_REEMIT_PAT_PMT  0x01

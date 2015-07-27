@@ -163,6 +163,8 @@ void tsWriteSection(MpegTSSection *s, uint8_t *buf, uint32 len)
             memset(q, 0xff, left);
         }
 
+        s->write_packet(packet);
+
         buf_ptr += len1;
         len -= len1;
     }
@@ -237,41 +239,65 @@ void tsWritePAT(uint16 * programId, uint16 * pmtPID, uint32 numOfProg)
     tsWriteTableSection(&pat, PAT_TID, 1, 0, 0, 0, data, q - data);
 }
 
-#if 0
-void tsWriteSDT()
+/* NOTE: !str is accepted for an empty string */
+static void putstr8(uint8_t **q_ptr, const char *str)
+{
+    uint8_t *q;
+    int len;
+
+    q = *q_ptr;
+    if (!str)
+        len = 0;
+    else
+        len = strlen(str);
+    *q++ = len;
+    memcpy(q, str, len);
+    q += len;
+    *q_ptr = q;
+}
+
+
+void tsWriteSDT(uint16 program_number)
 {
     uint8_t data[SECTION_LENGTH], *q, *desc_list_len_ptr, *desc_len_ptr;
     int i, running_status, free_ca_mode, val;
 
     q = data;
-    put16(&q, ts->onid);
+    // original_netword_id
+    put16(&q, 1);
+    // reserved 8bits
     *q++ = 0xff;
-        put16(&q, service->sid);
-        *q++ = 0xfc | 0x00; /* currently no EIT info */
-        desc_list_len_ptr = q;
-        q += 2;
-        running_status = 4; /* running */
-        free_ca_mode = 0;
 
-        /* write only one descriptor for the service name and provider */
-        *q++ = 0x48;
-        desc_len_ptr = q;
-        q++;
-        *q++ = ts->service_type;
-        putstr8(&q, service->provider_name);
-        putstr8(&q, service->name);
-        desc_len_ptr[0] = q - desc_len_ptr - 1;
+    ///////////////////////////////////////////////////
+    // one service
+    // service_id:16 bits, PMT:program_number
+    put16(&q, program_number);  // 0x01
+    *q++ = 0xfc | 0x00; /* currently no EIT info */
+    desc_list_len_ptr = q;
+    q += 2;
+    running_status = 4; /* running */
+    free_ca_mode = 0;
 
-        /* fill descriptor length */
-        val = (running_status << 13) | (free_ca_mode << 12) |
-            (q - desc_list_len_ptr - 2);
-        desc_list_len_ptr[0] = val >> 8;
-        desc_list_len_ptr[1] = val;
-    }
-    mpegts_write_section1(&ts->sdt, SDT_TID, ts->tsid, ts->tables_version, 0, 0,
-        data, q - data);
+    /* write only one descriptor for the service name and provider */
+    *q++ = 0x48;
+    desc_len_ptr = q;
+    q++;
+    *q++ = 1;   //service_type
+    putstr8(&q, "Alex-VideoLibrary");
+    putstr8(&q, "AlexVideoService");
+    desc_len_ptr[0] = q - desc_len_ptr - 1;
+
+    /* fill descriptor length */
+    val = (running_status << 13) | (free_ca_mode << 12) |
+        (q - desc_list_len_ptr - 2);
+    desc_list_len_ptr[0] = val >> 8;
+    desc_list_len_ptr[1] = val;
+
+    MpegTSSection sdt;
+    sdt.pid = PAT_PID;
+    tsWriteTableSection(&sdt, SDT_TID, 1, 0, 0, 0, data, q - data);
 }
-#endif
+
 
 static int tsWritePMT(MpegTSProgramInfo * prog)
 {
