@@ -25,7 +25,6 @@ URLFile::URLFile(std::string name_, Mode mode_, bool saveToFile)
     _curlJobDone = false;
     _curlWriteSize = 0;
     _err_code = 0;
-    _bJobAborted = false;
     _bAborting = false;
 }
 
@@ -194,9 +193,9 @@ static osThreadExitCode threadFunc(uintp param)
             pThread->_threadStatus = IO_THREAD_STATUS_IDLE;
         }*/
 
-        uint64 startTime, endTime = 0;
-        startTime = osQueryNanosecondTimer();
-        osDump(8, "*** CURL START TIME: %lld ns \n", startTime);
+        //uint64 startTime, endTime = 0;
+        //startTime = osQueryNanosecondTimer();
+        //osDump(8, "*** CURL START TIME: %lld ns \n", startTime);
 
         uint32 http_code = 0;
         CURLcode retCode = curl_easy_perform(urlFile->_curl);
@@ -206,20 +205,21 @@ static osThreadExitCode threadFunc(uintp param)
             if ((CURLE_ABORTED_BY_CALLBACK == retCode) && urlFile->_bAborting)
             {
                 urlFile->_bAborting = false;
-                urlFile->_bJobAborted = true;
+                urlFile->setErrorCode(FILE_IO_ABORTED);
                 urlFile->_curlJobDone = true;
                 return OS_THREAD_SUCCESS;
             }
 
             osLog(LOG_ERROR, "CURL: write fail.");
             urlFile->_err_code = (retCode << 32) | http_code;
-            urlFile->_curlJobDone = false;
+            urlFile->setErrorCode(FILE_IO_CURL_ERR);
+            urlFile->_curlJobDone = true;
             return OS_THREAD_FAILED;
         }
         urlFile->_curlJobDone = true;
 
-        endTime = osQueryNanosecondTimer();
-        osDump(8, "*** CURL END TIME  : %lld ns. Total: %f s. \n", endTime, ((float)(endTime - startTime)) / 1000000000);
+        //endTime = osQueryNanosecondTimer();
+        //(8, "*** CURL END TIME  : %lld ns. Total: %f s. \n", endTime, ((float)(endTime - startTime)) / 1000000000);
 
         return OS_THREAD_SUCCESS;
     }
@@ -423,13 +423,16 @@ URLFile::read(void* buffer, Size size, Size& nin, Size maxChunkSize)
                 if ((CURLE_ABORTED_BY_CALLBACK == retCode) && _bAborting)
                 {
                     _bAborting = false;
-                    _bJobAborted = true;
+                    setErrorCode(FILE_IO_ABORTED);
                     _curlJobDone = true;
                     osLog(LOG_INFO, "CURL: job aborted.");
                     return true;
                 }
 
-                osLog(LOG_ERROR, "CURL: write fail.");
+                osLog(LOG_ERROR, "CURL: fail. Err code: %d", retCode);
+                setErrorCode(FILE_IO_CURL_ERR);
+                _err_code = (retCode << 32);
+                _curlJobDone = true;
                 return true;
             }
             _curlJobDone = true;
@@ -489,13 +492,15 @@ URLFile::seek(Size pos)
                 if ((CURLE_ABORTED_BY_CALLBACK == retCode) && _bAborting)
                 {
                     _bAborting = false;
-                    _bJobAborted = true;
+                    setErrorCode(FILE_IO_ABORTED);
                     _curlJobDone = true;
                     osLog(LOG_INFO, "CURL: job aborted.");
                     return true;
                 }
 
-                osLog(LOG_ERROR, "CURL: write fail.");
+                osLog(LOG_ERROR, "CURL: fail.  Err code: %d", retCode);
+                setErrorCode(FILE_IO_CURL_ERR);
+                _curlJobDone = true;
                 return true;
             }
             _curlJobDone = true;

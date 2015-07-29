@@ -108,6 +108,15 @@ public:
 
             if (strncmp(strBuf, "quit", 8) == 0)
             {
+                uint32 i = 0;
+                for (i = 0; i < m_vecCallBack.size(); i++)
+                {
+                    if (strncmp("quit", m_vecCallBack[i].cmdName.c_str(), 8) == 0)
+                    {
+                        m_vecCallBack[i].pfnFunc(0, NULL);
+                        break;
+                    }
+                }
                 break;
             }
             else if (strncmp(strBuf, "help", 8) == 0)

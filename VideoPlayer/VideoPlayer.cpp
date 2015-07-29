@@ -215,12 +215,8 @@ bool DoMultiArgsCB(int Id, const char * pOptText, uint32 nArgIndex, char * pArgs
             urlStrings.clear();
             beginNum = 0;
             // formatted url string "http://.../.../.../...%d.mp4"
-            string s;
-            s.assign(pArgsText);
-            std::size_t found = s.find_last_of("%");
-            tempStr = s.substr(0, found + 1);
-            tempStr.append("03");
-            tempStr.append((s.substr(found + 1)).c_str());
+            // example: http://vod.cntv.lxdns.com/flash/live_back/nettv_cctv5/cctv5-2015-07-20-14-%03d.mp4
+            tempStr.assign(pArgsText);
         }
         else if (1 == nArgIndex)
         {
@@ -284,6 +280,12 @@ bool cliAbort(int argc, char** argv)
     return true;
 }
 
+bool cliQuit(int argc, char** argv)
+{
+    jobMgr.AbortAllJobs();
+    return true;
+}
+
 bool cliTransform(int argc, char** argv)
 {
     int optID = 0;
@@ -323,6 +325,7 @@ bool cliTransform(int argc, char** argv)
     }
     //jobMgr.WaitAll();
 
+    urlStrings.clear();
     osDestroyCmdLineOptHandler(hCmdOpt);
     return true;
 }
@@ -340,6 +343,7 @@ int main(int argc, char** argv)
     osCLIFuncCB cmbInfo[] = {
             { string("abort"), string(""), cliAbort },
             { string("trans"), string(""), cliTransform },
+            { string("quit"),  string(""), cliQuit },
     };
     osSetCallBackFuncCmdLineInterface(hcli, sizeof(cmbInfo) / sizeof(osCLIFuncCB), cmbInfo);
     cmdWin = osGetCmdWinCmdLineInterface(hcli);

@@ -125,7 +125,6 @@ public:
     {
         AutoLock LockRequest( m_LockWorkerThread );
         m_bAborted = true;
-        m_bReqProcessed = true;
     }
     // Clear abort flag for re-posting the same request.
     void ClearAbortFlag()
@@ -137,6 +136,14 @@ public:
     bool IsReqProcessed()
     {
         return m_bReqProcessed;
+    }
+
+    void WaitReqprocessed(uint32 waitIntervals = 1000)     // msecs
+    {
+        while (IsReqProcessed() == false)
+        {
+            osThreadSuspend(waitIntervals);
+        }
     }
 protected:
     // Check for the abort request
@@ -151,7 +158,7 @@ protected:
 protected:
     // Synchronization object for resource locking.
     SyncObject m_LockWorkerThread;
-    bool            m_bReqProcessed;
+    volatile bool       m_bReqProcessed;
 private:
     // Abort flag.
     bool m_bAborted;

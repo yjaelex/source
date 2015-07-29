@@ -64,7 +64,9 @@ public:
     virtual void Abort()
     {
         AbstractRequest::Abort();
-        m_urlFile->abort();
+
+        AutoLock LockRequest(m_LockWorkerThread);
+        if (m_mp4File && m_urlFile) m_urlFile->abort();
     }
 
     long Execute()
@@ -83,9 +85,9 @@ public:
 
             transformSingleVideoFile(m_mp4File, m_urlFile);
 
+            AutoLock LockRequest(m_LockWorkerThread);
             delete m_mp4File;
         }
-
         m_bReqProcessed = true;
         return 0;
     }
@@ -115,15 +117,13 @@ pvoid VideoLibraryJobMgr::PushJobRequest(uint32 jobType, uint32 argc, char ** ar
 
 void VideoLibraryJobMgr::WaitAll()
 {
-    for (uint32 i = 0; i < m_JobReqList.size(); i++)
+    uint32 count = m_JobReqList.size();
+    for (uint32 i = 0; i < count; i++)
     {
         TransformVideoRequest * req = (TransformVideoRequest*)m_JobReqList.front();
         m_JobReqList.pop_front();
 
-        while (req->IsReqProcessed() == false)
-        {
-            osThreadSuspend(1000);
-        }
+        req->WaitReqprocessed();
     }
 }
 
@@ -138,12 +138,15 @@ void VideoLibraryJobMgr::AbortJob(pvoid job)
 }
 void VideoLibraryJobMgr::AbortAllJobs()
 {
-    for (uint32 i = 0; i < m_JobReqList.size(); i++)
+    uint32 count = m_JobReqList.size();
+    for (uint32 i = 0; i < count; i++)
     {
         TransformVideoRequest * req = (TransformVideoRequest*)m_JobReqList.front();
         if (req)
         {
             req->Abort();
+            req->WaitReqprocessed();
+            delete req;
         }
         m_JobReqList.pop_front();
     }

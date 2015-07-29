@@ -6,6 +6,21 @@
 #include "osThread.h"
 #include <curl/curl.h>
 
+typedef enum FileIOErrCode
+{
+    FILE_NO_ERR = 0,
+    FILE_IO_ABORTED = 1<<0,
+    FILE_IO_OPEN_ERR = 1<<1,
+    FILE_IO_WRITE_ERR = 1<<2,
+    FILE_IO_READ_ERR = 1<<3,
+    FILE_IO_SEEK_ERR = 1<<4,
+
+    // CURL connection error
+    FILE_IO_CURL_ERR = 1<<23,
+
+    FILE_IO_UNKNOW_ERR = 1<<31,
+}FileIOErrCode;
+
 class FileProvider
 {
 public:
@@ -33,8 +48,25 @@ public:
     virtual bool close() = 0;
 
     virtual int64_t getSize() = 0;
+
+    FileIOErrCode getErrorCode()
+    {
+        return _errCode;
+    }
+
+    void setErrorCode(FileIOErrCode errCode)
+    {
+        _errCode = errCode;
+    }
+
 protected:
-    FileProvider() { }
+    FileProvider()
+    {
+        _errCode = FILE_NO_ERR;
+    }
+
+private:
+    FileIOErrCode _errCode;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,6 +199,15 @@ public:
 
     int64_t getSize();
 
+    FileIOErrCode getErrorCode()
+    {
+        return _provider.getErrorCode();
+    }
+
+    void setErrorCode(FileIOErrCode errCode)
+    {
+        _provider.setErrorCode(errCode);
+    }
 
 private:
     std::string   _name;
@@ -231,7 +272,7 @@ public:
 
     bool isAborted()
     {
-        return _bJobAborted && !_bAborting;
+        return (getErrorCode() & FILE_IO_ABORTED) && !_bAborting;
     }
 
 private:
@@ -261,9 +302,7 @@ public:
     OSRingBufferWithLock    _ringBuffer;
     CurlData*     _pCurCurlData;
     bool          _bAborting;
-    bool          _bJobAborted;
-    double          _lastRunTime;
-
+    double        _lastRunTime;
 
 public:
     void setName(const std::string& name);

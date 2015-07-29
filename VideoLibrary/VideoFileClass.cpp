@@ -92,7 +92,7 @@ void VideoFileClass::SetPosition(uint64_t pos, File* file)
     if (file->seek(pos))
     {
         //osAssert(!"seek failed");
-        osLog(LOG_ERROR, "seek failed");
+        osLog(LOG_ERROR, "seek failed! File: %s ", m_FileName.c_str());
         throw new osException("Seeking Failed!", __FILE__, __LINE__, __FUNCTION__);
     }
 }
@@ -135,7 +135,7 @@ bool VideoFileClass::ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file)
     if (file->read(buf, bufsiz, nin))
     {
         //osAssert(!"read failed");
-        osLog(LOG_ERROR, "read failed");
+        osLog(LOG_ERROR, "read failed! File: %s ", m_FileName.c_str());
         throw new osException("Reading File Failed!", __FILE__, __LINE__, __FUNCTION__);
         return false;
     }
@@ -143,7 +143,7 @@ bool VideoFileClass::ReadBytes(uint8_t* buf, uint32_t bufsiz, File* file)
     if (nin != bufsiz)
     {
         //osAssert(!"not enough bytes, reached end-of-file");
-        osLog(LOG_ERROR, "not enough bytes, reached end-of-file");
+        osLog(LOG_ERROR, "not enough bytes, reached end-of-file! File: %s ", m_FileName.c_str());
         throw new osException("not enough bytes, reached end-of-file", __FILE__, __LINE__, __FUNCTION__);
         return false;
     }
