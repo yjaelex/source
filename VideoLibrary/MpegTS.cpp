@@ -4,6 +4,10 @@
 /* The section length is 12 bits. The first 2 are set to 0, the remaining
 * 10 bits should not exceed 1021. */
 #define SECTION_LENGTH 1020
+#define AV_TIME_BASE            1000000
+#define PCR_TIME_BASE 27000000
+
+
 
 static const uint32_t crc_table[256] =
 {
@@ -524,4 +528,437 @@ static int tsWritePMT(MpegTSProgramInfo * prog)
     return 0;
 }
 
+#include <stdint.h>
+
+enum AVRounding {
+    AV_ROUND_ZERO = 0, ///< Round toward zero.
+    AV_ROUND_INF = 1, ///< Round away from zero.
+    AV_ROUND_DOWN = 2, ///< Round toward -infinity.
+    AV_ROUND_UP = 3, ///< Round toward +infinity.
+    AV_ROUND_NEAR_INF = 5, ///< Round to nearest and halfway cases away from zero.
+    AV_ROUND_PASS_MINMAX = 8192, ///< Flag to pass INT64_MIN/MAX through instead of rescaling, this avoids special cases for AV_NOPTS_VALUE
+};
+/**
+* Rescale a 64-bit integer with rounding to nearest.
+* A simple a*b/c isn't possible as it can overflow.
+*/
+int64_t av_rescale_rnd(int64_t a, int64_t b, int64_t c, enum AVRounding rnd)
+{
+    int64_t r = 0;
+    osAssert(c > 0);
+    osAssert(b >= 0);
+    osAssert((unsigned)(rnd&~AV_ROUND_PASS_MINMAX) <= 5 && (rnd&~AV_ROUND_PASS_MINMAX) != 4);
+
+    if (c <= 0 || b < 0 || !((unsigned)(rnd&~AV_ROUND_PASS_MINMAX) <= 5 && (rnd&~AV_ROUND_PASS_MINMAX) != 4))
+        return INT64_MIN;
+
+    if (rnd & AV_ROUND_PASS_MINMAX) {
+        if (a == INT64_MIN || a == INT64_MAX)
+            return a;
+        rnd = (AVRounding)((uint32)rnd - (uint32)AV_ROUND_PASS_MINMAX);
+    }
+
+    if (a < 0 && a != INT64_MIN)
+        return -av_rescale_rnd(-a, b, c, (AVRounding)((uint32)rnd ^ ((rnd >> 1) & 1)));
+
+    if (rnd == AV_ROUND_NEAR_INF)
+        r = c / 2;
+    else if (rnd & 1)
+        r = c - 1;
+
+    if (b <= INT_MAX && c <= INT_MAX) {
+        if (a <= INT_MAX)
+            return (a * b + r) / c;
+        else
+            return a / c * b + (a % c * b + r) / c;
+    }
+    else {
+#if 1
+        uint64_t a0 = a & 0xFFFFFFFF;
+        uint64_t a1 = a >> 32;
+        uint64_t b0 = b & 0xFFFFFFFF;
+        uint64_t b1 = b >> 32;
+        uint64_t t1 = a0 * b1 + a1 * b0;
+        uint64_t t1a = t1 << 32;
+        int i;
+
+        a0 = a0 * b0 + t1a;
+        a1 = a1 * b1 + (t1 >> 32) + (a0 < t1a);
+        a0 += r;
+        a1 += a0 < r;
+
+        for (i = 63; i >= 0; i--) {
+            a1 += a1 + ((a0 >> i) & 1);
+            t1 += t1;
+            if (c <= a1) {
+                a1 -= c;
+                t1++;
+            }
+        }
+        return t1;
+    }
+#else
+        AVInteger ai;
+        ai = av_mul_i(av_int2i(a), av_int2i(b));
+        ai = av_add_i(ai, av_int2i(r));
+        return av_i2int(av_div_i(ai, av_int2i(c)));
+}
+#endif
+}
+/**
+* Rescale a 64-bit integer with rounding to nearest.
+* A simple a*b/c isn't possible as it can overflow.
+*/
+int64_t av_rescale(int64_t a, int64_t b, int64_t c)
+{
+    return av_rescale_rnd(a, b, c, AV_ROUND_NEAR_INF);
+}
+
+/* send SDT, PAT and PMT tables regulary */
+static void retransmit_si_info(MpegTSProgramInfo * prog, int force_pat)
+{
+    if (++prog->sdt_packet_count == prog->sdt_packet_period) {
+        prog->sdt_packet_count = 0;
+        tsWriteSDT(prog->progNum);
+    }
+    if (++prog->pat_packet_count == prog->pat_packet_period || force_pat) {
+        prog->pat_packet_count = 0;
+        tsWritePAT(&prog->progNum, &prog->pmtPID, 1);
+        tsWritePMT(prog);
+    }
+}
+
+static int64_t get_pcr(MpegTSProgramInfo * prog)
+{
+    return av_rescale(prog->tsFile->GetPosition() + 11, 8 * PCR_TIME_BASE, prog->mux_rate);
+}
+
+static int write_pcr_bits(uint8_t *buf, int64_t pcr)
+{
+    int64_t pcr_low = pcr % 300, pcr_high = pcr / 300;
+
+    *buf++ = pcr_high >> 25;
+    *buf++ = pcr_high >> 17;
+    *buf++ = pcr_high >> 9;
+    *buf++ = pcr_high >> 1;
+    *buf++ = pcr_high << 7 | pcr_low >> 8 | 0x7e;
+    *buf++ = pcr_low;
+
+    return 6;
+}
+
+/* Write a single null transport stream packet */
+static void mpegts_insert_null_packet(MpegTSSection * s)
+{
+    uint8_t *q;
+    uint8_t buf[TSPKT_LENGTH];
+
+    q = buf;
+    *q++ = 0x47;
+    *q++ = 0x00 | 0x1f;
+    *q++ = 0xff;
+    *q++ = 0x10;
+    memset(q, 0x0FF, TSPKT_LENGTH - (q - buf));
+    //avio_write(s->pb, buf, TS_PACKET_SIZE);
+}
+
+/* Write a single transport stream packet with a PCR and no payload */
+static void mpegts_insert_pcr_only(MpegTSProgramInfo * prog, MpegTSSection * s, uint16 pid)
+{
+    uint8_t *q;
+    uint8_t buf[TSPKT_LENGTH];
+
+    q = buf;
+    *q++ = 0x47;
+    *q++ = pid >> 8;
+    *q++ = pid;
+    *q++ = 0x20 | s->cc;   /* Adaptation only */
+    /* Continuity Count field does not increment (see 13818-1 section 2.4.3.3) */
+    *q++ = TSPKT_LENGTH - 5; /* Adaptation Field Length */
+    *q++ = 0x10;               /* Adaptation flags: PCR present */
+
+    /* PCR coded into 6 bytes */
+    q += write_pcr_bits(q, get_pcr(prog));
+
+    /* stuffing bytes */
+    memset(q, 0xFF, TSPKT_LENGTH - (q - buf));
+    //avio_write(s->pb, buf, TS_PACKET_SIZE);
+}
+
+static void write_pts(uint8_t *q, int fourbits, int64_t pts)
+{
+    int val;
+
+    val = fourbits << 4 | (((pts >> 30) & 0x07) << 1) | 1;
+    *q++ = val;
+    val = (((pts >> 15) & 0x7fff) << 1) | 1;
+    *q++ = val >> 8;
+    *q++ = val;
+    val = (((pts)& 0x7fff) << 1) | 1;
+    *q++ = val >> 8;
+    *q++ = val;
+}
+
+/* Set an adaptation field flag in an MPEG-TS packet*/
+static void set_af_flag(uint8_t *pkt, int flag)
+{
+    // expect at least one flag to set
+    osAssert(flag);
+
+    if ((pkt[3] & 0x20) == 0) {
+        // no AF yet, set adaptation field flag
+        pkt[3] |= 0x20;
+        // 1 byte length, no flags
+        pkt[4] = 1;
+        pkt[5] = 0;
+    }
+    pkt[5] |= flag;
+}
+
+/* Extend the adaptation field by size bytes */
+static void extend_af(uint8_t *pkt, int size)
+{
+    // expect already existing adaptation field
+    osAssert(pkt[3] & 0x20);
+    pkt[4] += size;
+}
+
+/* Get a pointer to MPEG-TS payload (right after TS packet header) */
+static uint8_t *get_ts_payload_start(uint8_t *pkt)
+{
+    if (pkt[3] & 0x20)
+        return pkt + 5 + pkt[4];
+    else
+        return pkt + 4;
+}
+
+/* Add a PES header to the front of the payload, and segment into an integer
+* number of TS packets. The final TS packet is padded using an oversized
+* adaptation header to exactly fill the last TS packet.
+* NOTE: 'payload' contains a complete PES payload. */
+static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
+    const uint8_t *payload, int payload_size,
+    int64_t pts, int64_t dts, int keyFrame)
+{
+    //MpegTSWriteStream *ts_st = st->priv_data;
+    //MpegTSWrite *ts = s->priv_data;
+
+    
+    uint8_t buf[TSPKT_LENGTH];
+    uint8_t *q;
+    int val, is_start, len, header_len, write_pcr, is_dvb_subtitle, is_dvb_teletext, flags;
+    int afc_len, stuffing_len;
+    int64_t pcr = -1; /* avoid warning */
+    //int64_t delay = av_rescale(s->max_delay, 90000, AV_TIME_BASE);
+    int force_pat = av->GetType() == VP_STREAM_VIDEO && keyFrame && !av->prev_payload_key;
+
+    is_start = 1;
+    while (payload_size > 0) {
+        retransmit_si_info(prog, force_pat);
+        force_pat = 0;
+
+        write_pcr = 0;
+        if (pid == prog->pcr_pid) {
+            if (prog->mux_rate > 1 || is_start) // VBR pcr period is based on frames
+                prog->pcr_packet_count++;
+            if (prog->pcr_packet_count >=
+                prog->pcr_packet_period) {
+                prog->pcr_packet_count = 0;
+                write_pcr = 1;
+            }
+        }
+
+        if (prog->mux_rate > 1 && dts != AV_NOPTS_VALUE &&
+            (dts - get_pcr(ts, s->pb) / 300) > delay) {
+            /* pcr insert gets priority over null packet insert */
+            if (write_pcr)
+                mpegts_insert_pcr_only(s, st);
+            else
+                mpegts_insert_null_packet(s);
+            /* recalculate write_pcr and possibly retransmit si_info */
+            continue;
+        }
+
+        /* prepare packet header */
+        q = buf;
+        *q++ = 0x47;
+        val = ts_st->pid >> 8;
+        if (is_start)
+            val |= 0x40;
+        *q++ = val;
+        *q++ = ts_st->pid;
+        ts_st->cc = ts_st->cc + 1 & 0xf;
+        *q++ = 0x10 | ts_st->cc; // payload indicator + CC
+        if (key && is_start && pts != AV_NOPTS_VALUE) {
+            // set Random Access for key frames
+            if (ts_st->pid == ts_st->service->pcr_pid)
+                write_pcr = 1;
+            set_af_flag(buf, 0x40);
+            q = get_ts_payload_start(buf);
+        }
+        if (write_pcr) {
+            set_af_flag(buf, 0x10);
+            q = get_ts_payload_start(buf);
+            // add 11, pcr references the last byte of program clock reference base
+            if (ts->mux_rate > 1)
+                pcr = get_pcr(ts, s->pb);
+            else
+                pcr = (dts - delay) * 300;
+            if (dts != AV_NOPTS_VALUE && dts < pcr / 300)
+                av_log(s, AV_LOG_WARNING, "dts < pcr, TS is invalid\n");
+            extend_af(buf, write_pcr_bits(q, pcr));
+            q = get_ts_payload_start(buf);
+        }
+        if (is_start) {
+            int pes_extension = 0;
+            int pes_header_stuffing_bytes = 0;
+            /* write PES header */
+            *q++ = 0x00;
+            *q++ = 0x00;
+            *q++ = 0x01;
+            is_dvb_subtitle = 0;
+            is_dvb_teletext = 0;
+            if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+                if (st->codec->codec_id == AV_CODEC_ID_DIRAC)
+                    *q++ = 0xfd;
+                else
+                    *q++ = 0xe0;
+            }
+            else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
+                (st->codec->codec_id == AV_CODEC_ID_MP2 ||
+                st->codec->codec_id == AV_CODEC_ID_MP3 ||
+                st->codec->codec_id == AV_CODEC_ID_AAC)) {
+                *q++ = 0xc0;
+            }
+            else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
+                st->codec->codec_id == AV_CODEC_ID_AC3 &&
+                ts->m2ts_mode) {
+                *q++ = 0xfd;
+            }
+            else {
+                *q++ = 0xbd;
+                if (st->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
+                    if (st->codec->codec_id == AV_CODEC_ID_DVB_SUBTITLE) {
+                        is_dvb_subtitle = 1;
+                    }
+                    else if (st->codec->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
+                        is_dvb_teletext = 1;
+                    }
+                }
+            }
+            header_len = 0;
+            flags = 0;
+            if (pts != AV_NOPTS_VALUE) {
+                header_len += 5;
+                flags |= 0x80;
+            }
+            if (dts != AV_NOPTS_VALUE && pts != AV_NOPTS_VALUE && dts != pts) {
+                header_len += 5;
+                flags |= 0x40;
+            }
+            if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO &&
+                st->codec->codec_id == AV_CODEC_ID_DIRAC) {
+                /* set PES_extension_flag */
+                pes_extension = 1;
+                flags |= 0x01;
+
+                /* One byte for PES2 extension flag +
+                * one byte for extension length +
+                * one byte for extension id */
+                header_len += 3;
+            }
+            
+            len = payload_size + header_len + 3;
+            /* 3 extra bytes should be added to DVB subtitle payload: 0x20 0x00 at the beginning and trailing 0xff */
+            if (is_dvb_subtitle) {
+                len += 3;
+                payload_size++;
+            }
+            if (len > 0xffff)
+                len = 0;
+            if (ts->omit_video_pes_length && st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+                len = 0;
+            }
+            *q++ = len >> 8;
+            *q++ = len;
+            val = 0x80;
+            /* data alignment indicator is required for subtitle and data streams */
+            if (st->codec->codec_type == AVMEDIA_TYPE_SUBTITLE || st->codec->codec_type == AVMEDIA_TYPE_DATA)
+                val |= 0x04;
+            *q++ = val;
+            *q++ = flags;
+            *q++ = header_len;
+            if (pts != AV_NOPTS_VALUE) {
+                write_pts(q, flags >> 6, pts);
+                q += 5;
+            }
+            if (dts != AV_NOPTS_VALUE && pts != AV_NOPTS_VALUE && dts != pts) {
+                write_pts(q, 1, dts);
+                q += 5;
+            }
+            if (pes_extension && st->codec->codec_id == AV_CODEC_ID_DIRAC) {
+                flags = 0x01;  /* set PES_extension_flag_2 */
+                *q++ = flags;
+                *q++ = 0x80 | 0x01; /* marker bit + extension length */
+                /* Set the stream ID extension flag bit to 0 and
+                * write the extended stream ID. */
+                *q++ = 0x00 | 0x60;
+            }
+            /* For Blu-ray AC3 Audio Setting extended flags */
+            if (ts->m2ts_mode &&
+                pes_extension &&
+                st->codec->codec_id == AV_CODEC_ID_AC3) {
+                flags = 0x01; /* set PES_extension_flag_2 */
+                *q++ = flags;
+                *q++ = 0x80 | 0x01; /* marker bit + extension length */
+                *q++ = 0x00 | 0x71; /* for AC3 Audio (specifically on blue-rays) */
+            }
+
+            is_start = 0;
+        }
+        /* header size */
+        header_len = q - buf;
+        /* data len */
+        len = TS_PACKET_SIZE - header_len;
+        if (len > payload_size)
+            len = payload_size;
+        stuffing_len = TS_PACKET_SIZE - header_len - len;
+        if (stuffing_len > 0) {
+            /* add stuffing with AFC */
+            if (buf[3] & 0x20) {
+                /* stuffing already present: increase its size */
+                afc_len = buf[4] + 1;
+                memmove(buf + 4 + afc_len + stuffing_len,
+                    buf + 4 + afc_len,
+                    header_len - (4 + afc_len));
+                buf[4] += stuffing_len;
+                memset(buf + 4 + afc_len, 0xff, stuffing_len);
+            }
+            else {
+                /* add stuffing */
+                memmove(buf + 4 + stuffing_len, buf + 4, header_len - 4);
+                buf[3] |= 0x20;
+                buf[4] = stuffing_len - 1;
+                if (stuffing_len >= 2) {
+                    buf[5] = 0x00;
+                    memset(buf + 6, 0xff, stuffing_len - 2);
+                }
+            }
+        }
+
+        if (is_dvb_subtitle && payload_size == len) {
+            memcpy(buf + TS_PACKET_SIZE - len, payload, len - 1);
+            buf[TS_PACKET_SIZE - 1] = 0xff; /* end_of_PES_data_field_marker: an 8-bit field with fixed contents 0xff for DVB subtitle */
+        }
+        else {
+            memcpy(buf + TS_PACKET_SIZE - len, payload, len);
+        }
+
+        payload += len;
+        payload_size -= len;
+        mpegts_prefix_m2ts_header(s);
+        avio_write(s->pb, buf, TS_PACKET_SIZE);
+    }
+    av->prev_payload_key = keyFrame;
+}
 

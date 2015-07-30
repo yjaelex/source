@@ -127,11 +127,20 @@ public:
 #define MPEGTS_FLAG_AAC_LATM        0x02
 typedef struct MpegTSProgramInfo
 {
-    uint32              progNum;
+    uint16              progNum;
+    uint16              pmtPID;
     uint32              pcr_pid;
     uint32              flags;
+    uint32              sdt_packet_count;
+    uint32              pat_packet_count;
+    uint32              sdt_packet_period;
+    uint32              pat_packet_period;
+    uint64              mux_rate;
+    uint32              pcr_packet_count;
+    uint32              pcr_packet_period;
+    MpegTSClass*        tsFile;
     vector<AVStream*>   avStream;
-};
+}MpegTSProgramInfo;
 
 class MpegTSClass : public VideoFileClass
 {

@@ -556,6 +556,8 @@ public:
         return m_nTimeScale;
     }
 
+    int                 prev_payload_key;
+
 private:
     pvoid               m_pMediaInfo;
     pvoid               m_pStreamBuffer;
