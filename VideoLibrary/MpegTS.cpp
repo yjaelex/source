@@ -528,8 +528,6 @@ static int tsWritePMT(MpegTSProgramInfo * prog)
     return 0;
 }
 
-#include <stdint.h>
-
 enum AVRounding {
     AV_ROUND_ZERO = 0, ///< Round toward zero.
     AV_ROUND_INF = 1, ///< Round away from zero.
@@ -648,7 +646,7 @@ static int write_pcr_bits(uint8_t *buf, int64_t pcr)
 }
 
 /* Write a single null transport stream packet */
-static void mpegts_insert_null_packet(MpegTSSection * s)
+static void mpegts_insert_null_packet(MpegTSPacket * pkt)
 {
     uint8_t *q;
     uint8_t buf[TSPKT_LENGTH];
@@ -659,20 +657,20 @@ static void mpegts_insert_null_packet(MpegTSSection * s)
     *q++ = 0xff;
     *q++ = 0x10;
     memset(q, 0x0FF, TSPKT_LENGTH - (q - buf));
-    //avio_write(s->pb, buf, TS_PACKET_SIZE);
+    pkt->write(buf, TSPKT_LENGTH);
 }
 
 /* Write a single transport stream packet with a PCR and no payload */
-static void mpegts_insert_pcr_only(MpegTSProgramInfo * prog, MpegTSSection * s, uint16 pid)
+static void mpegts_insert_pcr_only(MpegTSProgramInfo * prog, MpegTSPacket * pkt)
 {
     uint8_t *q;
     uint8_t buf[TSPKT_LENGTH];
 
     q = buf;
     *q++ = 0x47;
-    *q++ = pid >> 8;
-    *q++ = pid;
-    *q++ = 0x20 | s->cc;   /* Adaptation only */
+    *q++ = pkt->pid >> 8;
+    *q++ = pkt->pid;
+    *q++ = 0x20 | pkt->cc;   /* Adaptation only */
     /* Continuity Count field does not increment (see 13818-1 section 2.4.3.3) */
     *q++ = TSPKT_LENGTH - 5; /* Adaptation Field Length */
     *q++ = 0x10;               /* Adaptation flags: PCR present */
@@ -682,7 +680,7 @@ static void mpegts_insert_pcr_only(MpegTSProgramInfo * prog, MpegTSSection * s, 
 
     /* stuffing bytes */
     memset(q, 0xFF, TSPKT_LENGTH - (q - buf));
-    //avio_write(s->pb, buf, TS_PACKET_SIZE);
+    pkt->write(buf, TSPKT_LENGTH);
 }
 
 static void write_pts(uint8_t *q, int fourbits, int64_t pts)
@@ -736,20 +734,21 @@ static uint8_t *get_ts_payload_start(uint8_t *pkt)
 * number of TS packets. The final TS packet is padded using an oversized
 * adaptation header to exactly fill the last TS packet.
 * NOTE: 'payload' contains a complete PES payload. */
-static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
-    const uint8_t *payload, int payload_size,
-    int64_t pts, int64_t dts, int keyFrame)
+static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, MpegTSPacket * pkt)
 {
-    //MpegTSWriteStream *ts_st = st->priv_data;
-    //MpegTSWrite *ts = s->priv_data;
-
+    uint16 pid = pkt->pid;
+    const uint8_t *payload = pkt->payload;
+    int payload_size = pkt->payload_size;
+    int64_t pts = pkt->pts;
+    int64_t dts = pkt->dts;
+    int keyFrame = pkt->keyFrame;
     
     uint8_t buf[TSPKT_LENGTH];
     uint8_t *q;
     int val, is_start, len, header_len, write_pcr, is_dvb_subtitle, is_dvb_teletext, flags;
     int afc_len, stuffing_len;
     int64_t pcr = -1; /* avoid warning */
-    //int64_t delay = av_rescale(s->max_delay, 90000, AV_TIME_BASE);
+    int64_t delay = av_rescale(prog->max_delay, 90000, AV_TIME_BASE);
     int force_pat = av->GetType() == VP_STREAM_VIDEO && keyFrame && !av->prev_payload_key;
 
     is_start = 1;
@@ -769,12 +768,12 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
         }
 
         if (prog->mux_rate > 1 && dts != AV_NOPTS_VALUE &&
-            (dts - get_pcr(ts, s->pb) / 300) > delay) {
+            (dts - get_pcr(prog) / 300) > delay) {
             /* pcr insert gets priority over null packet insert */
             if (write_pcr)
-                mpegts_insert_pcr_only(s, st);
+                mpegts_insert_pcr_only(prog, pkt);
             else
-                mpegts_insert_null_packet(s);
+                mpegts_insert_null_packet(pkt);
             /* recalculate write_pcr and possibly retransmit si_info */
             continue;
         }
@@ -782,16 +781,16 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
         /* prepare packet header */
         q = buf;
         *q++ = 0x47;
-        val = ts_st->pid >> 8;
+        val = pkt->pid >> 8;
         if (is_start)
             val |= 0x40;
         *q++ = val;
-        *q++ = ts_st->pid;
-        ts_st->cc = ts_st->cc + 1 & 0xf;
-        *q++ = 0x10 | ts_st->cc; // payload indicator + CC
-        if (key && is_start && pts != AV_NOPTS_VALUE) {
+        *q++ = pkt->pid;
+        pkt->cc = pkt->cc + 1 & 0xf;
+        *q++ = 0x10 | pkt->cc; // payload indicator + CC
+        if (keyFrame && is_start && pts != AV_NOPTS_VALUE) {
             // set Random Access for key frames
-            if (ts_st->pid == ts_st->service->pcr_pid)
+            if (pid == prog->pcr_pid)
                 write_pcr = 1;
             set_af_flag(buf, 0x40);
             q = get_ts_payload_start(buf);
@@ -800,12 +799,12 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
             set_af_flag(buf, 0x10);
             q = get_ts_payload_start(buf);
             // add 11, pcr references the last byte of program clock reference base
-            if (ts->mux_rate > 1)
-                pcr = get_pcr(ts, s->pb);
+            if (prog->mux_rate > 1)
+                pcr = get_pcr(prog);
             else
                 pcr = (dts - delay) * 300;
             if (dts != AV_NOPTS_VALUE && dts < pcr / 300)
-                av_log(s, AV_LOG_WARNING, "dts < pcr, TS is invalid\n");
+                osLog(LOG_WARN, "dts < pcr, TS is invalid\n");
             extend_af(buf, write_pcr_bits(q, pcr));
             q = get_ts_payload_start(buf);
         }
@@ -818,30 +817,25 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
             *q++ = 0x01;
             is_dvb_subtitle = 0;
             is_dvb_teletext = 0;
-            if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-                if (st->codec->codec_id == AV_CODEC_ID_DIRAC)
+            if (av->GetType() == VP_STREAM_VIDEO) {
+                if (av->GetCodecID() == AV_CODEC_ID_DIRAC)
                     *q++ = 0xfd;
                 else
                     *q++ = 0xe0;
             }
-            else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
-                (st->codec->codec_id == AV_CODEC_ID_MP2 ||
-                st->codec->codec_id == AV_CODEC_ID_MP3 ||
-                st->codec->codec_id == AV_CODEC_ID_AAC)) {
+            else if (av->GetType() == VP_STREAM_AUDIO &&
+                (av->GetCodecID() == AV_CODEC_ID_MP2 ||
+                av->GetCodecID() == AV_CODEC_ID_MP3 ||
+                av->GetCodecID() == AV_CODEC_ID_AAC)) {
                 *q++ = 0xc0;
-            }
-            else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
-                st->codec->codec_id == AV_CODEC_ID_AC3 &&
-                ts->m2ts_mode) {
-                *q++ = 0xfd;
             }
             else {
                 *q++ = 0xbd;
-                if (st->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
-                    if (st->codec->codec_id == AV_CODEC_ID_DVB_SUBTITLE) {
+                if (av->GetType() == VP_STREAM_SUBTITLE) {
+                    if (av->GetCodecID() == AV_CODEC_ID_DVB_SUBTITLE) {
                         is_dvb_subtitle = 1;
                     }
-                    else if (st->codec->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
+                    else if (av->GetCodecID() == AV_CODEC_ID_DVB_TELETEXT) {
                         is_dvb_teletext = 1;
                     }
                 }
@@ -856,8 +850,8 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
                 header_len += 5;
                 flags |= 0x40;
             }
-            if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO &&
-                st->codec->codec_id == AV_CODEC_ID_DIRAC) {
+            if (av->GetType() == VP_STREAM_VIDEO &&
+                av->GetCodecID() == AV_CODEC_ID_DIRAC) {
                 /* set PES_extension_flag */
                 pes_extension = 1;
                 flags |= 0x01;
@@ -876,14 +870,14 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
             }
             if (len > 0xffff)
                 len = 0;
-            if (ts->omit_video_pes_length && st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-                len = 0;
-            }
+            //if (ts->omit_video_pes_length && st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+            //    len = 0;
+            //}
             *q++ = len >> 8;
             *q++ = len;
             val = 0x80;
             /* data alignment indicator is required for subtitle and data streams */
-            if (st->codec->codec_type == AVMEDIA_TYPE_SUBTITLE || st->codec->codec_type == AVMEDIA_TYPE_DATA)
+            if (av->GetType() == VP_STREAM_SUBTITLE || av->GetType() == VP_STREAM_DATA)
                 val |= 0x04;
             *q++ = val;
             *q++ = flags;
@@ -896,7 +890,7 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
                 write_pts(q, 1, dts);
                 q += 5;
             }
-            if (pes_extension && st->codec->codec_id == AV_CODEC_ID_DIRAC) {
+            if (pes_extension && av->GetCodecID() == AV_CODEC_ID_DIRAC) {
                 flags = 0x01;  /* set PES_extension_flag_2 */
                 *q++ = flags;
                 *q++ = 0x80 | 0x01; /* marker bit + extension length */
@@ -905,24 +899,24 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
                 *q++ = 0x00 | 0x60;
             }
             /* For Blu-ray AC3 Audio Setting extended flags */
-            if (ts->m2ts_mode &&
-                pes_extension &&
-                st->codec->codec_id == AV_CODEC_ID_AC3) {
-                flags = 0x01; /* set PES_extension_flag_2 */
-                *q++ = flags;
-                *q++ = 0x80 | 0x01; /* marker bit + extension length */
-                *q++ = 0x00 | 0x71; /* for AC3 Audio (specifically on blue-rays) */
-            }
+            //if (ts->m2ts_mode &&
+            //    pes_extension &&
+            //    st->codec->codec_id == AV_CODEC_ID_AC3) {
+            //    flags = 0x01; /* set PES_extension_flag_2 */
+            //    *q++ = flags;
+            //    *q++ = 0x80 | 0x01; /* marker bit + extension length */
+            //    *q++ = 0x00 | 0x71; /* for AC3 Audio (specifically on blue-rays) */
+            //}
 
             is_start = 0;
         }
         /* header size */
         header_len = q - buf;
         /* data len */
-        len = TS_PACKET_SIZE - header_len;
+        len = TSPKT_LENGTH - header_len;
         if (len > payload_size)
             len = payload_size;
-        stuffing_len = TS_PACKET_SIZE - header_len - len;
+        stuffing_len = TSPKT_LENGTH - header_len - len;
         if (stuffing_len > 0) {
             /* add stuffing with AFC */
             if (buf[3] & 0x20) {
@@ -947,18 +941,36 @@ static void tsWritePES(MpegTSProgramInfo * prog, AVStream * av, uint16 pid,
         }
 
         if (is_dvb_subtitle && payload_size == len) {
-            memcpy(buf + TS_PACKET_SIZE - len, payload, len - 1);
-            buf[TS_PACKET_SIZE - 1] = 0xff; /* end_of_PES_data_field_marker: an 8-bit field with fixed contents 0xff for DVB subtitle */
+            memcpy(buf + TSPKT_LENGTH - len, payload, len - 1);
+            buf[TSPKT_LENGTH - 1] = 0xff; /* end_of_PES_data_field_marker: an 8-bit field with fixed contents 0xff for DVB subtitle */
         }
         else {
-            memcpy(buf + TS_PACKET_SIZE - len, payload, len);
+            memcpy(buf + TSPKT_LENGTH - len, payload, len);
         }
 
         payload += len;
         payload_size -= len;
-        mpegts_prefix_m2ts_header(s);
-        avio_write(s->pb, buf, TS_PACKET_SIZE);
+        pkt->write(buf, TSPKT_LENGTH);
     }
     av->prev_payload_key = keyFrame;
 }
+
+bool MpegTSClass::writePacket(uint32 index, uint8 * buf, uint32 size, bool isSync,
+    int64 pts = AV_NOPTS_VALUE, int64 dts = AV_NOPTS_VALUE)
+{
+    m_pkt.init(getStreamPID(index), size, pts, dts, isSync);
+    m_pkt.alloc(size);
+
+    try {
+        tsWritePES(&m_prog, m_prog.avStream[index], &m_pkt);
+    }
+    catch (osException * except)
+    {
+        osLog(LOG_WARN, "Execptions: %s", except->msg().c_str());
+        return false;
+    }
+
+    return true;
+}
+
 
